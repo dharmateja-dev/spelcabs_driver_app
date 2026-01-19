@@ -1,0 +1,101 @@
+buildscript {
+//    ext.kotlin_version = '2.1.0' // or latest stable
+    ext.kotlin_version = '2.1.0'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath 'com.android.tools.build:gradle:8.11.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+        }
+
+        // For Kotlin projects (like many plugins)
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = '1.8'
+            }
+        }
+    }
+//
+//    plugins.withType(JavaPlugin).configureEach {
+//        java {
+//            toolchain {
+//                languageVersion = JavaLanguageVersion.of(17)
+//            }
+//        }
+//    }
+//    plugins.withType(org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper).configureEach {
+//        kotlin {
+//            jvmToolchain(17)
+//        }
+//    }
+//
+//    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+//        kotlinOptions {
+//            jvmTarget = "17"
+//            apiVersion = "1.8"
+//            languageVersion = "1.8"
+//        }
+//    }
+//
+//    tasks.withType(JavaCompile).configureEach {
+//        sourceCompatibility = JavaVersion.VERSION_17
+//        targetCompatibility = JavaVersion.VERSION_17
+//    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.evaluationDependsOn(':app')
+
+
+    configurations.configureEach {
+        resolutionStrategy {
+            force 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
+            force 'com.braintreepayments.api:data-collector:4.31.0'
+        }
+        exclude group: 'com.paypal.android.sdk', module: 'data-collector'
+    }
+
+    // These specific configurations are still good, but the allprojects block
+    // with toolchain should handle most of it.
+//    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+//        kotlinOptions {
+//            jvmTarget = "17"
+//        }
+//    }
+//
+//    tasks.withType(JavaCompile).configureEach {
+//        sourceCompatibility = JavaVersion.VERSION_17
+//        targetCompatibility = JavaVersion.VERSION_17
+//    }
+//
+//    plugins.withType(org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper).configureEach {
+//        kotlin {
+//            jvmToolchain(17)
+//        }
+//    }
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
