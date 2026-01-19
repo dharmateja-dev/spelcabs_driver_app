@@ -198,7 +198,9 @@ class AuthApiService {
       }
 
       // Create new driver
-      final String newUid = const Uuid().v4();
+      // Use Firebase Auth UID as the Document ID to maintain a "Single Identity" across apps
+      String newUid =
+          FirebaseAuth.instance.currentUser?.uid ?? const Uuid().v4();
       DriverUserModel newDriver = DriverUserModel(
         id: newUid,
         fullName: fullname,
@@ -392,9 +394,7 @@ class AuthApiService {
           DriverUserModel newDriver = DriverUserModel(
             id: firebaseUser.uid,
             fullName: firebaseUser.displayName,
-            email: firebaseUser.email != null
-                ? firebaseUser.email!.toLowerCase()
-                : null,
+            email: firebaseUser.email?.toLowerCase(),
             phoneNumber: firebaseUser.phoneNumber,
             profilePic: firebaseUser.photoURL ?? Constant.userPlaceHolder,
             loginType: Constant.googleLoginType,
@@ -509,9 +509,7 @@ class AuthApiService {
                     appleCredential.familyName != null
                 ? '${appleCredential.givenName!} ${appleCredential.familyName!}'
                 : firebaseUser.displayName,
-            email: firebaseUser.email != null
-                ? firebaseUser.email!.toLowerCase()
-                : null,
+            email: firebaseUser.email?.toLowerCase(),
             phoneNumber: firebaseUser.phoneNumber,
             profilePic: firebaseUser.photoURL ?? Constant.userPlaceHolder,
             loginType: Constant.appleLoginType,

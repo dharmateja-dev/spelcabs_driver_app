@@ -255,7 +255,7 @@ class FireStoreUtils {
     bool isLoggedInLocally = Preferences.getBoolean(Constant.isLoggedInKey);
     if (isLoggedInLocally) {
       String? driverId = Preferences.getString(Constant.driverIdKey);
-      if (driverId != null && driverId.isNotEmpty) {
+      if (driverId.isNotEmpty) {
         // Attempt to fetch profile from Firestore to ensure data consistency
         DriverUserModel? driverModel = await getDriverProfile(driverId);
         if (driverModel != null) {
@@ -315,7 +315,7 @@ class FireStoreUtils {
     String? uidFromPrefs = Preferences.getString(Constant.driverIdKey);
     User? firebaseUser = FirebaseAuth.instance.currentUser;
 
-    if (uidFromPrefs != null && uidFromPrefs.isNotEmpty) {
+    if (uidFromPrefs.isNotEmpty) {
       AppLogger.debug(
           "getCurrentUid: Returning UID from preferences: $uidFromPrefs",
           tag: "FireStoreUtils");
@@ -1202,8 +1202,8 @@ class FireStoreUtils {
           baseQuery.where('serviceId', isEqualTo: driverUserModel.serviceId);
     }
 
-    final double centerLat = latitude!;
-    final double centerLng = longitude!;
+    final double centerLat = latitude;
+    final double centerLng = longitude;
     double radiusKm;
     final parsedRadius = double.tryParse(Constant.radius ?? "") ?? 0.0;
 
@@ -1285,7 +1285,7 @@ class FireStoreUtils {
     final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     final double distance = earthRadiusKm * c;
-    AppLogger.debug("Haversine distance calculated: ${distance} km",
+    AppLogger.debug("Haversine distance calculated: $distance km",
         tag: "FireStoreUtils");
     return distance;
   }
