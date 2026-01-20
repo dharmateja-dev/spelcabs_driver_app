@@ -5,8 +5,8 @@ import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
 import 'package:driver/themes/responsive.dart';
 import 'package:driver/themes/text_field_them.dart';
+import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,7 +32,7 @@ class ContactUsScreen extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25))),
@@ -222,36 +222,53 @@ class ContactUsScreen extends StatelessWidget {
                                                               "Please enter feedback"
                                                                   .tr);
                                                         } else {
-                                                          final Email email =
-                                                              Email(
-                                                            body: controller
+                                                          // Show loading indicator
+                                                          ShowToastDialog
+                                                              .showLoader(
+                                                                  "Submitting your request..."
+                                                                      .tr);
+
+                                                          // Submit support request to Firestore
+                                                          bool success =
+                                                              await FireStoreUtils
+                                                                  .submitSupportRequest(
+                                                            userEmail: controller
+                                                                .emailController
+                                                                .value
+                                                                .text,
+                                                            message: controller
                                                                 .feedbackController
                                                                 .value
                                                                 .text,
                                                             subject: controller
                                                                 .subject.value,
-                                                            recipients: [
-                                                              controller
-                                                                  .email.value
-                                                            ],
-                                                            cc: [
-                                                              controller
-                                                                  .emailController
-                                                                  .value
-                                                                  .text
-                                                            ],
-                                                            isHTML: false,
+                                                            supportEmail:
+                                                                controller.email
+                                                                    .value,
                                                           );
-                                                          await FlutterEmailSender
-                                                              .send(email);
-                                                          controller
-                                                              .emailController
-                                                              .value
-                                                              .clear();
-                                                          controller
-                                                              .feedbackController
-                                                              .value
-                                                              .clear();
+
+                                                          ShowToastDialog
+                                                              .closeLoader();
+
+                                                          if (success) {
+                                                            ShowToastDialog
+                                                                .showToast(
+                                                                    "Your support request has been submitted successfully!"
+                                                                        .tr);
+                                                            controller
+                                                                .emailController
+                                                                .value
+                                                                .clear();
+                                                            controller
+                                                                .feedbackController
+                                                                .value
+                                                                .clear();
+                                                          } else {
+                                                            ShowToastDialog
+                                                                .showToast(
+                                                                    "Failed to submit your request. Please try again."
+                                                                        .tr);
+                                                          }
                                                         }
                                                       },
                                                     ),

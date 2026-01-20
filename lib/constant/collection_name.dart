@@ -26,4 +26,5 @@ class CollectionName {
   static const String zone = "zone";
   static const String subscriptionPlan = "subscription_plans";
   static const String subscriptionHistory = "subscription_history";
+  static const String supportRequests = "support_requests";
 }

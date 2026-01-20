@@ -171,6 +171,53 @@ class FireStoreUtils {
     }
   }
 
+  /// Checks if an email is already registered in the customers (users) collection.
+  /// Used to enforce "one number/email, one profile" policy for social sign-ins.
+  static Future<bool> isEmailRegisteredInCustomers(String email) async {
+    if (email.isEmpty) return false;
+
+    AppLogger.debug("isEmailRegisteredInCustomers called for email: $email",
+        tag: "FireStoreUtils");
+    try {
+      // Check exact match
+      var querySnapshot = await fireStore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        AppLogger.info(
+            "Email already registered in customers collection: $email",
+            tag: "FireStoreUtils");
+        return true;
+      }
+
+      // Also check lowercase match
+      final lower = email.toLowerCase();
+      if (lower != email) {
+        querySnapshot = await fireStore
+            .collection('users')
+            .where('email', isEqualTo: lower)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          AppLogger.info(
+              "Email (lowercase) already registered in customers collection: $lower",
+              tag: "FireStoreUtils");
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e, s) {
+      AppLogger.error("Error checking if email is registered in customers",
+          tag: "FireStoreUtils", error: e, stackTrace: s);
+      return false;
+    }
+  }
+
   /// Check if email/phone exists in both users (customer) and driver_users collections
   static Future<bool> isEmailOrPhoneRegistered(
       String email, String? countryCode, String? phoneNumber) async {
@@ -2316,6 +2363,44 @@ class FireStoreUtils {
       return true;
     } catch (e, s) {
       AppLogger.error("FireStoreUtils: Error saving subscription transaction",
+          tag: "FireStoreUtils", error: e, stackTrace: s);
+      return false;
+    }
+  }
+
+  /// Submits a support request to Firestore instead of opening an external email app.
+  /// This stores the request in the 'support_requests' collection.
+  static Future<bool> submitSupportRequest({
+    required String userEmail,
+    required String message,
+    required String subject,
+    String? supportEmail,
+  }) async {
+    AppLogger.debug(
+        "submitSupportRequest called with email: $userEmail, subject: $subject",
+        tag: "FireStoreUtils");
+    try {
+      String requestId = Constant.getUuid();
+      await fireStore
+          .collection(CollectionName.supportRequests)
+          .doc(requestId)
+          .set({
+        'id': requestId,
+        'userEmail': userEmail,
+        'message': message,
+        'subject': subject,
+        'supportEmail': supportEmail ?? '',
+        'userId': getCurrentUid(),
+        'userType': 'driver',
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+      });
+      AppLogger.info(
+          "Support request submitted successfully with ID: $requestId",
+          tag: "FireStoreUtils");
+      return true;
+    } catch (e, s) {
+      AppLogger.error("Error submitting support request: $e",
           tag: "FireStoreUtils", error: e, stackTrace: s);
       return false;
     }

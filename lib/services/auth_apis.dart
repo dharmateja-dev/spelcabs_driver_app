@@ -375,6 +375,7 @@ class AuthApiService {
         } else {
           // New driver - ensure email isn't already registered to another account
           if (firebaseUser.email != null && firebaseUser.email!.isNotEmpty) {
+            // Check if email exists in driver_users collection
             DriverUserModel? existingByEmail =
                 await FireStoreUtils.getDriverProfileByEmail(
                     firebaseUser.email!.toString());
@@ -384,7 +385,21 @@ class AuthApiService {
               _showSnackbar(context,
                   "An account with this email already exists. Please login with that account.");
               AppLogger.warning(
-                  "AuthApiService: Email ${firebaseUser.email} already in use by ${existingByEmail.id}",
+                  "AuthApiService: Email ${firebaseUser.email} already in use by driver ${existingByEmail.id}",
+                  tag: "AuthApiService");
+              return;
+            }
+
+            // Check if email exists in customers (users) collection - enforce "one email, one profile"
+            bool existsInCustomers =
+                await FireStoreUtils.isEmailRegisteredInCustomers(
+                    firebaseUser.email!);
+            if (existsInCustomers) {
+              ShowToastDialog.closeLoader();
+              _showSnackbar(context,
+                  "This email is already registered as a customer. One account per email/phone is allowed.");
+              AppLogger.warning(
+                  "AuthApiService: Email ${firebaseUser.email} already registered as customer",
                   tag: "AuthApiService");
               return;
             }
@@ -487,6 +502,7 @@ class AuthApiService {
         } else {
           // New driver - ensure email isn't already registered to another account
           if (firebaseUser.email != null && firebaseUser.email!.isNotEmpty) {
+            // Check if email exists in driver_users collection
             DriverUserModel? existingByEmail =
                 await FireStoreUtils.getDriverProfileByEmail(
                     firebaseUser.email!.toString());
@@ -496,7 +512,21 @@ class AuthApiService {
               _showSnackbar(context,
                   "An account with this email already exists. Please login with that account.");
               AppLogger.warning(
-                  "AuthApiService: Email ${firebaseUser.email} already in use by ${existingByEmail.id}",
+                  "AuthApiService: Email ${firebaseUser.email} already in use by driver ${existingByEmail.id}",
+                  tag: "AuthApiService");
+              return;
+            }
+
+            // Check if email exists in customers (users) collection - enforce "one email, one profile"
+            bool existsInCustomers =
+                await FireStoreUtils.isEmailRegisteredInCustomers(
+                    firebaseUser.email!);
+            if (existsInCustomers) {
+              ShowToastDialog.closeLoader();
+              _showSnackbar(context,
+                  "This email is already registered as a customer. One account per email/phone is allowed.");
+              AppLogger.warning(
+                  "AuthApiService: Email ${firebaseUser.email} already registered as customer",
                   tag: "AuthApiService");
               return;
             }
