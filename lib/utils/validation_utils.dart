@@ -98,35 +98,62 @@ class ValidationUtils {
   /// Validates a vehicle number (India format).
   /// Returns null if valid, or an error message if invalid.
   ///
-  /// Accepted patterns (ignoring case and separators):
-  /// - KA01AB1234
-  /// - KA-01-AB-1234
-  /// - DL1C1234
+  /// Validation Rules:
+  /// 1. Mandatory - must not be empty
+  /// 2. Format - valid Indian vehicle number format (8-10 chars)
+  /// 3. Character restrictions - no special characters or emojis
+  /// 4. Case handling - accepts lowercase, auto-converts to uppercase
+  /// 5. Whitespace validation - no leading/trailing/multiple spaces
   ///
-  /// Rules:
-  /// - Must start with 2 letters (State code)
-  /// - Followed by 1-2 digits (District code)
-  /// - Followed by 0-3 letters (Series - optional)
-  /// - Ends with 4 digits (Unique number)
+  /// Accepted patterns (ignoring case):
+  /// - KA01AB1234
+  /// - DL5CAF5030
   static String? validateVehicleNumber(String? number) {
-    if (number == null || number.trim().isEmpty) {
-      return 'Vehicle number is required';
+    // 1. Mandatory validation - must not be empty
+    if (number == null || number.isEmpty) {
+      return 'Please enter vehicle number';
     }
 
-    // Remove spaces and hyphens for validation
-    final cleanNumber =
-        number.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-
-    if (cleanNumber.length < 2) {
-      return 'Please enter a valid vehicle number (e.g. KA01AB1234)';
+    // 6. Whitespace validation - check for only spaces
+    if (number.trim().isEmpty) {
+      return 'Invalid vehicle number format';
     }
+
+    // 6. Check for multiple consecutive spaces
+    if (RegExp(r'\s{2,}').hasMatch(number)) {
+      return 'Invalid vehicle number format';
+    }
+
+    // 6. Check for leading or trailing spaces
+    if (number != number.trim()) {
+      return 'Invalid vehicle number format';
+    }
+
+    // Remove spaces and hyphens for format validation (allowed separators)
+    final cleanNumber = number.replaceAll(RegExp(r'[\s-]'), '');
+
+    // 3. Character restrictions - check for special characters and emojis
+    // Only allow letters and numbers after removing allowed separators
+    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(cleanNumber)) {
+      return 'Vehicle number should contain only letters and numbers';
+    }
+
+    // 2. Format validation - length check
+    if (cleanNumber.length < 8) {
+      return 'Enter a valid vehicle number';
+    }
+
+    if (cleanNumber.length > 10) {
+      return 'Enter a valid vehicle number';
+    }
+
+    // Convert to uppercase for pattern matching (4. Case handling)
+    final upperNumber = cleanNumber.toUpperCase();
 
     // Extract first 2 characters as state code
-    final String stateCode = cleanNumber.substring(0, 2);
+    final String stateCode = upperNumber.substring(0, 2);
 
     // List of valid Indian State/UT codes
-    // Note: 'TS' and 'TG' are both used for Telangana in different contexts/times, including both for robustness.
-    // 'OR' was old Odisha code, 'OD' is new. Included 'OR' for older vehicles.
     const Set<String> validStateCodes = {
       'AN',
       'AP',
@@ -171,20 +198,28 @@ class ValidationUtils {
     };
 
     if (!validStateCodes.contains(stateCode)) {
-      return 'Invalid state code. Please enter a valid Indian vehicle number.';
+      return 'Enter a valid vehicle number';
     }
 
-    // Regex explanation:
-    // ^[A-Z]{2} : Starts with 2 letters (State)
-    // [0-9]{1,2} : 1 or 2 digits (District)
-    // [A-Z]{0,3} : 0 to 3 letters (Series)
-    // [0-9]{4}$ : Ends with 4 digits (Number)
-    final RegExp standardRegex = RegExp(r'^[A-Z]{2}[0-9]{1,2}[A-Z]*[0-9]{4}$');
+    // Regex for valid Indian vehicle number pattern:
+    // ^[A-Z]{2} : Starts with 2 letters (State code)
+    // [0-9]{1,2} : 1 or 2 digits (District code)
+    // [A-Z]{0,3} : 0 to 3 letters (Series - optional)
+    // [0-9]{4}$ : Ends with 4 digits (Unique number)
+    final RegExp standardRegex =
+        RegExp(r'^[A-Z]{2}[0-9]{1,2}[A-Z]{0,3}[0-9]{4}$');
 
-    if (!standardRegex.hasMatch(cleanNumber)) {
-      return 'Please enter a valid vehicle number (e.g. KA01AB1234)';
+    if (!standardRegex.hasMatch(upperNumber)) {
+      return 'Enter a valid vehicle number';
     }
 
     return null;
+  }
+
+  /// Normalizes a vehicle number to uppercase format for storage.
+  /// Removes spaces and hyphens, converts to uppercase.
+  /// Use this before saving to database or comparing.
+  static String normalizeVehicleNumber(String number) {
+    return number.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
   }
 }

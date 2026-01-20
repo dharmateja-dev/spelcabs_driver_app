@@ -638,6 +638,43 @@ class FireStoreUtils {
     }
   }
 
+  /// Checks if a vehicle number is already registered by another driver.
+  /// Returns true if the vehicle number exists and belongs to a different driver.
+  /// [vehicleNumber] - The normalized vehicle number (uppercase, no spaces/hyphens)
+  /// [currentDriverId] - The current driver's ID to exclude from the check
+  static Future<bool> checkVehicleNumberExists(
+      String vehicleNumber, String? currentDriverId) async {
+    AppLogger.debug(
+        "checkVehicleNumberExists called for vehicle: $vehicleNumber",
+        tag: "FireStoreUtils");
+    try {
+      QuerySnapshot querySnapshot = await fireStore
+          .collection(CollectionName.driverUsers)
+          .where('vehicleInformation.vehicleNumber', isEqualTo: vehicleNumber)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return false; // No duplicate found
+      }
+
+      // Check if the found document belongs to a different driver
+      for (var doc in querySnapshot.docs) {
+        if (doc.id != currentDriverId) {
+          AppLogger.info(
+              "Vehicle number $vehicleNumber already registered by driver: ${doc.id}",
+              tag: "FireStoreUtils");
+          return true; // Found duplicate belonging to another driver
+        }
+      }
+
+      return false; // The only match is the current driver
+    } catch (error, s) {
+      AppLogger.error("Error checking vehicle number existence: $error",
+          tag: "FireStoreUtils", error: error, stackTrace: s);
+      return false;
+    }
+  }
+
   // fire_store_utils.dart
   static Future<UserModel?> getCustomer(String uuid) async {
     AppLogger.debug("getCustomer called for UID: $uuid", tag: "FireStoreUtils");

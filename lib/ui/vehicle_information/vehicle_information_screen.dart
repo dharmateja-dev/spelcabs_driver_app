@@ -740,191 +740,211 @@ class VehicleInformationScreen extends StatelessWidget {
 
                                         if (controller
                                             .selectedServiceId.value!.isEmpty) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please select service".tr);
-                                        } else if (!controller
-                                            .validateVehicleNumber()) {
+                                          return;
+                                        }
+
+                                        // Validate vehicle number with duplicate check (async)
+                                        final isVehicleValid = await controller
+                                            .validateVehicleNumberWithDuplicateCheck();
+                                        if (!isVehicleValid) {
+                                          ShowToastDialog.closeLoader();
                                           // Validation failed, error shows inline
                                           return;
-                                        } else if (controller
+                                        }
+
+                                        // Normalize vehicle number to uppercase
+                                        controller.normalizeVehicleNumber();
+
+                                        if (controller
                                             .registrationDateController
                                             .value
                                             .text
                                             .isEmpty) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please select registration date"
                                                   .tr);
-                                        } else if (
-                                            // Only require vehicle type when selected service appears to be car-like
-                                            (controller
-                                                    .serviceList.isNotEmpty &&
-                                                controller.selectedServiceId
-                                                        .value !=
-                                                    null &&
-                                                controller.selectedServiceId
-                                                    .value!.isNotEmpty &&
-                                                ((() {
-                                                  try {
-                                                    final sel = controller
-                                                        .serviceList
-                                                        .firstWhere(
-                                                            (s) =>
-                                                                s.id ==
-                                                                controller
-                                                                    .selectedServiceId
-                                                                    .value,
-                                                            orElse: () =>
-                                                                ServiceModel());
-                                                    final title = sel.title !=
-                                                                null &&
-                                                            sel.title!
-                                                                .isNotEmpty
-                                                        ? Constant
-                                                                .localizationTitle(
-                                                                    sel.title)
-                                                            .toLowerCase()
-                                                        : "";
-                                                    return (title
-                                                            .contains('car') ||
-                                                        title
-                                                            .contains('taxi') ||
-                                                        title.contains('cab'));
-                                                  } catch (e) {
-                                                    return false;
-                                                  }
-                                                })()) &&
-                                                (controller.selectedVehicle
-                                                            .value.id ==
-                                                        null ||
-                                                    controller.selectedVehicle
-                                                        .value.id!.isEmpty))) {
+                                          return;
+                                        }
+
+                                        // Only require vehicle type when selected service appears to be car-like
+                                        if (controller.serviceList.isNotEmpty &&
+                                            controller
+                                                    .selectedServiceId.value !=
+                                                null &&
+                                            controller.selectedServiceId.value!
+                                                .isNotEmpty &&
+                                            ((() {
+                                              try {
+                                                final sel = controller
+                                                    .serviceList
+                                                    .firstWhere(
+                                                        (s) =>
+                                                            s.id ==
+                                                            controller
+                                                                .selectedServiceId
+                                                                .value,
+                                                        orElse: () =>
+                                                            ServiceModel());
+                                                final title = sel.title !=
+                                                            null &&
+                                                        sel.title!.isNotEmpty
+                                                    ? Constant
+                                                            .localizationTitle(
+                                                                sel.title)
+                                                        .toLowerCase()
+                                                    : "";
+                                                return (title.contains('car') ||
+                                                    title.contains('taxi') ||
+                                                    title.contains('cab'));
+                                              } catch (e) {
+                                                return false;
+                                              }
+                                            })()) &&
+                                            (controller.selectedVehicle.value
+                                                        .id ==
+                                                    null ||
+                                                controller.selectedVehicle.value
+                                                    .id!.isEmpty)) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please enter Vehicle type".tr);
-                                          ShowToastDialog.closeLoader();
                                           return;
-                                        } else if (controller
+                                        }
+
+                                        if (controller
                                             .selectedColor.value.isEmpty) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please enter Vehicle color".tr);
-                                        } else if (controller.seatsController
-                                            .value.text.isEmpty) {
+                                          return;
+                                        }
+
+                                        if (controller.seatsController.value
+                                            .text.isEmpty) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please enter seats".tr);
-                                        } else if (controller
-                                            .selectedZone.isEmpty) {
+                                          return;
+                                        }
+
+                                        if (controller.selectedZone.isEmpty) {
+                                          ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please select Zone".tr);
-                                        } else {
-                                          if (controller.driverModel.value
-                                                  .serviceId ==
-                                              null) {
-                                            controller.driverModel.value
-                                                    .serviceId =
-                                                controller
-                                                    .selectedServiceId.value;
-                                            await FireStoreUtils
-                                                .updateDriverUser(controller
-                                                    .driverModel.value);
-                                          }
-                                          controller.driverModel.value.zoneIds =
-                                              controller.selectedZone;
+                                          return;
+                                        }
 
-                                          // Determine if selected service is car-like to decide vehicleType usage
-                                          bool isCarServiceForSave = false;
-                                          if (controller
-                                                  .serviceList.isNotEmpty &&
-                                              controller.selectedServiceId
-                                                      .value !=
-                                                  null &&
-                                              controller.selectedServiceId
-                                                  .value!.isNotEmpty) {
+                                        // All validations passed, proceed to save
+                                        if (controller
+                                                .driverModel.value.serviceId ==
+                                            null) {
+                                          controller
+                                                  .driverModel.value.serviceId =
+                                              controller
+                                                  .selectedServiceId.value;
+                                          await FireStoreUtils.updateDriverUser(
+                                              controller.driverModel.value);
+                                        }
+                                        controller.driverModel.value.zoneIds =
+                                            controller.selectedZone;
+
+                                        // Determine if selected service is car-like to decide vehicleType usage
+                                        bool isCarServiceForSave = false;
+                                        if (controller.serviceList.isNotEmpty &&
+                                            controller
+                                                    .selectedServiceId.value !=
+                                                null &&
+                                            controller.selectedServiceId.value!
+                                                .isNotEmpty) {
+                                          try {
+                                            final sel = controller.serviceList
+                                                .firstWhere(
+                                                    (s) =>
+                                                        s.id ==
+                                                        controller
+                                                            .selectedServiceId
+                                                            .value,
+                                                    orElse: () =>
+                                                        ServiceModel());
+                                            final title = sel.title != null &&
+                                                    sel.title!.isNotEmpty
+                                                ? Constant.localizationTitle(
+                                                        sel.title)
+                                                    .toLowerCase()
+                                                : "";
+                                            if (title.contains('car') ||
+                                                title.contains('taxi') ||
+                                                title.contains('cab')) {
+                                              isCarServiceForSave = true;
+                                            }
+                                          } catch (e) {
+                                            isCarServiceForSave = false;
+                                          }
+                                        }
+
+                                        controller.driverModel.value.vehicleInformation = VehicleInformation(
+                                            registrationDate: Timestamp.fromDate(
+                                                controller.selectedDate.value!),
+                                            vehicleColor:
+                                                controller.selectedColor.value,
+                                            vehicleNumber: controller
+                                                .vehicleNumberController
+                                                .value
+                                                .text,
+                                            vehicleType: isCarServiceForSave
+                                                ? controller
+                                                    .selectedVehicle.value.name
+                                                : null,
+                                            vehicleTypeId: isCarServiceForSave
+                                                ? controller
+                                                    .selectedVehicle.value.id
+                                                : null,
+                                            seats: controller
+                                                .seatsController.value.text,
+                                            driverRules: controller
+                                                .selectedDriverRulesList);
+
+                                        await FireStoreUtils.updateDriverUser(
+                                                controller.driverModel.value)
+                                            .then((value) async {
+                                          ShowToastDialog.closeLoader();
+                                          if (value == true) {
+                                            ShowToastDialog.showToast(
+                                                "Information update successfully"
+                                                    .tr);
+
+                                            // Refresh HomeController data to ensure orders and location get refreshed
                                             try {
-                                              final sel = controller.serviceList
-                                                  .firstWhere(
-                                                      (s) =>
-                                                          s.id ==
-                                                          controller
-                                                              .selectedServiceId
-                                                              .value,
-                                                      orElse: () =>
-                                                          ServiceModel());
-                                              final title = sel.title != null &&
-                                                      sel.title!.isNotEmpty
-                                                  ? Constant.localizationTitle(
-                                                          sel.title)
-                                                      .toLowerCase()
-                                                  : "";
-                                              if (title.contains('car') ||
-                                                  title.contains('taxi') ||
-                                                  title.contains('cab')) {
-                                                isCarServiceForSave = true;
+                                              if (Get.isRegistered<
+                                                  HomeController>()) {
+                                                final homeController =
+                                                    Get.find<HomeController>();
+                                                homeController.isLoading.value =
+                                                    true;
+                                                // Re-fetch driver document and active rides; also restart location updates
+                                                homeController.getDriver();
+                                                await Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 500));
+                                                homeController.getActiveRide();
+                                                homeController
+                                                    .updateCurrentLocation();
+                                                homeController.isLoading.value =
+                                                    false;
                                               }
                                             } catch (e) {
-                                              isCarServiceForSave = false;
+                                              // Non-fatal: just log
+                                              AppLogger.error(
+                                                  "Error refreshing HomeController after saving vehicle info: $e",
+                                                  tag:
+                                                      "VehicleInformationScreen");
                                             }
                                           }
-
-                                          controller.driverModel.value.vehicleInformation = VehicleInformation(
-                                              registrationDate:
-                                                  Timestamp.fromDate(controller
-                                                      .selectedDate.value!),
-                                              vehicleColor: controller
-                                                  .selectedColor.value,
-                                              vehicleNumber: controller
-                                                  .vehicleNumberController
-                                                  .value
-                                                  .text,
-                                              vehicleType: isCarServiceForSave
-                                                  ? controller.selectedVehicle
-                                                      .value.name
-                                                  : null,
-                                              vehicleTypeId: isCarServiceForSave
-                                                  ? controller
-                                                      .selectedVehicle.value.id
-                                                  : null,
-                                              seats: controller
-                                                  .seatsController.value.text,
-                                              driverRules: controller.selectedDriverRulesList);
-
-                                          await FireStoreUtils.updateDriverUser(
-                                                  controller.driverModel.value)
-                                              .then((value) async {
-                                            ShowToastDialog.closeLoader();
-                                            if (value == true) {
-                                              ShowToastDialog.showToast(
-                                                  "Information update successfully"
-                                                      .tr);
-
-                                              // Refresh HomeController data to ensure orders and location get refreshed
-                                              try {
-                                                if (Get.isRegistered<
-                                                    HomeController>()) {
-                                                  final homeController = Get
-                                                      .find<HomeController>();
-                                                  homeController
-                                                      .isLoading.value = true;
-                                                  // Re-fetch driver document and active rides; also restart location updates
-                                                  homeController.getDriver();
-                                                  await Future.delayed(
-                                                      const Duration(
-                                                          milliseconds: 500));
-                                                  homeController
-                                                      .getActiveRide();
-                                                  homeController
-                                                      .updateCurrentLocation();
-                                                  homeController
-                                                      .isLoading.value = false;
-                                                }
-                                              } catch (e) {
-                                                // Non-fatal: just log
-                                                AppLogger.error(
-                                                    "Error refreshing HomeController after saving vehicle info: $e",
-                                                    tag:
-                                                        "VehicleInformationScreen");
-                                              }
-                                            }
-                                          });
-                                        }
+                                        });
                                       },
                                     ),
                                   ),

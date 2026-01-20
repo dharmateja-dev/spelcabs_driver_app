@@ -85,13 +85,47 @@ class VehicleInformationController extends GetxController {
   // Validation error state
   RxnString vehicleNumberError = RxnString(null);
 
-  /// Validates the vehicle number.
+  /// Validates the vehicle number synchronously (format validation only).
   /// Returns true if valid, false otherwise.
   bool validateVehicleNumber() {
     final error = ValidationUtils.validateVehicleNumber(
         vehicleNumberController.value.text);
     vehicleNumberError.value = error;
     return error == null;
+  }
+
+  /// Validates the vehicle number including async duplicate check.
+  /// Returns true if valid and not a duplicate, false otherwise.
+  Future<bool> validateVehicleNumberWithDuplicateCheck() async {
+    // First do format validation
+    if (!validateVehicleNumber()) {
+      return false;
+    }
+
+    // Normalize the vehicle number for duplicate check
+    final normalizedNumber = ValidationUtils.normalizeVehicleNumber(
+        vehicleNumberController.value.text);
+
+    // Check for duplicates
+    final isDuplicate = await FireStoreUtils.checkVehicleNumberExists(
+        normalizedNumber, driverModel.value.id);
+
+    if (isDuplicate) {
+      vehicleNumberError.value = 'This vehicle number is already registered';
+      return false;
+    }
+
+    return true;
+  }
+
+  /// Normalizes the vehicle number to uppercase.
+  /// Call this before saving to ensure consistent format.
+  void normalizeVehicleNumber() {
+    final currentText = vehicleNumberController.value.text;
+    if (currentText.isNotEmpty) {
+      final normalized = ValidationUtils.normalizeVehicleNumber(currentText);
+      vehicleNumberController.value.text = normalized;
+    }
   }
 
   // Check if vehicle information has been submitted
