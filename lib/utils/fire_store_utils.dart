@@ -2398,9 +2398,10 @@ class FireStoreUtils {
       for (var zoneId in zoneIds) {
         final matchingZone = allZones.where((z) => z.id == zoneId).toList();
         if (matchingZone.isNotEmpty) {
-          final zoneName = Constant.localizationName(matchingZone.first.name);
-          if (Constant.isWorldwideZone(zoneName)) {
-            AppLogger.info("Driver has worldwide zone: $zoneName",
+          // Check strictly using zoneType as requested
+          if (matchingZone.first.zoneType == 'worldwide') {
+            AppLogger.info(
+                "Driver has worldwide zone (type check): ${matchingZone.first.id}",
                 tag: "FireStoreUtils");
             return true;
           }
