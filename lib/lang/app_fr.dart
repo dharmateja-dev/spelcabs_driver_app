@@ -2,7 +2,8 @@ const Map<String, String> trFr = {
   'GoRide': 'AllezRide',
   'privacy_policy': "politique de confidentialité",
   "Sign up": "S'inscrire",
-  "Create your account to start using GoRide": "Créez votre compte pour commencer à utiliser GoRide",
+  "Create your account to start using GoRide":
+      "Créez votre compte pour commencer à utiliser GoRide",
   'Full name': 'Nom et prénom',
   "Phone number": "Numéro de téléphone",
   'Email': 'E-mail',
@@ -13,19 +14,22 @@ const Map<String, String> trFr = {
   "Please enter valid email": "Veuillez entrer une adresse e-mail valide",
   "Please wait": "S'il vous plaît, attendez",
   "Login": "Se connecter",
-  "Welcome Back! We are happy to have \n you back": "Content de te revoir! Nous sommes heureux de vous retrouver \n",
+  "Welcome Back! We are happy to have \n you back":
+      "Content de te revoir! Nous sommes heureux de vous retrouver \n",
   "Next": "Suivant",
   "OR": "OU",
   "Login with google": "Connectez-vous avec Google",
   "Login with apple": "Connectez-vous avec Apple",
-  'By tapping "Next" you agree to ': 'En appuyant sur "Suivant", vous acceptez ',
+  'By tapping "Next" you agree to ':
+      'En appuyant sur "Suivant", vous acceptez ',
   'Terms and conditions': 'Termes et conditions',
   'privacy policy': 'politique de confidentialité',
   "terms": "termes",
   ' and ': ' et ',
   "privacy": "confidentialité",
   "Verify Phone Number": "Vérifier le numéro de téléphone",
-  "We just send a verification code to": "Nous envoyons simplement un code de vérification à",
+  "We just send a verification code to":
+      "Nous envoyons simplement un code de vérification à",
   "Verify": "Vérifier",
   "Verify OTP": "Vérifier OTP",
   "Code is Invalid": "Le code n'est pas valide",
@@ -39,9 +43,13 @@ const Map<String, String> trFr = {
   "Number": "Nombre",
   "Please enter bank name": "Veuillez saisir le nom de la banque",
   "Please enter branch name": "Veuillez entrer le nom de la succursale",
+  "Please enter IFSC code": "Veuillez saisir le code IFSC",
+  "IFSC code must be 11 alphanumeric characters":
+      "Le code IFSC doit contenir 11 caractères alphanumériques",
   "Please enter holder name": "Veuillez entrer le nom du titulaire",
   "Please enter account number": "Veuillez entrer le numéro de compte",
-  "Bank details update successfully": "Mise à jour réussie des coordonnées bancaires",
+  "Bank details update successfully":
+      "Mise à jour réussie des coordonnées bancaires",
   "No Conversion found": "Aucune conversion trouvée",
   "Please enter text": "Veuillez saisir du texte",
   'Start typing ...': 'Commencez à taper...',
@@ -70,6 +78,7 @@ const Map<String, String> trFr = {
   'Please complete your payment.': 'Veuillez finaliser votre paiement.',
   "Ride Complete successfully": "Randonnée terminée avec succès",
   "Pickup Customer": "Client de ramassage",
+  "PICKUP PARCEL": "RÉCUPÉRER LE COLIS",
   "OTP verify from customer": "Vérification OTP du client",
   "OTP verify": "Vérification OTP",
   "Please wait...": "S'il vous plaît, attendez...",
@@ -79,25 +88,30 @@ const Map<String, String> trFr = {
   "Customer pickup successfully": "Prise en charge du client avec succès",
   "OTP Invalid": "OTP invalide",
   "Cargo Load successfully": "Chargement réussi",
-  "You have to minimum  wallet amount to Accept Order and place a bid": "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
+  "You have to minimum  wallet amount to Accept Order and place a bid":
+      "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
   'New': 'Nouveau',
   'Accepted': 'Accepté',
   'Active': 'Actif',
   "Map view": "Map view",
-  "You are Now offline so you can't get nearest order.": "You are Now offline so you can't get nearest order.",
+  "You are Now offline so you can't get nearest order.":
+      "You are Now offline so you can't get nearest order.",
   "New Rides Not found": "New Rides Not found",
   "Recommended Price is": "Recommended Price is",
   "Approx distanc": "Approx distanc",
   "Enter Fare rate": "Enter Fare rate",
   "Accept fare on": "Accept fare on",
   'New Driver Bid': 'Offre de nouveau conducteur',
-  'Driver has offered for your journey.🚗': 'Un chauffeur vous a proposé pour votre trajet.🚗',
+  'Driver has offered for your journey.🚗':
+      'Un chauffeur vous a proposé pour votre trajet.🚗',
   "Ride Accepted": "Ride Accepted",
-  "You have to minimum wallet amount to Accept Order and place a bid": "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
+  "You have to minimum wallet amount to Accept Order and place a bid":
+      "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
   " For Person": " For Person",
   "View details": "Afficher les détails",
   "No active ride found": "Aucun trajet actif trouvé",
-  "Intercity/Outstation feature is disable for": "La fonctionnalité Intercity/Outstation est désactivée pour",
+  "Intercity/Outstation feature is disable for":
+      "La fonctionnalité Intercity/Outstation est désactivée pour",
   'From': 'Depuis',
   'To': 'À',
   'Confirm': 'Confirmer',
@@ -118,8 +132,10 @@ const Map<String, String> trFr = {
   "Back side of": "Face arrière de",
   "Done": "Fait",
   "Please enter document number": "Veuillez entrer le numéro du document",
-  "Please upload front side of document.": "Veuillez télécharger le recto du document.",
-  "Please upload back side of document.": "Veuillez télécharger le verso du document.",
+  "Please upload front side of document.":
+      "Veuillez télécharger le recto du document.",
+  "Please upload back side of document.":
+      "Veuillez télécharger le verso du document.",
   "Please wait..": "S'il vous plaît, attendez..",
   "Please Select": "Veuillez sélectionner",
   "Camera": "Caméra",
@@ -149,7 +165,8 @@ const Map<String, String> trFr = {
   "wallet": "portefeuille",
   "Admin commission debited": "Commission d'administration débitée",
   'Cash Payment conformed': 'Paiement en espèces conforme',
-  'Driver has conformed your cash payment': 'Le chauffeur a confirmé votre paiement en espèces',
+  'Driver has conformed your cash payment':
+      'Le chauffeur a confirmé votre paiement en espèces',
   "Payment Conform successfully": "Paiement conforme avec succès",
   "Update Profile": "Mettre à jour le profil",
   "Profile update successfully": "Mise à jour du profil réussie",
@@ -167,7 +184,8 @@ const Map<String, String> trFr = {
   "OK": "D'ACCORD",
   "Account delete": "Supprimer le compte",
   "Please contact to administrator": "Veuillez contacter l'administrateur",
-  "Are you sure want to delete Account.": "Êtes-vous sûr de vouloir supprimer le compte.",
+  "Are you sure want to delete Account.":
+      "Êtes-vous sûr de vouloir supprimer le compte.",
   "Privacy Policy": "politique de confidentialité",
   "Terms and Conditions": "Termes et conditions",
   'Vehicle Number': 'Numéro de véhicule',
@@ -179,7 +197,8 @@ const Map<String, String> trFr = {
   "Select Your Rules": "Sélectionnez vos règles",
   "Please select service": "Veuillez sélectionner un service",
   "Please enter Vehicle number": "Veuillez saisir le numéro du véhicule",
-  "Please select registration date": "Veuillez sélectionner la date d'inscription",
+  "Please select registration date":
+      "Veuillez sélectionner la date d'inscription",
   "Please enter Vehicle type": "Veuillez saisir le type de véhicule",
   "Please enter Vehicle color": "Veuillez entrer la couleur du véhicule",
   "Please enter seats": "Veuillez entrer les sièges",
@@ -193,13 +212,15 @@ const Map<String, String> trFr = {
   "No transaction found": "Aucune transaction trouvée",
   "withdraw": "retirer",
   "Insufficient balance": "Solde insuffisant",
-  "Your bank details is not available.Please add bank details": "Vos coordonnées bancaires ne sont pas disponibles. Veuillez ajouter vos coordonnées bancaires",
+  "Your bank details is not available.Please add bank details":
+      "Vos coordonnées bancaires ne sont pas disponibles. Veuillez ajouter vos coordonnées bancaires",
   "Withdrawal history": "Historique des retraits",
   "Add Topup Amount": "Ajouter un montant de recharge",
   'Enter Amount': 'Entrez le montant',
   "Select Payment Option": "Sélectionnez l'option de paiement",
   "Topup": "Recharge",
-  "Something went wrong, please contact admin.": "Quelque chose s'est mal passé, veuillez contacter l'administrateur.",
+  "Something went wrong, please contact admin.":
+      "Quelque chose s'est mal passé, veuillez contacter l'administrateur.",
   "Please select payment method": "Veuillez sélectionner le mode de paiement",
   "Please enter amount": "Veuillez entrer le montant",
   "Transaction Details": "Détails de la transaction",
@@ -211,7 +232,8 @@ const Map<String, String> trFr = {
   "Amount to Withdraw": "Montant à retirer",
   'Notes': 'Remarques',
   "Withdrawal": "Retrait",
-  "Withdraw amount must be greater or equal to": "Le montant du retrait doit être supérieur ou égal à",
+  "Withdraw amount must be greater or equal to":
+      "Le montant du retrait doit être supérieur ou égal à",
   "Request sent to admin": "Demande envoyée à l'administrateur",
   'Online': 'En ligne',
   'Offline': 'Hors ligne',
@@ -240,4 +262,13 @@ const Map<String, String> trFr = {
   'Vehicle Information': 'Informations sur le véhicule',
   'Settings': 'Paramètres',
   'Log out': 'Se déconnecter',
+  // Subscription related
+  "Switch to Commission Model": "Passer au modèle de commission",
+  "Are you sure you want to cancel your current subscription and switch to the Commission Model? You will be charged admin commission on each ride.":
+      "Êtes-vous sûr de vouloir annuler votre abonnement actuel et passer au modèle de commission? Une commission administrative sera facturée sur chaque trajet.",
+  "Switched to Commission Model successfully.":
+      "Passage au modèle de commission réussi.",
+  "You already have an active subscription. Switch to Commission Model first.":
+      "Vous avez déjà un abonnement actif. Passez d'abord au modèle de commission.",
+  "Switch": "Changer",
 };

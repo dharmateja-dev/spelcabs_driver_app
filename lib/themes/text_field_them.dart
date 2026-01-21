@@ -228,6 +228,7 @@ class TextFieldThem {
     required String hintText,
     required TextEditingController controller,
     TextInputType keyBoardType = TextInputType.text,
+    TextCapitalization textCapitalization = TextCapitalization.none,
     bool enable = true,
     int maxLine = 1,
   }) {
@@ -238,6 +239,7 @@ class TextFieldThem {
         textAlign: TextAlign.start,
         enabled: enable,
         keyboardType: keyBoardType,
+        textCapitalization: textCapitalization,
         maxLines: maxLine,
         style: GoogleFonts.poppins(
             color: themeChange.getThem() ? Colors.white : Colors.black),

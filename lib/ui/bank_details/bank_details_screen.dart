@@ -32,7 +32,7 @@ class BankDetailsScreen extends StatelessWidget {
                     height: Responsive.height(100, context),
                     width: Responsive.width(100, context),
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25))),
@@ -64,7 +64,9 @@ class BankDetailsScreen extends StatelessWidget {
                                   ),
                                   TextFieldThem.buildTextFiled(context,
                                       hintText: 'IFSC Code'.tr,
-                                      keyBoardType: TextInputType.number,
+                                      keyBoardType: TextInputType.text,
+                                      textCapitalization:
+                                          TextCapitalization.characters,
                                       controller: controller
                                           .branchNameController.value),
                                   const SizedBox(
@@ -119,7 +121,15 @@ class BankDetailsScreen extends StatelessWidget {
                                       }
                                       if (branchName.isEmpty) {
                                         ShowToastDialog.showToast(
-                                            "Please enter branch name".tr);
+                                            "Please enter IFSC code".tr);
+                                        return;
+                                      }
+                                      // Validate IFSC code (alphanumeric, 11 characters)
+                                      if (!RegExp(r'^[A-Za-z0-9]{11}$')
+                                          .hasMatch(branchName)) {
+                                        ShowToastDialog.showToast(
+                                            "IFSC code must be 11 alphanumeric characters"
+                                                .tr);
                                         return;
                                       }
                                       if (holderName.isEmpty) {

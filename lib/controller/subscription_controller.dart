@@ -64,13 +64,36 @@ class SubscriptionController extends GetxController {
     isLoading.value = false;
   }
 
+  /// Refresh data for pull-to-refresh functionality
+  Future<void> refreshData() async {
+    userModel.value =
+        await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid()) ??
+            DriverUserModel();
+
+    await getSubscriptionPlans();
+  }
+
   // -------------------- PLANS --------------------
   Future<void> getSubscriptionPlans() async {
     final plans = await FireStoreUtils.getAllSubscriptionPlans();
 
-    subscriptionPlanList.assignAll(
-      plans.where((e) => e.isActive == true || e.isEnable == true).toList(),
-    );
+    // Filter enabled plans
+    List<SubscriptionModel> filteredPlans =
+        plans.where((e) => e.isActive == true || e.isEnable == true).toList();
+
+    // Sort plans to put the active plan (user's current subscription) at index 0
+    final activeSubscriptionPlanId = userModel.value.subscriptionPlanId;
+    if (activeSubscriptionPlanId != null &&
+        activeSubscriptionPlanId.isNotEmpty) {
+      filteredPlans.sort((a, b) {
+        // Active plan goes first
+        if (a.id == activeSubscriptionPlanId) return -1;
+        if (b.id == activeSubscriptionPlanId) return 1;
+        return 0; // Keep original order for other plans
+      });
+    }
+
+    subscriptionPlanList.assignAll(filteredPlans);
 
     if (subscriptionPlanList.isNotEmpty) {
       selectedSubscriptionPlan.value = subscriptionPlanList.first;
@@ -102,14 +125,34 @@ class SubscriptionController extends GetxController {
       return;
     }
 
-    if (hasActiveSubscription()) {
-      ShowToastDialog.showToast("You already have an active subscription.".tr);
-      return;
-    }
-
     selectedSubscriptionPlan.value = plan;
     totalAmount.value =
         plan.priceDouble ?? double.tryParse(plan.price ?? '0') ?? 0.0;
+  }
+
+  /// Check if the selected plan is the Commission Model (free plan with price 0)
+  bool isCommissionModelPlan(SubscriptionModel plan) {
+    return (plan.priceDouble ?? 0) == 0 &&
+        (plan.name?.toLowerCase().contains('commission') ?? false);
+  }
+
+  /// Switch back to Commission Model (clear subscription)
+  Future<void> switchToCommissionModel() async {
+    ShowToastDialog.showLoader("Please wait".tr);
+
+    // Clear subscription fields
+    userModel.value.subscriptionPlanId = null;
+    userModel.value.subscriptionPlan = null;
+    userModel.value.subscriptionExpiryDate = null;
+    userModel.value.commission = null; // Reset to default admin commission
+
+    await FireStoreUtils.updateDriverUser(userModel.value);
+
+    ShowToastDialog.closeLoader();
+    ShowToastDialog.showToast("Switched to Commission Model successfully.".tr);
+
+    // Refresh the data to update UI
+    await refreshData();
   }
 
   // -------------------- PAYMENT SUCCESS --------------------

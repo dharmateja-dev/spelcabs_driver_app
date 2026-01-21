@@ -41,6 +41,9 @@ const Map<String, String> enUS = {
   "Number": "Number",
   "Please enter bank name": "Please enter bank name",
   "Please enter branch name": "Please enter branch name",
+  "Please enter IFSC code": "Please enter IFSC code",
+  "IFSC code must be 11 alphanumeric characters":
+      "IFSC code must be 11 alphanumeric characters",
   "Please enter holder name": "Please enter holder name",
   "Please enter account number": "Please enter account number",
   "Bank details update successfully": "Bank details update successfully",
@@ -72,6 +75,7 @@ const Map<String, String> enUS = {
   'Please complete your payment.': 'Please complete your payment.',
   "Ride Complete successfully": "Ride Complete successfully",
   "Pickup Customer": "Pickup Customer",
+  "PICKUP PARCEL": "PICKUP PARCEL",
   "OTP verify from customer": "OTP verify from customer",
   "OTP verify": "OTP verify",
   "Please wait...": "Please wait...",
@@ -254,4 +258,13 @@ const Map<String, String> enUS = {
   'Vehicle Information': 'Vehicle Information',
   'Settings': 'Settings',
   'Log out': 'Log out',
+  // Subscription related
+  "Switch to Commission Model": "Switch to Commission Model",
+  "Are you sure you want to cancel your current subscription and switch to the Commission Model? You will be charged admin commission on each ride.":
+      "Are you sure you want to cancel your current subscription and switch to the Commission Model? You will be charged admin commission on each ride.",
+  "Switched to Commission Model successfully.":
+      "Switched to Commission Model successfully.",
+  "You already have an active subscription. Switch to Commission Model first.":
+      "You already have an active subscription. Switch to Commission Model first.",
+  "Switch": "Switch",
 };

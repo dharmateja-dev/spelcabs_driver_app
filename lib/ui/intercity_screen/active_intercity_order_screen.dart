@@ -398,7 +398,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
                                                             .buildBorderButton(
                                                             context,
                                                             title:
-                                                                "Pickup Customer"
+                                                                "PICKUP PARCEL"
                                                                     .tr,
                                                             btnHeight: 44,
                                                             iconVisibility:

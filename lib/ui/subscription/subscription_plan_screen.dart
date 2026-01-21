@@ -1,4 +1,5 @@
 import 'package:driver/constant/constant.dart';
+import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/subscription_controller.dart';
 import 'package:driver/model/subscription_plan_model.dart';
 import 'package:driver/themes/app_colors.dart';
@@ -36,39 +37,129 @@ class SubscriptionPlanScreen extends StatelessWidget {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.subscriptionPlanList.length,
-                      itemBuilder: (context, index) {
-                        final plan = controller.subscriptionPlanList[index];
+                  : RefreshIndicator(
+                      onRefresh: () => controller.refreshData(),
+                      color: AppColors.primary,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.subscriptionPlanList.length,
+                        itemBuilder: (context, index) {
+                          final plan = controller.subscriptionPlanList[index];
+                          final bool isCommissionModel =
+                              controller.isCommissionModelPlan(plan);
+                          final bool hasActiveSub =
+                              controller.hasActiveSubscription();
 
-                        return SubscriptionPlanCard(
-                          plan: plan,
-                          isSelected:
-                              controller.selectedSubscriptionPlan.value.id ==
-                                  plan.id,
-                          isActive:
-                              controller.userModel.value.subscriptionPlanId ==
-                                  plan.id,
-                          isDark: themeChange.getThem(),
-                          onSelect: () {
-                            controller.selectPlan(plan);
-                          },
-                          onBuy: () {
-                            controller.selectPlan(plan);
-                            // Handle free plans directly
-                            if ((plan.priceDouble ?? 0) == 0) {
-                              controller.selectedPaymentMethod.value = 'wallet';
-                              controller.placeOrder();
-                            } else {
-                              // Show payment method selection
-                              _showPaymentMethodDialog(
-                                  context, controller, themeChange);
-                            }
-                          },
-                        );
-                      },
+                          return SubscriptionPlanCard(
+                            plan: plan,
+                            isSelected:
+                                controller.selectedSubscriptionPlan.value.id ==
+                                    plan.id,
+                            isActive:
+                                controller.userModel.value.subscriptionPlanId ==
+                                    plan.id,
+                            isDark: themeChange.getThem(),
+                            isCommissionModel: isCommissionModel,
+                            hasActiveSubscription: hasActiveSub,
+                            onSelect: () {
+                              controller.selectPlan(plan);
+                            },
+                            onBuy: () {
+                              // If user has active subscription and clicks on Commission Model
+                              if (hasActiveSub && isCommissionModel) {
+                                _showSwitchToCommissionDialog(
+                                    context, controller, themeChange);
+                                return;
+                              }
+
+                              // If user has active subscription and clicking on another plan
+                              if (hasActiveSub && !isCommissionModel) {
+                                ShowToastDialog.showToast(
+                                    "You already have an active subscription. Switch to Commission Model first."
+                                        .tr);
+                                return;
+                              }
+
+                              controller.selectPlan(plan);
+                              // Handle free plans directly
+                              if ((plan.priceDouble ?? 0) == 0) {
+                                controller.selectedPaymentMethod.value =
+                                    'wallet';
+                                controller.placeOrder();
+                              } else {
+                                // Show payment method selection
+                                _showPaymentMethodDialog(
+                                    context, controller, themeChange);
+                              }
+                            },
+                          );
+                        },
+                      ),
                     ),
+        );
+      },
+    );
+  }
+
+  /// Show confirmation dialog to switch to Commission Model
+  void _showSwitchToCommissionDialog(BuildContext context,
+      SubscriptionController controller, DarkThemeProvider themeChange) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: themeChange.getThem()
+              ? AppColors.darkContainerBackground
+              : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "Switch to Commission Model".tr,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: themeChange.getThem() ? Colors.white : Colors.black,
+            ),
+          ),
+          content: Text(
+            "Are you sure you want to cancel your current subscription and switch to the Commission Model? You will be charged admin commission on each ride."
+                .tr,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: themeChange.getThem() ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                "Cancel".tr,
+                style: GoogleFonts.poppins(
+                  color: AppColors.subTitleColor,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+                await controller.switchToCommissionModel();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Switch".tr,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -293,6 +384,8 @@ class SubscriptionPlanCard extends StatelessWidget {
   final bool isSelected;
   final bool isActive;
   final bool isDark;
+  final bool isCommissionModel;
+  final bool hasActiveSubscription;
   final VoidCallback onSelect;
   final VoidCallback onBuy;
 
@@ -302,6 +395,8 @@ class SubscriptionPlanCard extends StatelessWidget {
     required this.isSelected,
     required this.isActive,
     required this.isDark,
+    this.isCommissionModel = false,
+    this.hasActiveSubscription = false,
     required this.onSelect,
     required this.onBuy,
   });
@@ -430,12 +525,8 @@ class SubscriptionPlanCard extends StatelessWidget {
               width: double.infinity,
               child: RoundedButtonFill(
                 radius: 14,
-                title: isActive
-                    ? "Current Plan".tr
-                    : (plan.priceDouble ?? 0) == 0
-                        ? "Activate".tr
-                        : "Buy Now".tr,
-                color: isActive ? Colors.grey.shade400 : AppColors.primary,
+                title: _getButtonTitle(),
+                color: _getButtonColor(),
                 textColor: Colors.white,
                 onPress: isActive ? () {} : onBuy,
               ),
@@ -444,6 +535,34 @@ class SubscriptionPlanCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// 🔹 GET BUTTON TITLE
+  String _getButtonTitle() {
+    if (isActive) {
+      return "Current Plan".tr;
+    }
+    // If user has active subscription and this is Commission Model, show "Switch"
+    if (hasActiveSubscription && isCommissionModel) {
+      return "Switch".tr;
+    }
+    // For free plans (including Commission Model when no active subscription)
+    if ((plan.priceDouble ?? 0) == 0) {
+      return "Activate".tr;
+    }
+    return "Buy Now".tr;
+  }
+
+  /// 🔹 GET BUTTON COLOR
+  Color _getButtonColor() {
+    if (isActive) {
+      return Colors.grey.shade400;
+    }
+    // Orange color for switching to Commission Model
+    if (hasActiveSubscription && isCommissionModel) {
+      return Colors.orange;
+    }
+    return AppColors.primary;
   }
 
   /// 🔹 VALIDITY TEXT
