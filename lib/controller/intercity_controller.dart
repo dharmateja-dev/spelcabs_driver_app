@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:developer';
 
+import 'dart:async'; // Added for StreamSubscription
 import 'package:driver/utils/app_logger.dart';
 
 class IntercityController extends GetxController {
@@ -23,6 +24,8 @@ class IntercityController extends GetxController {
       TextEditingController().obs;
   DateTime? suggestedTime = DateTime.now();
   DateTime? dateAndTime = DateTime.now();
+  StreamSubscription?
+      _intercityOrderSubscription; // Subscription for real-time updates
 
   @override
   void onInit() {
@@ -60,8 +63,12 @@ class IntercityController extends GetxController {
   }
 
   getOrder() async {
+    // Cancel any existing subscription to avoid duplicates
+    await _intercityOrderSubscription?.cancel();
+    _intercityOrderSubscription = null;
+
     try {
-      AppLogger.info("Starting getOrder() function...",
+      AppLogger.info("Starting getOrder() function - Initializing Stream...",
           tag: "IntercityController");
       isLoading.value = true;
       intercityServiceOrder.clear();
@@ -97,126 +104,111 @@ class IntercityController extends GetxController {
       }
 
       // Zone-based filtering for Outstation rides
-      // **Outstation Zone Logic:**
-      // - When zone is a city (e.g., Mumbai, Ahmedabad): Show all outstation orders
-      //   that originate FROM those cities. Outstation allows cross-city trips.
-      // - When zone is Worldwide: Show ALL intercity orders (designed for cross-city/long-distance trips)
-      //
-      // Note: Unlike city rides, outstation rides don't require pickup and drop in the SAME zone
-      // Outstation rides are specifically for trips BETWEEN cities
-
       if (driverModel.value.zoneIds != null &&
           driverModel.value.zoneIds!.isNotEmpty) {
-        // Check if driver has any worldwide zone by fetching zone names
         bool hasWorldwideZone = await FireStoreUtils.hasDriverWorldwideZone(
             driverModel.value.zoneIds);
 
-        if (hasWorldwideZone) {
-          // Worldwide zone: Show ALL intercity orders (no zone filter)
-          // Outstation rides are designed for cross-city / long-distance trips
-          AppLogger.debug(
-              "Driver has worldwide zone - showing all intercity orders",
-              tag: "IntercityController");
-          // No zone filter added - query will return all matching orders
-        } else {
-          // City zones: Filter by those zones (show orders originating from driver's city zones)
-          query = query.where('zoneId', whereIn: driverModel.value.zoneIds);
-          AppLogger.debug("Zone filter added: ${driverModel.value.zoneIds}",
-              tag: "IntercityController");
-        }
+        AppLogger.debug(
+            "Driver zone check - Worldwide: $hasWorldwideZone. Showing ALL intercity orders per requirement (Outstation shows all cities).",
+            tag: "IntercityController");
       } else {
         AppLogger.warning(
             "Driver has no zones assigned - showing all intercity orders",
             tag: "IntercityController");
       }
 
-      AppLogger.info("Executing Firestore query (broad)…",
-          tag: "IntercityController");
-      final querySnapshot = await query.get();
-      AppLogger.info("Found ${querySnapshot.docs.length} orders (pre-filter).",
+      AppLogger.info("Listening to Firestore query (broad)…",
           tag: "IntercityController");
 
-      final uid = FireStoreUtils.getCurrentUid();
-      const freightServiceId =
-          "Kn2VEnPI3ikF58uK8YqY"; // Freight service ID to EXCLUDE
-      int kept = 0;
+      // Use snapshots() for real-time updates
+      _intercityOrderSubscription = query.snapshots().listen((querySnapshot) {
+        AppLogger.info(
+            "Stream update received: ${querySnapshot.docs.length} orders (pre-filter).",
+            tag: "IntercityController");
 
-      for (var doc in querySnapshot.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>;
+        final uid = FireStoreUtils.getCurrentUid();
+        const freightServiceId =
+            "Kn2VEnPI3ikF58uK8YqY"; // Freight service ID to EXCLUDE
+        int kept = 0;
+        List<InterCityOrderModel> tempOrders = [];
 
-          // ✅ FIX: EXCLUDE freight orders - only show intercity orders
-          final serviceId = data['intercityServiceId'] as String?;
-          if (serviceId == freightServiceId) {
-            AppLogger.debug(
-                "Order ${doc.id} is a freight order; skipping for intercity list.",
-                tag: "IntercityController");
-            continue; // Skip freight orders
+        for (var doc in querySnapshot.docs) {
+          try {
+            final data = doc.data() as Map<String, dynamic>;
+
+            // ✅ FIX: EXCLUDE freight orders - only show intercity orders
+            final serviceId = data['intercityServiceId'] as String?;
+            if (serviceId == freightServiceId) {
+              continue; // Skip freight orders
+            }
+
+            // ---- Client-side SOURCE match (lenient) ----
+            bool sourceOk = true;
+            if (srcText.isNotEmpty) {
+              sourceOk = eqOrContains(
+                      data['sourceLocationName'] as String?, srcText) ||
+                  eqOrContains(data['sourceName_norm'] as String?,
+                      srcText); // ok if absent
+            }
+
+            // ---- Client-side DESTINATION match (lenient) ----
+            bool destOk = true;
+            if (dstText.isNotEmpty) {
+              destOk = eqOrContains(
+                      data['destinationLocationName'] as String?, dstText) ||
+                  eqOrContains(data['destinationName_norm'] as String?,
+                      dstText); // ok if absent
+            }
+
+            if (!(sourceOk && destOk)) continue;
+
+            final orderModel = InterCityOrderModel.fromJson(data);
+
+            // skip already accepted by this driver (your existing logic)
+            bool alreadyAccepted = false;
+            final accepted = orderModel.acceptedDriverId;
+            if (accepted != null) {
+              alreadyAccepted = accepted.cast<String>().contains(uid);
+            }
+
+            if (!alreadyAccepted) {
+              tempOrders.add(orderModel);
+              kept++;
+            }
+          } catch (e, s) {
+            AppLogger.error("Error parsing order document ${doc.id}: $e",
+                tag: "IntercityController", error: e, stackTrace: s);
           }
-
-          // ---- Client-side SOURCE match (lenient) ----
-          bool sourceOk = true;
-          if (srcText.isNotEmpty) {
-            sourceOk =
-                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    eqOrContains(data['sourceName_norm'] as String?,
-                        srcText); // ok if absent
-          }
-
-          // ---- Client-side DESTINATION match (lenient) ----
-          bool destOk = true;
-          if (dstText.isNotEmpty) {
-            destOk = eqOrContains(
-                    data['destinationLocationName'] as String?, dstText) ||
-                eqOrContains(data['destinationName_norm'] as String?,
-                    dstText); // ok if absent
-          }
-
-          if (!(sourceOk && destOk)) continue;
-
-          final orderModel = InterCityOrderModel.fromJson(data);
-
-          // skip already accepted by this driver (your existing logic)
-          bool alreadyAccepted = false;
-          final accepted = orderModel.acceptedDriverId;
-          if (accepted != null) {
-            alreadyAccepted = accepted.cast<String>().contains(uid);
-          }
-
-          if (!alreadyAccepted) {
-            intercityServiceOrder.add(orderModel);
-            kept++;
-            AppLogger.debug("Order ${doc.id} kept after client filters.",
-                tag: "IntercityController");
-          } else {
-            AppLogger.debug("Order ${doc.id} already accepted; skipping.",
-                tag: "IntercityController");
-          }
-        } catch (e, s) {
-          AppLogger.error("Error parsing order document ${doc.id}: $e",
-              tag: "IntercityController", error: e, stackTrace: s);
         }
-      }
 
-      AppLogger.info("Final display list contains $kept orders (post-filter).",
-          tag: "IntercityController");
+        intercityServiceOrder.value = tempOrders;
+        isLoading.value = false;
+        AppLogger.info(
+            "Final display list contains $kept orders (post-filter).",
+            tag: "IntercityController");
+      }, onError: (e) {
+        AppLogger.error("Error in intercity order stream: $e",
+            tag: "IntercityController");
+        isLoading.value = false;
+      });
     } catch (e, s) {
-      AppLogger.error("Error in getOrder: $e",
+      AppLogger.error("Error setting up getOrder stream: $e",
           tag: "IntercityController", error: e, stackTrace: s);
-    } finally {
-      isLoading.value = false;
-      AppLogger.info("Finished getOrder() function.",
-          tag: "IntercityController");
+      isLoading.value = false; // Ensure loading stops on setup error
     }
   }
 
   void clearSearch() {
-    AppLogger.info("Clearing search criteria.", tag: "IntercityController");
+    AppLogger.info("Clearing search criteria and cancelling stream.",
+        tag: "IntercityController");
     sourceCityController.value.clear();
     destinationCityController.value.clear();
     whenController.value.clear();
     intercityServiceOrder.clear();
-    dateAndTime = DateTime.now();
+    dateAndTime = null;
+    _intercityOrderSubscription?.cancel();
+    _intercityOrderSubscription = null;
   }
 
   // ====== UPDATED: properly validate search criteria ======
@@ -249,6 +241,7 @@ class IntercityController extends GetxController {
   void onClose() {
     AppLogger.info("IntercityController onClose called, disposing controllers.",
         tag: "IntercityController");
+    _intercityOrderSubscription?.cancel();
     sourceCityController.value.dispose();
     destinationCityController.value.dispose();
     whenController.value.dispose();
