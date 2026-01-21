@@ -67,11 +67,11 @@ class IntercityController extends GetxController {
       intercityServiceOrder.clear();
 
       // helpers
-      String _norm(String s) => s.trim().toLowerCase();
-      bool _eqOrContains(String? haystack, String needle) {
+      String norm(String s) => s.trim().toLowerCase();
+      bool eqOrContains(String? haystack, String needle) {
         if (haystack == null) return false;
-        final h = _norm(haystack);
-        final n = _norm(needle);
+        final h = norm(haystack);
+        final n = norm(needle);
         return h == n || h.contains(n);
       }
 
@@ -83,12 +83,12 @@ class IntercityController extends GetxController {
         tag: "IntercityController",
       );
 
-      // ---- Build a BROAD Firestore query (no exact text equals for locations) ----
+      // ---- Build Firestore query for Outstation/Intercity rides ----
       Query query = FireStoreUtils.fireStore
           .collection(CollectionName.ordersIntercity)
           .where('status', isEqualTo: Constant.ridePlaced);
 
-      // keep your existing string date filter (your DB uses string field `whenDates`)
+      // Date filter (if specified)
       if (whenController.value.text.isNotEmpty && dateAndTime != null) {
         final formattedDate = DateFormat("dd-MMM-yyyy").format(dateAndTime!);
         query = query.where('whenDates', isEqualTo: formattedDate);
@@ -96,10 +96,37 @@ class IntercityController extends GetxController {
             tag: "IntercityController");
       }
 
+      // Zone-based filtering for Outstation rides
+      // **Outstation Zone Logic:**
+      // - When zone is a city (e.g., Mumbai, Ahmedabad): Show all outstation orders
+      //   that originate FROM those cities. Outstation allows cross-city trips.
+      // - When zone is Worldwide: Show ALL intercity orders (designed for cross-city/long-distance trips)
+      //
+      // Note: Unlike city rides, outstation rides don't require pickup and drop in the SAME zone
+      // Outstation rides are specifically for trips BETWEEN cities
+
       if (driverModel.value.zoneIds != null &&
           driverModel.value.zoneIds!.isNotEmpty) {
-        query = query.where('zoneId', whereIn: driverModel.value.zoneIds);
-        AppLogger.debug("Zone filter added: ${driverModel.value.zoneIds}",
+        // Check if driver has any worldwide zone by fetching zone names
+        bool hasWorldwideZone = await FireStoreUtils.hasDriverWorldwideZone(
+            driverModel.value.zoneIds);
+
+        if (hasWorldwideZone) {
+          // Worldwide zone: Show ALL intercity orders (no zone filter)
+          // Outstation rides are designed for cross-city / long-distance trips
+          AppLogger.debug(
+              "Driver has worldwide zone - showing all intercity orders",
+              tag: "IntercityController");
+          // No zone filter added - query will return all matching orders
+        } else {
+          // City zones: Filter by those zones (show orders originating from driver's city zones)
+          query = query.where('zoneId', whereIn: driverModel.value.zoneIds);
+          AppLogger.debug("Zone filter added: ${driverModel.value.zoneIds}",
+              tag: "IntercityController");
+        }
+      } else {
+        AppLogger.warning(
+            "Driver has no zones assigned - showing all intercity orders",
             tag: "IntercityController");
       }
 
@@ -131,17 +158,17 @@ class IntercityController extends GetxController {
           bool sourceOk = true;
           if (srcText.isNotEmpty) {
             sourceOk =
-                _eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    _eqOrContains(data['sourceName_norm'] as String?,
+                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
+                    eqOrContains(data['sourceName_norm'] as String?,
                         srcText); // ok if absent
           }
 
           // ---- Client-side DESTINATION match (lenient) ----
           bool destOk = true;
           if (dstText.isNotEmpty) {
-            destOk = _eqOrContains(
+            destOk = eqOrContains(
                     data['destinationLocationName'] as String?, dstText) ||
-                _eqOrContains(data['destinationName_norm'] as String?,
+                eqOrContains(data['destinationName_norm'] as String?,
                     dstText); // ok if absent
           }
 
@@ -153,11 +180,7 @@ class IntercityController extends GetxController {
           bool alreadyAccepted = false;
           final accepted = orderModel.acceptedDriverId;
           if (accepted != null) {
-            if (accepted is List) {
-              alreadyAccepted = accepted.cast<String>().contains(uid);
-            } else if (accepted is String) {
-              alreadyAccepted = accepted == uid;
-            }
+            alreadyAccepted = accepted.cast<String>().contains(uid);
           }
 
           if (!alreadyAccepted) {

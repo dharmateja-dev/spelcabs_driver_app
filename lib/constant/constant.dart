@@ -108,6 +108,41 @@ class Constant {
   static String? referralAmount = "0";
   static const String freightServiceId = "Kn2VEnPI3ikF58uK8YqY";
 
+  // Zone Type Constants
+  // These keywords identify "worldwide" zones - zones that don't have city boundaries
+  static const List<String> worldwideZoneKeywords = [
+    'worldwide',
+    'world wide',
+    'global',
+    'international',
+    'all cities',
+    'all zones',
+  ];
+
+  /// Check if a zone name indicates a "Worldwide" zone (no city boundary)
+  /// Worldwide zones don't have specific city boundaries and are used for:
+  /// - Outstation: Allow cross-city/long-distance trips
+  /// - City rides: Should show validation message as city rides require specific city zones
+  static bool isWorldwideZone(String? zoneName) {
+    if (zoneName == null || zoneName.trim().isEmpty) return false;
+    final lowerName = zoneName.toLowerCase().trim();
+    return worldwideZoneKeywords.any((keyword) => lowerName.contains(keyword));
+  }
+
+  /// Check if any of the zone names in the list is a worldwide zone
+  static bool hasWorldwideZone(List<String>? zoneNames) {
+    if (zoneNames == null || zoneNames.isEmpty) return false;
+    return zoneNames.any((name) => isWorldwideZone(name));
+  }
+
+  // Validation Messages for Zone-based Rides
+  static const String cityRideWorldwideValidationMessage =
+      "City rides are available only within a single city. Please select a valid city pickup and drop.";
+  static const String cityRideOutsideBoundaryMessage =
+      "City rides are available only within city limits";
+  static const String pickupDropSameZoneMessage =
+      "Pickup and drop must be within the same city zone for city rides";
+
   static const globalUrl = "https://bidbolt.socialspark.world/";
 
   static const userPlaceHolder =
@@ -559,9 +594,9 @@ class Constant {
 
   static LanguageModel getLanguage() {
     try {
-      final String? user = Preferences.getString(Preferences.languageCodeKey);
+      final String user = Preferences.getString(Preferences.languageCodeKey);
 
-      if (user == null || user.trim().isEmpty) {
+      if (user.trim().isEmpty) {
         return LanguageModel.defaultLanguage();
       }
 

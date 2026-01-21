@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "38966084632-9hkhban0lg0p9po6v794s9ptlaqdj1qf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bidbolt.driver",
+            "certificate_hash": "d3af2fa5fad8bd6da555c328b4ef461b311c0322"
+          }
+        },
+        {
           "client_id": "38966084632-igv7ihra6ihvl10ktovcfssjtbhqetic.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -88,6 +96,14 @@
           "android_info": {
             "package_name": "com.movenetics.bidbolt",
             "certificate_hash": "8efaab843722170a138154bafffcfcdc0946aadd"
+          }
+        },
+        {
+          "client_id": "38966084632-urob6a1lnge2uahvrj3sapoe9c44j6k2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.movenetics.bidbolt",
+            "certificate_hash": "f077ee23c5f28ab6a8ae97ca0893a8e49a4e83dc"
           }
         },
         {
