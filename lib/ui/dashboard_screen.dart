@@ -307,12 +307,13 @@ class DashBoardScreen extends StatelessWidget {
                         DriverUserModel driverModel = snapshot.data!;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(60),
                               child: CachedNetworkImage(
-                                height: Responsive.width(20, context),
-                                width: Responsive.width(20, context),
+                                height: Responsive.width(18, context),
+                                width: Responsive.width(18, context),
                                 imageUrl: driverModel.profilePic.toString(),
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) =>
@@ -321,19 +322,22 @@ class DashBoardScreen extends StatelessWidget {
                                     Image.network(Constant.userPlaceHolder),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(driverModel.fullName.toString(),
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w500)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 0),
-                              child: Text(
-                                driverModel.email.toString(),
-                                style: GoogleFonts.poppins(),
+                            const SizedBox(height: 6),
+                            Text(
+                              driverModel.fullName.toString(),
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
                               ),
-                            )
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              driverModel.email.toString(),
+                              style: GoogleFonts.poppins(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         );
                       }

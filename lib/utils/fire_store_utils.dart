@@ -39,6 +39,7 @@ import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/Preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:driver/services/driver_assignment_validator.dart';
 
 class FireStoreUtils {
   static FirebaseFirestore fireStore = FirebaseFirestore.instance;
@@ -255,7 +256,7 @@ class FireStoreUtils {
     bool isLoggedInLocally = Preferences.getBoolean(Constant.isLoggedInKey);
     if (isLoggedInLocally) {
       String? driverId = Preferences.getString(Constant.driverIdKey);
-      if (driverId != null && driverId.isNotEmpty) {
+      if (driverId.isNotEmpty) {
         // Attempt to fetch profile from Firestore to ensure data consistency
         DriverUserModel? driverModel = await getDriverProfile(driverId);
         if (driverModel != null) {
@@ -315,7 +316,7 @@ class FireStoreUtils {
     String? uidFromPrefs = Preferences.getString(Constant.driverIdKey);
     User? firebaseUser = FirebaseAuth.instance.currentUser;
 
-    if (uidFromPrefs != null && uidFromPrefs.isNotEmpty) {
+    if (uidFromPrefs.isNotEmpty) {
       AppLogger.debug(
           "getCurrentUid: Returning UID from preferences: $uidFromPrefs",
           tag: "FireStoreUtils");
@@ -1172,6 +1173,13 @@ class FireStoreUtils {
   // }
 
   // ************************************************************************************************************
+  /// Gets orders that the driver is eligible to receive based on zone validation rules.
+  ///
+  /// Zone Validation Rules (based on test cases):
+  /// - TC01: Local Driver Assignment - Driver within 5km radius receives ride
+  /// - TC02: Out-of-State Driver Blocking - Driver in different zone does NOT receive ride
+  /// - TC03: Offline Local Driver - Driver with status "Offline" does NOT receive ride
+  /// - TC04: Twin City Driver Dispatch - Driver in twin city (e.g., Bhilai) receives Durg rides
   Stream<List<OrderModel>> getOrders(
       DriverUserModel driverUserModel, double? latitude, double? longitude) {
     AppLogger.debug("getOrders called for driver: ${driverUserModel.id}",
@@ -1179,6 +1187,14 @@ class FireStoreUtils {
     AppLogger.debug(
         "DEBUG center used: ($latitude, $longitude), Constant.radius='${Constant.radius}'",
         tag: "FireStoreUtils");
+
+    // TC03: Check if driver is online FIRST before querying orders
+    if (driverUserModel.isOnline != true) {
+      AppLogger.debug(
+          "Driver ${driverUserModel.id} is OFFLINE - returning empty order list",
+          tag: "FireStoreUtils");
+      return Stream.value(<OrderModel>[]);
+    }
 
     if (latitude == null || longitude == null) {
       AppLogger.debug("Location not available", tag: "FireStoreUtils");
@@ -1190,6 +1206,8 @@ class FireStoreUtils {
       return Stream.value(<OrderModel>[]);
     }
 
+    // Build query to fetch orders from driver's zones and twin city zones
+    // First, get the basic query for the driver's assigned zones
     Query<Map<String, dynamic>> baseQuery = fireStore
         .collection(CollectionName.orders)
         .where('zoneId', whereIn: driverUserModel.zoneIds)
@@ -1202,55 +1220,91 @@ class FireStoreUtils {
           baseQuery.where('serviceId', isEqualTo: driverUserModel.serviceId);
     }
 
-    final double centerLat = latitude!;
-    final double centerLng = longitude!;
+    final double centerLat = latitude;
+    final double centerLng = longitude;
     double radiusKm;
-    final parsedRadius = double.tryParse(Constant.radius ?? "") ?? 0.0;
+    final parsedRadius = double.tryParse(Constant.radius) ?? 0.0;
 
+    // TC01: Set radius for proximity check (default 5km as per test case)
     if (parsedRadius > 100.0) {
       radiusKm = parsedRadius / 1000.0;
     } else if (parsedRadius > 0) {
       radiusKm = parsedRadius;
     } else {
-      radiusKm = 4.0;
+      radiusKm = 5.0; // Default 5km radius as per TC01
     }
 
-    AppLogger.debug("Using radius: ${radiusKm}km", tag: "FireStoreUtils");
+    AppLogger.debug("Using radius for TC01: ${radiusKm}km",
+        tag: "FireStoreUtils");
 
-    return serviceQuery.snapshots().map((snapshot) {
+    return serviceQuery.snapshots().asyncMap((snapshot) async {
       AppLogger.info(
           "Received a new snapshot from Firestore. Total documents: ${snapshot.docs.length}",
           tag: "FireStoreUtils");
       List<OrderModel> ordersList = <OrderModel>[];
 
+      // Get available zones for twin city validation (TC04)
+      final List<ZoneModel> availableZones =
+          await DriverAssignmentValidator.getAvailableZones();
+
       for (DocumentSnapshot doc in snapshot.docs) {
         try {
           final data = doc.data() as Map<String, dynamic>?;
           if (data != null) {
-            final GeoPoint? orderLocation = _extractGeoPoint(data['position']);
-            if (orderLocation != null) {
-              final double actualDistance = _calculateHaversineDistance(
-                  centerLat,
-                  centerLng,
-                  orderLocation.latitude,
-                  orderLocation.longitude);
+            final OrderModel order = OrderModel.fromJson(data);
 
-              AppLogger.debug(
-                  "Order ${doc.id}: Driver coords=($centerLat, $centerLng), Order coords=(${orderLocation.latitude}, ${orderLocation.longitude}), distance=${actualDistance.toStringAsFixed(2)}km",
-                  tag: "FireStoreUtils");
+            // Validate order using DriverAssignmentValidator
+            // This checks: TC01 (distance), TC02 (zone), TC03 (online), TC04 (twin cities)
+            if (order.sourceLocationLAtLng != null &&
+                order.sourceLocationLAtLng!.latitude != null &&
+                order.sourceLocationLAtLng!.longitude != null) {
+              final result =
+                  await DriverAssignmentValidator.shouldDriverReceiveRide(
+                driver: driverUserModel,
+                ridePickupLocation: order.sourceLocationLAtLng!,
+                rideZoneId: order.zoneId,
+                availableZones: availableZones,
+                customRadiusKm: radiusKm,
+              );
 
-              if (actualDistance <= radiusKm) {
-                final OrderModel order = OrderModel.fromJson(data);
+              if (result.isEligible) {
                 ordersList.add(order);
+                AppLogger.debug(
+                    "Order ${doc.id} ELIGIBLE: ${result.message} (distance: ${result.distanceKm?.toStringAsFixed(2)}km)",
+                    tag: "FireStoreUtils");
               } else {
                 AppLogger.debug(
-                    "Order ${doc.id} excluded by distance check (${actualDistance.toStringAsFixed(2)}km > ${radiusKm}km)",
+                    "Order ${doc.id} NOT ELIGIBLE: ${result.reason} - ${result.message}",
                     tag: "FireStoreUtils");
               }
             } else {
-              // If we can't extract position, include it anyway (fallback)
-              final OrderModel order = OrderModel.fromJson(data);
-              ordersList.add(order);
+              // Fallback: Use position for distance check if sourceLocationLAtLng is missing
+              final GeoPoint? orderLocation =
+                  _extractGeoPoint(data['position']);
+              if (orderLocation != null) {
+                final double actualDistance = _calculateHaversineDistance(
+                    centerLat,
+                    centerLng,
+                    orderLocation.latitude,
+                    orderLocation.longitude);
+
+                if (actualDistance <= radiusKm) {
+                  ordersList.add(order);
+                  AppLogger.debug(
+                      "Order ${doc.id} added via fallback distance check (${actualDistance.toStringAsFixed(2)}km)",
+                      tag: "FireStoreUtils");
+                } else {
+                  AppLogger.debug(
+                      "Order ${doc.id} excluded by fallback distance check (${actualDistance.toStringAsFixed(2)}km > ${radiusKm}km)",
+                      tag: "FireStoreUtils");
+                }
+              } else {
+                // Last resort: include order if we can't determine distance
+                ordersList.add(order);
+                AppLogger.warning(
+                    "Order ${doc.id} added without distance validation (no position data)",
+                    tag: "FireStoreUtils");
+              }
             }
           }
         } catch (e) {
@@ -1259,8 +1313,8 @@ class FireStoreUtils {
         }
       }
 
-      AppLogger.debug(
-          "Yielding ${ordersList.length} orders after manual filtering.",
+      AppLogger.info(
+          "Yielding ${ordersList.length} orders after zone validation (TC01-TC04).",
           tag: "FireStoreUtils");
       return ordersList;
     });
@@ -1285,7 +1339,7 @@ class FireStoreUtils {
     final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     final double distance = earthRadiusKm * c;
-    AppLogger.debug("Haversine distance calculated: ${distance} km",
+    AppLogger.debug("Haversine distance calculated: $distance km",
         tag: "FireStoreUtils");
     return distance;
   }
@@ -2316,6 +2370,115 @@ class FireStoreUtils {
       return true;
     } catch (e, s) {
       AppLogger.error("FireStoreUtils: Error saving subscription transaction",
+          tag: "FireStoreUtils", error: e, stackTrace: s);
+      return false;
+    }
+  }
+
+  /// Check if email is already registered in the customers (users) collection
+  /// Returns true if email exists
+  static Future<bool> isEmailRegisteredInCustomers(String email) async {
+    try {
+      final String lowercaseEmail = email.toLowerCase();
+      final QuerySnapshot querySnapshot = await fireStore
+          .collection(CollectionName.users)
+          .where('email', isEqualTo: lowercaseEmail)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        AppLogger.info(
+            "Email (lowercase) already registered in customers collection: $lowercaseEmail",
+            tag: "FireStoreUtils");
+        return true;
+      }
+
+      // Fallback: check original email case just in case
+      final QuerySnapshot querySnapshotOriginal = await fireStore
+          .collection(CollectionName.users)
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshotOriginal.docs.isNotEmpty) {
+        AppLogger.info(
+            "Email (original) already registered in customers collection: $email",
+            tag: "FireStoreUtils");
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      AppLogger.error("Error checking email in customers collection: $e",
+          tag: "FireStoreUtils", error: e);
+      return false;
+    }
+  }
+
+  /// Checks if a vehicle number is already registered by ANY driver
+  /// Returns true if the vehicle number exists and belongs to a DIFFERENT driver
+  /// [vehicleNumber] - The normalized vehicle number to check
+  /// [currentDriverId] - The ID of the current driver (to exclude from check)
+  static Future<bool> checkVehicleNumberExists(
+      String vehicleNumber, String? currentDriverId) async {
+    try {
+      final QuerySnapshot querySnapshot = await fireStore
+          .collection(CollectionName.driverUsers)
+          .where('vehicleInformation.vehicleNumber', isEqualTo: vehicleNumber)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return false;
+      }
+
+      // If we found a match, check if it belongs to a different driver
+      for (var doc in querySnapshot.docs) {
+        if (doc.id != currentDriverId) {
+          AppLogger.info(
+              "Vehicle number $vehicleNumber already registered by driver ${doc.id}",
+              tag: "FireStoreUtils");
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      AppLogger.error("Error checking vehicle number existence: $e",
+          tag: "FireStoreUtils", error: e);
+      return false;
+    }
+  }
+
+  /// Submits a support request to Firestore
+  /// Returns true if successful, false otherwise
+  static Future<bool> submitSupportRequest({
+    required String userEmail,
+    required String message,
+    required String subject,
+    String? supportEmail,
+  }) async {
+    try {
+      String requestId = Constant.getUuid();
+      await fireStore
+          .collection(CollectionName.supportRequests)
+          .doc(requestId)
+          .set({
+        'id': requestId,
+        'userEmail': userEmail,
+        'message': message,
+        'subject': subject,
+        'supportEmail': supportEmail ?? '',
+        'userId': getCurrentUid(),
+        'userType': 'driver', // Since this is the driver app
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+      });
+      AppLogger.info(
+          "Support request submitted successfully with ID: $requestId",
+          tag: "FireStoreUtils");
+      return true;
+    } catch (e, s) {
+      AppLogger.error("Error submitting support request: $e",
           tag: "FireStoreUtils", error: e, stackTrace: s);
       return false;
     }

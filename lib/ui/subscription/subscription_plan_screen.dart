@@ -74,9 +74,9 @@ class SubscriptionPlanScreen extends StatelessWidget {
 
                               // If user has active subscription and clicking on another plan
                               if (hasActiveSub && !isCommissionModel) {
-                                ShowToastDialog.showToast(
-                                    "You already have an active subscription. Switch to Commission Model first."
-                                        .tr);
+                                // Show confirmation dialog for switching plans
+                                _showSwitchPlanDialog(
+                                    context, controller, themeChange, plan);
                                 return;
                               }
 
@@ -144,6 +144,81 @@ class SubscriptionPlanScreen extends StatelessWidget {
               onPressed: () async {
                 Get.back();
                 await controller.switchToCommissionModel();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Switch".tr,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show confirmation dialog to switch to another subscription plan
+  void _showSwitchPlanDialog(
+      BuildContext context,
+      SubscriptionController controller,
+      DarkThemeProvider themeChange,
+      SubscriptionModel newPlan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: themeChange.getThem()
+              ? AppColors.darkContainerBackground
+              : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            "Switch Plan".tr,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: themeChange.getThem() ? Colors.white : Colors.black,
+            ),
+          ),
+          content: Text(
+            "Are you sure you want to switch to ${newPlan.name}? Your current subscription will be replaced with the new plan."
+                .tr,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: themeChange.getThem() ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                "Cancel".tr,
+                style: GoogleFonts.poppins(
+                  color: AppColors.subTitleColor,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Get.back();
+                controller.selectPlan(newPlan);
+                // Handle free plans directly
+                if ((newPlan.priceDouble ?? 0) == 0) {
+                  controller.selectedPaymentMethod.value = 'wallet';
+                  controller.placeOrder();
+                } else {
+                  // Show payment method selection
+                  _showPaymentMethodDialog(context, controller, themeChange);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

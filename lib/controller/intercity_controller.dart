@@ -4,12 +4,12 @@ import 'package:driver/constant/constant.dart';
 import 'package:driver/controller/home_intercity_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/intercity_order_model.dart';
+import 'package:driver/model/zone_model.dart';
+import 'package:driver/services/driver_assignment_validator.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'dart:developer';
-
 import 'package:driver/utils/app_logger.dart';
 
 class IntercityController extends GetxController {
@@ -59,6 +59,13 @@ class IntercityController extends GetxController {
     }
   }
 
+  /// Gets intercity orders with zone validation.
+  ///
+  /// Zone Validation Rules (based on test cases):
+  /// - TC01: Local Driver Assignment - Driver within radius receives ride
+  /// - TC02: Out-of-State Driver Blocking - Driver in different zone does NOT receive ride
+  /// - TC03: Offline Local Driver - Driver with status "Offline" does NOT receive ride
+  /// - TC04: Twin City Driver Dispatch - Driver in twin city receives merged zone rides
   getOrder() async {
     try {
       AppLogger.info("Starting getOrder() function...",
@@ -66,12 +73,20 @@ class IntercityController extends GetxController {
       isLoading.value = true;
       intercityServiceOrder.clear();
 
+      // TC03: Check if driver is online FIRST
+      if (driverModel.value.isOnline != true) {
+        AppLogger.debug(
+            "Driver ${driverModel.value.id} is OFFLINE - returning empty order list",
+            tag: "IntercityController");
+        return;
+      }
+
       // helpers
-      String _norm(String s) => s.trim().toLowerCase();
-      bool _eqOrContains(String? haystack, String needle) {
+      String norm(String s) => s.trim().toLowerCase();
+      bool eqOrContains(String? haystack, String needle) {
         if (haystack == null) return false;
-        final h = _norm(haystack);
-        final n = _norm(needle);
+        final h = norm(haystack);
+        final n = norm(needle);
         return h == n || h.contains(n);
       }
 
@@ -114,6 +129,10 @@ class IntercityController extends GetxController {
           "Kn2VEnPI3ikF58uK8YqY"; // Freight service ID to EXCLUDE
       int kept = 0;
 
+      // Get available zones for twin city validation (TC04)
+      final List<ZoneModel> availableZones =
+          await DriverAssignmentValidator.getAvailableZones();
+
       for (var doc in querySnapshot.docs) {
         try {
           final data = doc.data() as Map<String, dynamic>;
@@ -131,17 +150,17 @@ class IntercityController extends GetxController {
           bool sourceOk = true;
           if (srcText.isNotEmpty) {
             sourceOk =
-                _eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    _eqOrContains(data['sourceName_norm'] as String?,
+                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
+                    eqOrContains(data['sourceName_norm'] as String?,
                         srcText); // ok if absent
           }
 
           // ---- Client-side DESTINATION match (lenient) ----
           bool destOk = true;
           if (dstText.isNotEmpty) {
-            destOk = _eqOrContains(
+            destOk = eqOrContains(
                     data['destinationLocationName'] as String?, dstText) ||
-                _eqOrContains(data['destinationName_norm'] as String?,
+                eqOrContains(data['destinationName_norm'] as String?,
                     dstText); // ok if absent
           }
 
@@ -153,20 +172,44 @@ class IntercityController extends GetxController {
           bool alreadyAccepted = false;
           final accepted = orderModel.acceptedDriverId;
           if (accepted != null) {
-            if (accepted is List) {
-              alreadyAccepted = accepted.cast<String>().contains(uid);
-            } else if (accepted is String) {
-              alreadyAccepted = accepted == uid;
-            }
+            alreadyAccepted = accepted.cast<String>().contains(uid);
           }
 
-          if (!alreadyAccepted) {
+          if (alreadyAccepted) {
+            AppLogger.debug("Order ${doc.id} already accepted; skipping.",
+                tag: "IntercityController");
+            continue;
+          }
+
+          // TC01, TC02, TC04: Validate driver eligibility using DriverAssignmentValidator
+          if (orderModel.sourceLocationLAtLng != null &&
+              orderModel.sourceLocationLAtLng!.latitude != null &&
+              orderModel.sourceLocationLAtLng!.longitude != null) {
+            final result =
+                await DriverAssignmentValidator.shouldDriverReceiveRide(
+              driver: driverModel.value,
+              ridePickupLocation: orderModel.sourceLocationLAtLng!,
+              rideZoneId: orderModel.zoneId,
+              availableZones: availableZones,
+            );
+
+            if (result.isEligible) {
+              intercityServiceOrder.add(orderModel);
+              kept++;
+              AppLogger.debug(
+                  "Order ${doc.id} ELIGIBLE: ${result.message} (distance: ${result.distanceKm?.toStringAsFixed(2)}km)",
+                  tag: "IntercityController");
+            } else {
+              AppLogger.debug(
+                  "Order ${doc.id} NOT ELIGIBLE: ${result.reason} - ${result.message}",
+                  tag: "IntercityController");
+            }
+          } else {
+            // Fallback: add order without zone validation (backwards compatibility)
             intercityServiceOrder.add(orderModel);
             kept++;
-            AppLogger.debug("Order ${doc.id} kept after client filters.",
-                tag: "IntercityController");
-          } else {
-            AppLogger.debug("Order ${doc.id} already accepted; skipping.",
+            AppLogger.debug(
+                "Order ${doc.id} kept after client filters (no zone validation).",
                 tag: "IntercityController");
           }
         } catch (e, s) {
@@ -175,7 +218,8 @@ class IntercityController extends GetxController {
         }
       }
 
-      AppLogger.info("Final display list contains $kept orders (post-filter).",
+      AppLogger.info(
+          "Final display list contains $kept orders (post zone validation TC01-TC04).",
           tag: "IntercityController");
     } catch (e, s) {
       AppLogger.error("Error in getOrder: $e",
