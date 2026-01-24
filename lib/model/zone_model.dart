@@ -8,16 +8,8 @@ class ZoneModel {
   List<LanguageName>? name;
   String? id;
   double? longitude;
-  String? zoneType;
 
-  ZoneModel(
-      {this.area,
-      this.publish,
-      this.latitude,
-      this.name,
-      this.id,
-      this.longitude,
-      this.zoneType});
+  ZoneModel({this.area, this.publish, this.latitude, this.name, this.id, this.longitude});
 
   ZoneModel.fromJson(Map<String, dynamic> json) {
     if (json['area'] != null) {
@@ -38,7 +30,6 @@ class ZoneModel {
     latitude = json['latitude'];
     id = json['id'];
     longitude = json['longitude'];
-    zoneType = json['zoneType'];
   }
 
   Map<String, dynamic> toJson() {
@@ -53,7 +44,6 @@ class ZoneModel {
     data['latitude'] = latitude;
     data['id'] = id;
     data['longitude'] = longitude;
-    data['zoneType'] = zoneType;
     return data;
   }
 }
