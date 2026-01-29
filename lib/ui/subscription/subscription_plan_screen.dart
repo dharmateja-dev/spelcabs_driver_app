@@ -1,5 +1,4 @@
 import 'package:driver/constant/constant.dart';
-import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/subscription_controller.dart';
 import 'package:driver/model/subscription_plan_model.dart';
 import 'package:driver/themes/app_colors.dart';
@@ -17,85 +16,93 @@ class SubscriptionPlanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
-    return GetX<SubscriptionController>(
+    return GetBuilder<SubscriptionController>(
       init: SubscriptionController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: themeChange.getThem()
               ? AppColors.darkBackground
               : AppColors.background,
-          body: controller.isLoading.value
-              ? Constant.loader(context)
-              : controller.subscriptionPlanList.isEmpty
-                  ? Center(
-                      child: Text(
-                        "No subscription plans available".tr,
-                        style: TextStyle(
-                          color: themeChange.getThem()
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: () => controller.refreshData(),
-                      color: AppColors.primary,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: controller.subscriptionPlanList.length,
-                        itemBuilder: (context, index) {
-                          final plan = controller.subscriptionPlanList[index];
-                          final bool isCommissionModel =
-                              controller.isCommissionModelPlan(plan);
-                          final bool hasActiveSub =
-                              controller.hasActiveSubscription();
+          body: Obx(() {
+            // All reactive values are now inside single Obx
+            if (controller.isLoading.value) {
+              return Constant.loader(context);
+            }
 
-                          return SubscriptionPlanCard(
-                            plan: plan,
-                            isSelected:
-                                controller.selectedSubscriptionPlan.value.id ==
-                                    plan.id,
-                            isActive:
-                                controller.userModel.value.subscriptionPlanId ==
-                                    plan.id,
-                            isDark: themeChange.getThem(),
-                            isCommissionModel: isCommissionModel,
-                            hasActiveSubscription: hasActiveSub,
-                            onSelect: () {
-                              controller.selectPlan(plan);
-                            },
-                            onBuy: () {
-                              // If user has active subscription and clicks on Commission Model
-                              if (hasActiveSub && isCommissionModel) {
-                                _showSwitchToCommissionDialog(
-                                    context, controller, themeChange);
-                                return;
-                              }
+            if (controller.subscriptionPlanList.isEmpty) {
+              return Center(
+                child: Text(
+                  "No subscription plans available".tr,
+                  style: TextStyle(
+                    color: themeChange.getThem() ? Colors.white : Colors.black,
+                  ),
+                ),
+              );
+            }
 
-                              // If user has active subscription and clicking on another plan
-                              if (hasActiveSub && !isCommissionModel) {
-                                // Show confirmation dialog for switching plans
-                                _showSwitchPlanDialog(
-                                    context, controller, themeChange, plan);
-                                return;
-                              }
+            return RefreshIndicator(
+              onRefresh: () => controller.refreshData(),
+              color: AppColors.primary,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.subscriptionPlanList.length,
+                itemBuilder: (context, index) {
+                  final plan = controller.subscriptionPlanList[index];
+                  final bool isCommissionModel =
+                      controller.isCommissionModelPlan(plan);
+                  final bool hasActiveSub = controller.hasActiveSubscription();
 
-                              controller.selectPlan(plan);
-                              // Handle free plans directly
-                              if ((plan.priceDouble ?? 0) == 0) {
-                                controller.selectedPaymentMethod.value =
-                                    'wallet';
-                                controller.placeOrder();
-                              } else {
-                                // Show payment method selection
-                                _showPaymentMethodDialog(
-                                    context, controller, themeChange);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                  // isActive is true if:
+                  // 1. This plan is the user's current subscription plan, OR
+                  // 2. This is Commission Model and user has NO active subscription
+                  final bool isActive =
+                      (controller.userModel.value.subscriptionPlanId ==
+                              plan.id) ||
+                          (isCommissionModel && !hasActiveSub);
+
+                  return SubscriptionPlanCard(
+                    plan: plan,
+                    isSelected:
+                        controller.selectedSubscriptionPlan.value.id == plan.id,
+                    isActive: isActive,
+                    isDark: themeChange.getThem(),
+                    isCommissionModel: isCommissionModel,
+                    hasActiveSubscription: hasActiveSub,
+                    onSelect: () {
+                      controller.selectPlan(plan);
+                    },
+                    onBuy: () {
+                      // If user has active subscription and clicks on Commission Model
+                      if (hasActiveSub && isCommissionModel) {
+                        _showSwitchToCommissionDialog(
+                            context, controller, themeChange);
+                        return;
+                      }
+
+                      // If user has active subscription and clicking on another plan
+                      if (hasActiveSub && !isCommissionModel) {
+                        // Show confirmation dialog for switching plans
+                        _showSwitchPlanDialog(
+                            context, controller, themeChange, plan);
+                        return;
+                      }
+
+                      controller.selectPlan(plan);
+                      // Handle free plans directly
+                      if ((plan.priceDouble ?? 0) == 0) {
+                        controller.selectedPaymentMethod.value = 'wallet';
+                        controller.placeOrder();
+                      } else {
+                        // Show payment method selection
+                        _showPaymentMethodDialog(
+                            context, controller, themeChange);
+                      }
+                    },
+                  );
+                },
+              ),
+            );
+          }),
         );
       },
     );

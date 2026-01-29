@@ -40,7 +40,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                   .collection(CollectionName.ordersIntercity)
                   .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
                   .where('intercityServiceId',
-                      isEqualTo: "Kn2VEnPI3ikF58uK8YqY")
+                      isEqualTo: Constant.freightServiceId)
                   .where('status', whereIn: [
                 Constant.rideInProgress,
                 Constant.rideActive

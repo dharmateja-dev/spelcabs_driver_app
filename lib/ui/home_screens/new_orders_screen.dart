@@ -36,14 +36,15 @@ class NewOrderScreen extends StatelessWidget {
                   //EDIT: Only fetch orders if location is initialized and available
                   : Obx(
                       () => (controller.isLocationInitialized.value &&
-                              Constant.currentLocation != null) //EDIT
+                              controller.searchLocation.value !=
+                                  null) //EDIT: Use observable searchLocation
                           ? StreamBuilder<List<OrderModel>>(
                               stream: FireStoreUtils().getOrders(
                                   controller.driverModel.value,
-                                  Constant.currentLocation!
-                                      .latitude, //EDIT: Use non-null asserted latitude
-                                  Constant.currentLocation!
-                                      .longitude), //EDIT: Use non-null asserted longitude
+                                  controller.searchLocation.value!
+                                      .latitude, //EDIT: Use observable searchLocation
+                                  controller.searchLocation.value!
+                                      .longitude), //EDIT: Use observable searchLocation
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -176,9 +177,10 @@ class NewOrderScreen extends StatelessWidget {
                                                                       .darkGray
                                                                   : AppColors
                                                                       .gray,
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
+                                                              borderRadius:
+                                                                  const BorderRadius
+                                                                      .all(
+                                                                      Radius.circular(
                                                                           10))),
                                                           child: Padding(
                                                             padding:

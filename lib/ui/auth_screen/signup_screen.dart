@@ -1,29 +1,19 @@
-import 'dart:developer';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:driver/constant/constant.dart';
-import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/signup_controller.dart';
-import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
 import 'package:driver/themes/responsive.dart';
 import 'package:driver/themes/text_field_them.dart';
 import 'package:driver/ui/auth_screen/login_screen.dart';
-import 'package:driver/ui/auth_screen/otp_screen.dart';
-import 'package:driver/ui/dashboard_screen.dart';
 import 'package:driver/ui/terms_and_condition/terms_and_condition_screen.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
-import 'package:driver/utils/fire_store_utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({Key? key}) : super(key: key);

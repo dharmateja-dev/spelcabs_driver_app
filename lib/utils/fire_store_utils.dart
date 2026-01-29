@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
@@ -39,7 +38,6 @@ import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/Preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:driver/services/driver_assignment_validator.dart';
 
 class FireStoreUtils {
   static FirebaseFirestore fireStore = FirebaseFirestore.instance;
@@ -1173,13 +1171,10 @@ class FireStoreUtils {
   // }
 
   // ************************************************************************************************************
-  /// Gets orders that the driver is eligible to receive based on zone validation rules.
-  ///
-  /// Zone Validation Rules (based on test cases):
-  /// - TC01: Local Driver Assignment - Driver within 5km radius receives ride
-  /// - TC02: Out-of-State Driver Blocking - Driver in different zone does NOT receive ride
-  /// - TC03: Offline Local Driver - Driver with status "Offline" does NOT receive ride
-  /// - TC04: Twin City Driver Dispatch - Driver in twin city (e.g., Bhilai) receives Durg rides
+  // ************************************************************************************************************
+  /// Fetches nearby orders using GeoFlutterFire geo-queries.
+  /// This is optimized to only download orders within the driver's radius,
+  /// instead of downloading ALL orders in the zone and filtering client-side.
   Stream<List<OrderModel>> getOrders(
       DriverUserModel driverUserModel, double? latitude, double? longitude) {
     AppLogger.debug("getOrders called for driver: ${driverUserModel.id}",
@@ -1187,14 +1182,6 @@ class FireStoreUtils {
     AppLogger.debug(
         "DEBUG center used: ($latitude, $longitude), Constant.radius='${Constant.radius}'",
         tag: "FireStoreUtils");
-
-    // TC03: Check if driver is online FIRST before querying orders
-    if (driverUserModel.isOnline != true) {
-      AppLogger.debug(
-          "Driver ${driverUserModel.id} is OFFLINE - returning empty order list",
-          tag: "FireStoreUtils");
-      return Stream.value(<OrderModel>[]);
-    }
 
     if (latitude == null || longitude == null) {
       AppLogger.debug("Location not available", tag: "FireStoreUtils");
@@ -1206,106 +1193,81 @@ class FireStoreUtils {
       return Stream.value(<OrderModel>[]);
     }
 
-    // Build query to fetch orders from driver's zones and twin city zones
-    // First, get the basic query for the driver's assigned zones
-    Query<Map<String, dynamic>> baseQuery = fireStore
-        .collection(CollectionName.orders)
-        .where('zoneId', whereIn: driverUserModel.zoneIds)
-        .where('status', isEqualTo: Constant.ridePlaced);
-
-    Query<Map<String, dynamic>> serviceQuery = baseQuery;
-    if (driverUserModel.serviceId != null &&
-        driverUserModel.serviceId!.toString().trim().isNotEmpty) {
-      serviceQuery =
-          baseQuery.where('serviceId', isEqualTo: driverUserModel.serviceId);
-    }
-
-    final double centerLat = latitude;
-    final double centerLng = longitude;
+    // Calculate radius in km
     double radiusKm;
     final parsedRadius = double.tryParse(Constant.radius) ?? 0.0;
 
-    // TC01: Set radius for proximity check (default 5km as per test case)
     if (parsedRadius > 100.0) {
+      // Assume it's in meters, convert to km
       radiusKm = parsedRadius / 1000.0;
     } else if (parsedRadius > 0) {
       radiusKm = parsedRadius;
     } else {
-      radiusKm = 5.0; // Default 5km radius as per TC01
+      radiusKm = 4.0; // Default 4km
     }
 
-    AppLogger.debug("Using radius for TC01: ${radiusKm}km",
+    AppLogger.info("Using GeoFlutterFire geo-query with radius: ${radiusKm}km",
         tag: "FireStoreUtils");
 
-    return serviceQuery.snapshots().asyncMap((snapshot) async {
+    // Create the geo-query center point
+    final geo = Geoflutterfire();
+    final center = geo.point(latitude: latitude, longitude: longitude);
+
+    // Build base query - only filter by status at the Firestore level
+    // Zone and service filtering will be done client-side on the smaller result set
+    Query<Map<String, dynamic>> baseQuery = fireStore
+        .collection(CollectionName.orders)
+        .where('status', isEqualTo: Constant.ridePlaced);
+
+    // Create geo collection reference
+    final geoRef = geo.collection(collectionRef: baseQuery);
+
+    // Use the 'within' method for geo-queries
+    // The 'position' field contains the geohash and geopoint
+    return geoRef
+        .within(
+      center: center,
+      radius: radiusKm,
+      field: 'position',
+      strictMode: true, // Only return documents within exact radius
+    )
+        .map((List<DocumentSnapshot<Map<String, dynamic>>> snapshots) {
       AppLogger.info(
-          "Received a new snapshot from Firestore. Total documents: ${snapshot.docs.length}",
+          "GeoFlutterFire returned ${snapshots.length} nearby orders (within ${radiusKm}km)",
           tag: "FireStoreUtils");
+
       List<OrderModel> ordersList = <OrderModel>[];
 
-      // Get available zones for twin city validation (TC04)
-      final List<ZoneModel> availableZones =
-          await DriverAssignmentValidator.getAvailableZones();
-
-      for (DocumentSnapshot doc in snapshot.docs) {
+      for (DocumentSnapshot<Map<String, dynamic>> doc in snapshots) {
         try {
-          final data = doc.data() as Map<String, dynamic>?;
+          final data = doc.data();
           if (data != null) {
-            final OrderModel order = OrderModel.fromJson(data);
+            // Client-side zone filtering (from much smaller result set)
+            final orderZoneId = data['zoneId'] as String?;
+            if (orderZoneId == null ||
+                !driverUserModel.zoneIds!.contains(orderZoneId)) {
+              AppLogger.debug(
+                  "Order ${doc.id} filtered out: zone '$orderZoneId' not in driver zones",
+                  tag: "FireStoreUtils");
+              continue;
+            }
 
-            // Validate order using DriverAssignmentValidator
-            // This checks: TC01 (distance), TC02 (zone), TC03 (online), TC04 (twin cities)
-            if (order.sourceLocationLAtLng != null &&
-                order.sourceLocationLAtLng!.latitude != null &&
-                order.sourceLocationLAtLng!.longitude != null) {
-              final result =
-                  await DriverAssignmentValidator.shouldDriverReceiveRide(
-                driver: driverUserModel,
-                ridePickupLocation: order.sourceLocationLAtLng!,
-                rideZoneId: order.zoneId,
-                availableZones: availableZones,
-                customRadiusKm: radiusKm,
-              );
-
-              if (result.isEligible) {
-                ordersList.add(order);
+            // Client-side service filtering (if driver has a specific service)
+            if (driverUserModel.serviceId != null &&
+                driverUserModel.serviceId!.toString().trim().isNotEmpty) {
+              final orderServiceId = data['serviceId'] as String?;
+              if (orderServiceId != driverUserModel.serviceId) {
                 AppLogger.debug(
-                    "Order ${doc.id} ELIGIBLE: ${result.message} (distance: ${result.distanceKm?.toStringAsFixed(2)}km)",
+                    "Order ${doc.id} filtered out: service '$orderServiceId' != driver service '${driverUserModel.serviceId}'",
                     tag: "FireStoreUtils");
-              } else {
-                AppLogger.debug(
-                    "Order ${doc.id} NOT ELIGIBLE: ${result.reason} - ${result.message}",
-                    tag: "FireStoreUtils");
-              }
-            } else {
-              // Fallback: Use position for distance check if sourceLocationLAtLng is missing
-              final GeoPoint? orderLocation =
-                  _extractGeoPoint(data['position']);
-              if (orderLocation != null) {
-                final double actualDistance = _calculateHaversineDistance(
-                    centerLat,
-                    centerLng,
-                    orderLocation.latitude,
-                    orderLocation.longitude);
-
-                if (actualDistance <= radiusKm) {
-                  ordersList.add(order);
-                  AppLogger.debug(
-                      "Order ${doc.id} added via fallback distance check (${actualDistance.toStringAsFixed(2)}km)",
-                      tag: "FireStoreUtils");
-                } else {
-                  AppLogger.debug(
-                      "Order ${doc.id} excluded by fallback distance check (${actualDistance.toStringAsFixed(2)}km > ${radiusKm}km)",
-                      tag: "FireStoreUtils");
-                }
-              } else {
-                // Last resort: include order if we can't determine distance
-                ordersList.add(order);
-                AppLogger.warning(
-                    "Order ${doc.id} added without distance validation (no position data)",
-                    tag: "FireStoreUtils");
+                continue;
               }
             }
+
+            final OrderModel order = OrderModel.fromJson(data);
+            ordersList.add(order);
+            AppLogger.debug("Order ${doc.id} added to list",
+                tag: "FireStoreUtils");
           }
         } catch (e) {
           AppLogger.debug("Error parsing order ${doc.id}: $e",
@@ -1314,103 +1276,12 @@ class FireStoreUtils {
       }
 
       AppLogger.info(
-          "Yielding ${ordersList.length} orders after zone validation (TC01-TC04).",
+          "Final list: ${ordersList.length} orders after zone/service filtering",
           tag: "FireStoreUtils");
       return ordersList;
     });
   }
 
-  double _calculateHaversineDistance(
-      double lat1, double lon1, double lat2, double lon2) {
-    AppLogger.debug(
-        "Calculating Haversine distance for coordinates: ($lat1, $lon1) and ($lat2, $lon2)",
-        tag: "FireStoreUtils");
-    const double earthRadiusKm = 6371.0;
-
-    final double dLat = (lat2 - lat1) * (math.pi / 180);
-    final double dLon = (lon2 - lon1) * (math.pi / 180);
-
-    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(lat1 * (math.pi / 180)) *
-            math.cos(lat2 * (math.pi / 180)) *
-            math.sin(dLon / 2) *
-            math.sin(dLon / 2);
-
-    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-
-    final double distance = earthRadiusKm * c;
-    AppLogger.debug("Haversine distance calculated: $distance km",
-        tag: "FireStoreUtils");
-    return distance;
-  }
-
-  GeoPoint? _extractGeoPoint(dynamic pos) {
-    AppLogger.debug(
-        "Attempting to extract GeoPoint from data of type: ${pos.runtimeType}",
-        tag: "FireStoreUtils");
-    try {
-      if (pos == null) {
-        AppLogger.debug("GeoPoint extraction: input is null",
-            tag: "FireStoreUtils");
-        return null;
-      }
-      if (pos is GeoPoint) {
-        AppLogger.debug("GeoPoint extraction: input is already a GeoPoint",
-            tag: "FireStoreUtils");
-        return pos;
-      }
-      if (pos is Map) {
-        AppLogger.debug(
-            "GeoPoint extraction: input is a Map. Checking for 'geopoint' key.",
-            tag: "FireStoreUtils");
-        if (pos['geopoint'] is GeoPoint) {
-          AppLogger.debug(
-              "GeoPoint extraction: found GeoPoint at 'geopoint' key",
-              tag: "FireStoreUtils");
-          return pos['geopoint'];
-        }
-        if (pos.containsKey('geopoint') && pos['geopoint'] is Map) {
-          AppLogger.debug(
-              "GeoPoint extraction: found nested Map at 'geopoint' key",
-              tag: "FireStoreUtils");
-          final gp = pos['geopoint'];
-          final lat = (gp['latitude'] ?? gp['lat'])?.toDouble();
-          final lng = (gp['longitude'] ?? gp['lng'] ?? gp['lon'])?.toDouble();
-          if (lat != null && lng != null) {
-            AppLogger.debug("GeoPoint extracted from nested map: ($lat, $lng)",
-                tag: "FireStoreUtils");
-            return GeoPoint(lat, lng);
-          }
-        }
-        if (pos.containsKey('latitude') && pos.containsKey('longitude')) {
-          AppLogger.debug(
-              "GeoPoint extraction: found 'latitude' and 'longitude' keys directly in map",
-              tag: "FireStoreUtils");
-          final lat = (pos['latitude'] as num).toDouble();
-          final lng = (pos['longitude'] as num).toDouble();
-          AppLogger.debug("GeoPoint extracted from map: ($lat, $lng)",
-              tag: "FireStoreUtils");
-          return GeoPoint(lat, lng);
-        }
-      }
-      if (pos is List && pos.length >= 2) {
-        AppLogger.debug(
-            "GeoPoint extraction: input is a List. Assuming [lat, lng] format.",
-            tag: "FireStoreUtils");
-        final lat = (pos[0] as num).toDouble();
-        final lng = (pos[1] as num).toDouble();
-        AppLogger.debug("GeoPoint extracted from list: ($lat, $lng)",
-            tag: "FireStoreUtils");
-        return GeoPoint(lat, lng);
-      }
-    } catch (e, s) {
-      AppLogger.warning("GeoPoint extraction failed with error: $e",
-          tag: "FireStoreUtils");
-    }
-    AppLogger.debug("GeoPoint extraction failed, returning null.",
-        tag: "FireStoreUtils");
-    return null;
-  }
   //*************************************************************************************************************
 
   // Stream<List<OrderModel>> getOrders(DriverUserModel driverUserModel,
@@ -1474,7 +1345,7 @@ class FireStoreUtils {
     List<InterCityOrderModel> ordersList = [];
     Query<Map<String, dynamic>> query = fireStore
         .collection(CollectionName.ordersIntercity)
-        .where('intercityServiceId', isEqualTo: "Kn2VEnPI3ikF58uK8YqY")
+        .where('intercityServiceId', isEqualTo: Constant.freightServiceId)
         .where('status', isEqualTo: Constant.ridePlaced);
     GeoFirePoint center = Geoflutterfire()
         .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
@@ -1886,7 +1757,7 @@ class FireStoreUtils {
     return onBoardingModel;
   }
 
-  static Future addInBox(InboxModel inboxModel) async {
+  static Future<InboxModel?> addInBox(InboxModel inboxModel) async {
     AppLogger.debug("addInBox called for order ID: ${inboxModel.orderId}",
         tag: "FireStoreUtils");
     return await fireStore
@@ -1907,7 +1778,8 @@ class FireStoreUtils {
     });
   }
 
-  static Future addChat(ConversationModel conversationModel) async {
+  static Future<ConversationModel?> addChat(
+      ConversationModel conversationModel) async {
     AppLogger.debug(
         "addChat called for conversation ID: ${conversationModel.id}, order ID: ${conversationModel.orderId}",
         tag: "FireStoreUtils");

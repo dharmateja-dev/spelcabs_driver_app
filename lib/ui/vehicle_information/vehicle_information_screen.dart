@@ -973,7 +973,7 @@ class VehicleInformationScreen extends StatelessWidget {
     Widget cancelButton = TextButton(
       child: const Text(
         "Cancel",
-        style: TextStyle(color: AppColors.primary),
+        style: TextStyle(color: Colors.white70),
       ),
       onPressed: () {
         Get.back();

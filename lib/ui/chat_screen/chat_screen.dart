@@ -7,7 +7,6 @@ import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/send_notification.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
-import 'package:driver/model/ChatVideoContainer.dart';
 import 'package:driver/model/conversation_model.dart';
 import 'package:driver/model/inbox_model.dart';
 import 'package:driver/themes/app_colors.dart';

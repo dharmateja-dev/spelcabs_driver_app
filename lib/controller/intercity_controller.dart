@@ -1,11 +1,11 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/controller/home_intercity_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/intercity_order_model.dart';
-import 'package:driver/model/zone_model.dart';
-import 'package:driver/services/driver_assignment_validator.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,6 +14,9 @@ import 'package:driver/utils/app_logger.dart';
 
 class IntercityController extends GetxController {
   HomeIntercityController homeController = Get.put(HomeIntercityController());
+
+  /// Stream subscription for driver data - cancelled in onClose
+  StreamSubscription? _driverSubscription;
 
   Rx<TextEditingController> sourceCityController = TextEditingController().obs;
   Rx<TextEditingController> destinationCityController =
@@ -42,7 +45,7 @@ class IntercityController extends GetxController {
 
   void _listenToDriverData() {
     try {
-      FireStoreUtils.fireStore
+      _driverSubscription = FireStoreUtils.fireStore
           .collection(CollectionName.driverUsers)
           .doc(FireStoreUtils.getCurrentUid())
           .snapshots()
@@ -59,27 +62,14 @@ class IntercityController extends GetxController {
     }
   }
 
-  /// Gets intercity orders with zone validation.
-  ///
-  /// Zone Validation Rules (based on test cases):
-  /// - TC01: Local Driver Assignment - Driver within radius receives ride
-  /// - TC02: Out-of-State Driver Blocking - Driver in different zone does NOT receive ride
-  /// - TC03: Offline Local Driver - Driver with status "Offline" does NOT receive ride
-  /// - TC04: Twin City Driver Dispatch - Driver in twin city receives merged zone rides
+  /// Gets intercity orders - simplified version without zone validation.
+  /// All orders matching basic criteria (status, date, zone) will be shown.
   getOrder() async {
     try {
       AppLogger.info("Starting getOrder() function...",
           tag: "IntercityController");
       isLoading.value = true;
       intercityServiceOrder.clear();
-
-      // TC03: Check if driver is online FIRST
-      if (driverModel.value.isOnline != true) {
-        AppLogger.debug(
-            "Driver ${driverModel.value.id} is OFFLINE - returning empty order list",
-            tag: "IntercityController");
-        return;
-      }
 
       // helpers
       String norm(String s) => s.trim().toLowerCase();
@@ -126,18 +116,14 @@ class IntercityController extends GetxController {
 
       final uid = FireStoreUtils.getCurrentUid();
       const freightServiceId =
-          "Kn2VEnPI3ikF58uK8YqY"; // Freight service ID to EXCLUDE
+          Constant.freightServiceId; // Freight service ID to EXCLUDE
       int kept = 0;
-
-      // Get available zones for twin city validation (TC04)
-      final List<ZoneModel> availableZones =
-          await DriverAssignmentValidator.getAvailableZones();
 
       for (var doc in querySnapshot.docs) {
         try {
           final data = doc.data() as Map<String, dynamic>;
 
-          // ✅ FIX: EXCLUDE freight orders - only show intercity orders
+          // EXCLUDE freight orders - only show intercity orders
           final serviceId = data['intercityServiceId'] as String?;
           if (serviceId == freightServiceId) {
             AppLogger.debug(
@@ -175,41 +161,13 @@ class IntercityController extends GetxController {
             alreadyAccepted = accepted.cast<String>().contains(uid);
           }
 
-          if (alreadyAccepted) {
-            AppLogger.debug("Order ${doc.id} already accepted; skipping.",
-                tag: "IntercityController");
-            continue;
-          }
-
-          // TC01, TC02, TC04: Validate driver eligibility using DriverAssignmentValidator
-          if (orderModel.sourceLocationLAtLng != null &&
-              orderModel.sourceLocationLAtLng!.latitude != null &&
-              orderModel.sourceLocationLAtLng!.longitude != null) {
-            final result =
-                await DriverAssignmentValidator.shouldDriverReceiveRide(
-              driver: driverModel.value,
-              ridePickupLocation: orderModel.sourceLocationLAtLng!,
-              rideZoneId: orderModel.zoneId,
-              availableZones: availableZones,
-            );
-
-            if (result.isEligible) {
-              intercityServiceOrder.add(orderModel);
-              kept++;
-              AppLogger.debug(
-                  "Order ${doc.id} ELIGIBLE: ${result.message} (distance: ${result.distanceKm?.toStringAsFixed(2)}km)",
-                  tag: "IntercityController");
-            } else {
-              AppLogger.debug(
-                  "Order ${doc.id} NOT ELIGIBLE: ${result.reason} - ${result.message}",
-                  tag: "IntercityController");
-            }
-          } else {
-            // Fallback: add order without zone validation (backwards compatibility)
+          if (!alreadyAccepted) {
             intercityServiceOrder.add(orderModel);
             kept++;
-            AppLogger.debug(
-                "Order ${doc.id} kept after client filters (no zone validation).",
+            AppLogger.debug("Order ${doc.id} kept after client filters.",
+                tag: "IntercityController");
+          } else {
+            AppLogger.debug("Order ${doc.id} already accepted; skipping.",
                 tag: "IntercityController");
           }
         } catch (e, s) {
@@ -218,8 +176,7 @@ class IntercityController extends GetxController {
         }
       }
 
-      AppLogger.info(
-          "Final display list contains $kept orders (post zone validation TC01-TC04).",
+      AppLogger.info("Final display list contains $kept orders.",
           tag: "IntercityController");
     } catch (e, s) {
       AppLogger.error("Error in getOrder: $e",
@@ -270,6 +227,7 @@ class IntercityController extends GetxController {
   void onClose() {
     AppLogger.info("IntercityController onClose called, disposing controllers.",
         tag: "IntercityController");
+    _driverSubscription?.cancel();
     sourceCityController.value.dispose();
     destinationCityController.value.dispose();
     whenController.value.dispose();

@@ -1,14 +1,6 @@
-import 'dart:convert';
-import 'dart:math';
-import 'package:crypto/crypto.dart';
-import 'package:driver/constant/show_toast_dialog.dart';
-import 'package:driver/ui/auth_screen/otp_screen.dart';
 import 'package:driver/utils/validation_utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:driver/utils/app_logger.dart';
 import 'package:driver/services/auth_apis.dart'; // Ensure this path is correct
 

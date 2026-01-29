@@ -14,7 +14,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../controller/setting_controller.dart';
 
@@ -40,7 +39,7 @@ class SettingScreen extends StatelessWidget {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(25),
                                   topRight: Radius.circular(25))),
@@ -93,7 +92,7 @@ class SettingScreen extends StatelessWidget {
                                                     border: InputBorder.none,
                                                     isDense: true,
                                                   ),
-                                                  value: controller
+                                                  initialValue: controller
                                                               .selectedLanguage
                                                               .value
                                                               .id ==
@@ -177,7 +176,7 @@ class SettingScreen extends StatelessWidget {
                                                       value == null
                                                           ? 'field required'
                                                           : null,
-                                                  value: controller
+                                                  initialValue: controller
                                                           .selectedMode.isEmpty
                                                       ? null
                                                       : controller

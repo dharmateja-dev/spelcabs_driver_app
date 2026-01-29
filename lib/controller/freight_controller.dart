@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
@@ -27,6 +29,11 @@ class FreightController extends GetxController {
     const OrderFreightScreen()
   ];
   DashBoardController dashboardController = Get.put(DashBoardController());
+
+  /// Stream subscriptions for proper cleanup
+  StreamSubscription? _driverSubscription;
+  StreamSubscription? _activeRideSubscription;
+  StreamSubscription? _locationSubscription;
 
   Rx<TextEditingController> whenController = TextEditingController().obs;
   Rx<TextEditingController> suggestedTimeController =
@@ -67,11 +74,11 @@ class FreightController extends GetxController {
       print("   - Date: '${whenController.value.text}'");
 
       // Helper function for lenient matching
-      String _norm(String s) => s.trim().toLowerCase();
-      bool _eqOrContains(String? haystack, String needle) {
+      String norm(String s) => s.trim().toLowerCase();
+      bool eqOrContains(String? haystack, String needle) {
         if (haystack == null) return false;
-        final h = _norm(haystack);
-        final n = _norm(needle);
+        final h = norm(haystack);
+        final n = norm(needle);
         return h == n || h.contains(n);
       }
 
@@ -80,7 +87,7 @@ class FreightController extends GetxController {
           .collection(CollectionName.ordersIntercity)
           .where('status', isEqualTo: Constant.ridePlaced)
           .where('intercityServiceId',
-              isEqualTo: "Kn2VEnPI3ikF58uK8YqY"); // Freight filter
+              isEqualTo: Constant.freightServiceId); // Freight filter
 
       // Add date filter if provided
       if (whenController.value.text.isNotEmpty && dateAndTime != null) {
@@ -112,16 +119,16 @@ class FreightController extends GetxController {
           bool sourceOk = true;
           if (srcText.isNotEmpty) {
             sourceOk =
-                _eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    _eqOrContains(data['sourceName_norm'] as String?, srcText);
+                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
+                    eqOrContains(data['sourceName_norm'] as String?, srcText);
           }
 
           // ✅ Client-side DESTINATION match (lenient - if destination is provided)
           bool destOk = true;
           if (dstText.isNotEmpty) {
-            destOk = _eqOrContains(
+            destOk = eqOrContains(
                     data['destinationLocationName'] as String?, dstText) ||
-                _eqOrContains(data['destinationName_norm'] as String?, dstText);
+                eqOrContains(data['destinationName_norm'] as String?, dstText);
           }
 
           if (!(sourceOk && destOk)) {
@@ -189,7 +196,7 @@ class FreightController extends GetxController {
 
   getDriver() async {
     updateCurrentLocation();
-    FireStoreUtils.fireStore
+    _driverSubscription = FireStoreUtils.fireStore
         .collection(CollectionName.driverUsers)
         .doc(FireStoreUtils.getCurrentUid())
         .snapshots()
@@ -203,7 +210,7 @@ class FreightController extends GetxController {
   RxInt isActiveValue = 0.obs;
 
   getActiveRide() {
-    FirebaseFirestore.instance
+    _activeRideSubscription = FirebaseFirestore.instance
         .collection(CollectionName.orders)
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
         .where('status',
@@ -225,7 +232,7 @@ class FreightController extends GetxController {
           distanceFilter:
               double.parse(Constant.driverLocationUpdate.toString()),
           interval: 2000);
-      location.onLocationChanged.listen((locationData) {
+      _locationSubscription = location.onLocationChanged.listen((locationData) {
         print("------>");
         print(locationData);
         Constant.currentLocation = LocationLatLng(
@@ -257,7 +264,8 @@ class FreightController extends GetxController {
               distanceFilter:
                   double.parse(Constant.driverLocationUpdate.toString()),
               interval: 2000);
-          location.onLocationChanged.listen((locationData) async {
+          _locationSubscription =
+              location.onLocationChanged.listen((locationData) async {
             Constant.currentLocation = LocationLatLng(
                 latitude: locationData.latitude,
                 longitude: locationData.longitude);
@@ -290,6 +298,9 @@ class FreightController extends GetxController {
 
   @override
   void onClose() {
+    _driverSubscription?.cancel();
+    _activeRideSubscription?.cancel();
+    _locationSubscription?.cancel();
     sourceCityController.value.dispose();
     destinationCityController.value.dispose();
     whenController.value.dispose();

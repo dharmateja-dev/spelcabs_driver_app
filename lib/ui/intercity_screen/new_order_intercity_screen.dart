@@ -4,7 +4,6 @@ import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/send_notification.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/intercity_controller.dart';
-import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/intercity_order_model.dart';
 import 'package:driver/model/order/driverId_accept_reject.dart';
 import 'package:driver/model/place_picker_model.dart';
@@ -50,7 +49,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
                     height: Responsive.height(100, context),
                     width: Responsive.width(100, context),
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25))),
@@ -577,7 +576,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
         builder: (context) {
           return Container(
             decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(15),
                     topLeft: Radius.circular(15))),

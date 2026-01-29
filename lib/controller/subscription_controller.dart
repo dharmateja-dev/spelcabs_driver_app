@@ -64,13 +64,29 @@ class SubscriptionController extends GetxController {
     isLoading.value = false;
   }
 
-  /// Refresh data for pull-to-refresh functionality
+  /// Refresh data to update UI dynamically
   Future<void> refreshData() async {
-    userModel.value =
-        await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid()) ??
-            DriverUserModel();
+    // Set loading to trigger UI rebuild cycle
+    isLoading.value = true;
 
+    // Fetch fresh user data from Firestore
+    final freshUserData =
+        await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid());
+    userModel.value = freshUserData ?? DriverUserModel();
+
+    // Refetch subscription plans
     await getSubscriptionPlans();
+
+    // Explicitly notify listeners about changes
+    userModel.refresh();
+    subscriptionPlanList.refresh();
+    selectedSubscriptionPlan.refresh();
+
+    // Set loading to false to show updated UI
+    isLoading.value = false;
+
+    // Force controller update to rebuild all listeners
+    update();
   }
 
   // -------------------- PLANS --------------------
@@ -93,7 +109,9 @@ class SubscriptionController extends GetxController {
       });
     }
 
-    subscriptionPlanList.assignAll(filteredPlans);
+    // Clear and reassign to trigger reactive update
+    subscriptionPlanList.clear();
+    subscriptionPlanList.addAll(filteredPlans);
 
     if (subscriptionPlanList.isNotEmpty) {
       selectedSubscriptionPlan.value = subscriptionPlanList.first;
@@ -207,7 +225,8 @@ class SubscriptionController extends GetxController {
       "Subscription activated successfully.".tr,
     );
 
-    Get.offAllNamed('/dashboard');
+    // Refresh data to update UI dynamically without navigation
+    await refreshData();
   }
 
   // -------------------- WALLET --------------------

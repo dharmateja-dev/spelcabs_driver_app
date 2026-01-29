@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
@@ -30,9 +32,23 @@ class HomeController extends GetxController {
   // New observable to track if location has been initialized
   RxBool isLocationInitialized = false.obs;
 
+  /// Observable location used for searching nearby orders.
+  /// This only updates when the driver moves more than 500 meters,
+  /// preventing excessive stream rebuilds while still keeping the ride list current.
+  Rx<LocationLatLng?> searchLocation = Rx<LocationLatLng?>(null);
+
+  /// Minimum distance (in meters) the driver must move before we update the search location.
+  static const double _searchLocationThresholdMeters = 500.0;
+
+  /// Stream subscriptions to be cancelled in onClose
+  StreamSubscription? _driverSubscription;
+  StreamSubscription? _activeRideSubscription;
+  StreamSubscription? _locationSubscription;
+
   void onItemTapped(int index) {
     selectedIndex.value = index;
-    AppLogger.info("Bottom navigation item tapped: $index", tag: "HomeController");
+    AppLogger.info("Bottom navigation item tapped: $index",
+        tag: "HomeController");
   }
 
   @override
@@ -49,19 +65,23 @@ class HomeController extends GetxController {
 
   getDriver() async {
     AppLogger.debug("getDriver called.", tag: "HomeController");
-    FireStoreUtils.fireStore
+    _driverSubscription = FireStoreUtils.fireStore
         .collection(CollectionName.driverUsers)
         .doc(FireStoreUtils.getCurrentUid())
         .snapshots()
         .listen((event) {
       if (event.exists) {
         driverModel.value = DriverUserModel.fromJson(event.data()!);
-        AppLogger.info("Driver data updated: ${driverModel.value.fullName}", tag: "HomeController");
+        AppLogger.info("Driver data updated: ${driverModel.value.fullName}",
+            tag: "HomeController");
       } else {
-        AppLogger.warning("Driver document does not exist for current UID: ${FireStoreUtils.getCurrentUid()}", tag: "HomeController");
+        AppLogger.warning(
+            "Driver document does not exist for current UID: ${FireStoreUtils.getCurrentUid()}",
+            tag: "HomeController");
       }
     }, onError: (error) {
-      AppLogger.error("Error fetching driver data: $error", tag: "HomeController", error: error);
+      AppLogger.error("Error fetching driver data: $error",
+          tag: "HomeController", error: error);
     });
     // updateCurrentLocation(); // Removed from here as it's now in onInit() to ensure it starts early
   }
@@ -70,18 +90,20 @@ class HomeController extends GetxController {
 
   getActiveRide() {
     AppLogger.debug("getActiveRide called.", tag: "HomeController");
-    FirebaseFirestore.instance
+    _activeRideSubscription = FirebaseFirestore.instance
         .collection(CollectionName.orders)
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
         .where('status',
-        whereIn: [Constant.rideInProgress, Constant.rideActive])
+            whereIn: [Constant.rideInProgress, Constant.rideActive])
         .snapshots()
         .listen((event) {
-      isActiveValue.value = event.size;
-      AppLogger.info("Active rides count updated: ${isActiveValue.value}", tag: "HomeController");
-    }, onError: (error) {
-      AppLogger.error("Error fetching active rides: $error", tag: "HomeController", error: error);
-    });
+          isActiveValue.value = event.size;
+          AppLogger.info("Active rides count updated: ${isActiveValue.value}",
+              tag: "HomeController");
+        }, onError: (error) {
+          AppLogger.error("Error fetching active rides: $error",
+              tag: "HomeController", error: error);
+        });
   }
 
   Location location = Location();
@@ -89,27 +111,39 @@ class HomeController extends GetxController {
   updateCurrentLocation() async {
     AppLogger.debug("updateCurrentLocation called.", tag: "HomeController");
     PermissionStatus permissionStatus = await location.hasPermission();
-    AppLogger.info("Location permission status: $permissionStatus", tag: "HomeController");
+    AppLogger.info("Location permission status: $permissionStatus",
+        tag: "HomeController");
 
     if (permissionStatus == PermissionStatus.granted) {
       location.enableBackgroundMode(enable: true);
       location.changeSettings(
           accuracy: LocationAccuracy.high,
           distanceFilter:
-          double.parse(Constant.driverLocationUpdate.toString()),
+              double.parse(Constant.driverLocationUpdate.toString()),
           interval: 2000);
-      AppLogger.info("Location background mode enabled and settings changed.", tag: "HomeController");
+      AppLogger.info("Location background mode enabled and settings changed.",
+          tag: "HomeController");
 
-      location.onLocationChanged.listen((locationData) {
-        if (locationData.latitude != null && locationData.longitude != null) { //EDIT: Ensure valid location data
+      _locationSubscription = location.onLocationChanged.listen((locationData) {
+        if (locationData.latitude != null && locationData.longitude != null) {
+          //EDIT: Ensure valid location data
           Constant.currentLocation = LocationLatLng(
-              latitude: locationData.latitude, longitude: locationData.longitude);
-          AppLogger.debug("Location updated: ${locationData.latitude}, ${locationData.longitude}", tag: "HomeController");
+              latitude: locationData.latitude,
+              longitude: locationData.longitude);
+          AppLogger.debug(
+              "Location updated: ${locationData.latitude}, ${locationData.longitude}",
+              tag: "HomeController");
+
+          // Update search location if driver has moved significantly
+          _updateSearchLocationIfNeeded(
+              locationData.latitude!, locationData.longitude!);
 
           //EDIT: Set location initialized flag to true after first valid location
-          if (!isLocationInitialized.value) { //EDIT
+          if (!isLocationInitialized.value) {
+            //EDIT
             isLocationInitialized.value = true; //EDIT
-            AppLogger.info("Location initialized for the first time.", tag: "HomeController"); //EDIT
+            AppLogger.info("Location initialized for the first time.",
+                tag: "HomeController"); //EDIT
           } //EDIT
 
           FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
@@ -124,48 +158,78 @@ class HomeController extends GetxController {
                     latitude: locationData.latitude!,
                     longitude: locationData.longitude!);
 
-                driverUserModel.position =
-                    Positions(geoPoint: position.geoPoint, geohash: position.hash);
+                driverUserModel.position = Positions(
+                    geoPoint: position.geoPoint, geohash: position.hash);
                 driverUserModel.rotation = locationData.heading;
                 FireStoreUtils.updateDriverUser(driverUserModel);
-                AppLogger.debug("Driver location and rotation updated in Firestore.", tag: "HomeController");
+                AppLogger.debug(
+                    "Driver location and rotation updated in Firestore.",
+                    tag: "HomeController");
               } else {
-                AppLogger.info("Driver is offline, not updating location in Firestore.", tag: "HomeController");
+                AppLogger.info(
+                    "Driver is offline, not updating location in Firestore.",
+                    tag: "HomeController");
               }
             } else {
-              AppLogger.warning("Driver profile not found when trying to update location.", tag: "HomeController");
+              AppLogger.warning(
+                  "Driver profile not found when trying to update location.",
+                  tag: "HomeController");
             }
           }).catchError((error) {
-            AppLogger.error("Error getting driver profile for location update: $error", tag: "HomeController", error: error);
+            AppLogger.error(
+                "Error getting driver profile for location update: $error",
+                tag: "HomeController",
+                error: error);
           });
-        } else { //EDIT
-          AppLogger.warning("Received null latitude or longitude from location update.", tag: "HomeController"); //EDIT
+        } else {
+          //EDIT
+          AppLogger.warning(
+              "Received null latitude or longitude from location update.",
+              tag: "HomeController"); //EDIT
         } //EDIT
       });
     } else {
-      AppLogger.warning("Location permission not granted, requesting permission.", tag: "HomeController");
+      AppLogger.warning(
+          "Location permission not granted, requesting permission.",
+          tag: "HomeController");
       location.requestPermission().then((permissionStatus) {
-        AppLogger.info("Location permission requested, new status: $permissionStatus", tag: "HomeController");
+        AppLogger.info(
+            "Location permission requested, new status: $permissionStatus",
+            tag: "HomeController");
         if (permissionStatus == PermissionStatus.granted) {
           location.enableBackgroundMode(enable: true);
           location.changeSettings(
               accuracy: LocationAccuracy.high,
               distanceFilter:
-              double.parse(Constant.driverLocationUpdate.toString()),
+                  double.parse(Constant.driverLocationUpdate.toString()),
               interval: 2000);
-          AppLogger.info("Location background mode enabled and settings changed after permission request.", tag: "HomeController");
+          AppLogger.info(
+              "Location background mode enabled and settings changed after permission request.",
+              tag: "HomeController");
 
-          location.onLocationChanged.listen((locationData) async {
-            if (locationData.latitude != null && locationData.longitude != null) { //EDIT: Ensure valid location data
+          _locationSubscription =
+              location.onLocationChanged.listen((locationData) async {
+            if (locationData.latitude != null &&
+                locationData.longitude != null) {
+              //EDIT: Ensure valid location data
               Constant.currentLocation = LocationLatLng(
                   latitude: locationData.latitude,
                   longitude: locationData.longitude);
-              AppLogger.debug("Location updated (after permission request): ${locationData.latitude}, ${locationData.longitude}", tag: "HomeController");
+              AppLogger.debug(
+                  "Location updated (after permission request): ${locationData.latitude}, ${locationData.longitude}",
+                  tag: "HomeController");
+
+              // Update search location if driver has moved significantly
+              _updateSearchLocationIfNeeded(
+                  locationData.latitude!, locationData.longitude!);
 
               //EDIT: Set location initialized flag to true after first valid location (after permission request)
-              if (!isLocationInitialized.value) { //EDIT
+              if (!isLocationInitialized.value) {
+                //EDIT
                 isLocationInitialized.value = true; //EDIT
-                AppLogger.info("Location initialized for the first time (after permission request).", tag: "HomeController"); //EDIT
+                AppLogger.info(
+                    "Location initialized for the first time (after permission request).",
+                    tag: "HomeController"); //EDIT
               } //EDIT
 
               FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
@@ -185,18 +249,30 @@ class HomeController extends GetxController {
                         geoPoint: position.geoPoint, geohash: position.hash);
 
                     FireStoreUtils.updateDriverUser(driverUserModel);
-                    AppLogger.debug("Driver location and rotation updated in Firestore (after permission request).", tag: "HomeController");
+                    AppLogger.debug(
+                        "Driver location and rotation updated in Firestore (after permission request).",
+                        tag: "HomeController");
                   } else {
-                    AppLogger.info("Driver is offline, not updating location in Firestore (after permission request).", tag: "HomeController");
+                    AppLogger.info(
+                        "Driver is offline, not updating location in Firestore (after permission request).",
+                        tag: "HomeController");
                   }
                 } else {
-                  AppLogger.warning("Driver profile not found when trying to update location (after permission request).", tag: "HomeController");
+                  AppLogger.warning(
+                      "Driver profile not found when trying to update location (after permission request).",
+                      tag: "HomeController");
                 }
               }).catchError((error) {
-                AppLogger.error("Error getting driver profile for location update (after permission request): $error", tag: "HomeController", error: error);
+                AppLogger.error(
+                    "Error getting driver profile for location update (after permission request): $error",
+                    tag: "HomeController",
+                    error: error);
               });
-            } else { //EDIT
-              AppLogger.warning("Received null latitude or longitude from location update (after permission request).", tag: "HomeController"); //EDIT
+            } else {
+              //EDIT
+              AppLogger.warning(
+                  "Received null latitude or longitude from location update (after permission request).",
+                  tag: "HomeController"); //EDIT
             } //EDIT
           });
         }
@@ -204,6 +280,63 @@ class HomeController extends GetxController {
     }
     isLoading.value = false;
     update();
-    AppLogger.debug("HomeController isLoading set to false.", tag: "HomeController");
+    AppLogger.debug("HomeController isLoading set to false.",
+        tag: "HomeController");
+  }
+
+  /// Updates the searchLocation only if the driver has moved more than the threshold distance.
+  /// This prevents excessive stream rebuilds while keeping the ride list current.
+  void _updateSearchLocationIfNeeded(double newLat, double newLng) {
+    final current = searchLocation.value;
+
+    if (current == null) {
+      // First location update - always set it
+      searchLocation.value =
+          LocationLatLng(latitude: newLat, longitude: newLng);
+      AppLogger.info("Search location initialized: ($newLat, $newLng)",
+          tag: "HomeController");
+      return;
+    }
+
+    // Calculate distance from current search location
+    final distanceMeters = _calculateHaversineDistanceMeters(
+        current.latitude!, current.longitude!, newLat, newLng);
+
+    if (distanceMeters >= _searchLocationThresholdMeters) {
+      searchLocation.value =
+          LocationLatLng(latitude: newLat, longitude: newLng);
+      AppLogger.info(
+          "Search location updated (moved ${distanceMeters.toStringAsFixed(0)}m): ($newLat, $newLng)",
+          tag: "HomeController");
+    }
+  }
+
+  /// Calculates the Haversine distance between two coordinates in meters.
+  double _calculateHaversineDistanceMeters(
+      double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadiusMeters = 6371000.0;
+
+    final double dLat = (lat2 - lat1) * (math.pi / 180);
+    final double dLon = (lon2 - lon1) * (math.pi / 180);
+
+    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1 * (math.pi / 180)) *
+            math.cos(lat2 * (math.pi / 180)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return earthRadiusMeters * c;
+  }
+
+  @override
+  void onClose() {
+    AppLogger.debug("HomeController onClose called, cancelling subscriptions.",
+        tag: "HomeController");
+    _driverSubscription?.cancel();
+    _activeRideSubscription?.cancel();
+    _locationSubscription?.cancel();
+    super.onClose();
   }
 }

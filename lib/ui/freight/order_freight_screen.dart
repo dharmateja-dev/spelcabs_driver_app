@@ -23,7 +23,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class OrderFreightScreen extends StatelessWidget {
-  const OrderFreightScreen({Key? key}) : super(key: key);
+  const OrderFreightScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class OrderFreightScreen extends StatelessWidget {
                       .where('driverId',
                           isEqualTo: FireStoreUtils.getCurrentUid())
                       .where('intercityServiceId',
-                          isEqualTo: "Kn2VEnPI3ikF58uK8YqY")
+                          isEqualTo: Constant.freightServiceId)
                       .orderBy("createdDate", descending: true)
                       .snapshots(),
                   builder: (BuildContext context,

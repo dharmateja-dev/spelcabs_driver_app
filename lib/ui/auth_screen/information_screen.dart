@@ -3,7 +3,6 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/information_controller.dart';
-import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
 import 'package:driver/themes/text_field_them.dart';
