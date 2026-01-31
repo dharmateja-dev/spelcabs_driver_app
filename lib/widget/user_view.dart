@@ -353,7 +353,8 @@ class UserView extends StatefulWidget {
   final String? distance;
   final String? distanceType;
 
-  const UserView({Key? key, this.userId, this.amount, this.distance, this.distanceType}) : super(key: key);
+  const UserView(
+      {super.key, this.userId, this.amount, this.distance, this.distanceType});
 
   @override
   State<UserView> createState() => _UserViewState();
@@ -430,7 +431,7 @@ class _UserViewState extends State<UserView> {
           .doc(userId)
           .snapshots()
           .listen(
-            (snapshot) {
+        (snapshot) {
           _retryCount = 0;
           if (snapshot.exists) {
             try {
@@ -438,9 +439,11 @@ class _UserViewState extends State<UserView> {
               _memoryCache[userId] = user;
               _saveUserToCache(userId, user);
               controller.add(user);
-              AppLogger.info("UserView - Updated user from Firestore for $userId");
+              AppLogger.info(
+                  "UserView - Updated user from Firestore for $userId");
             } catch (e, s) {
-              AppLogger.error("UserView - Parsing error for $userId: $e", error: e, stackTrace: s);
+              AppLogger.error("UserView - Parsing error for $userId: $e",
+                  error: e, stackTrace: s);
               controller.add(cachedUser); // Fallback to cached version
             }
           } else {
@@ -454,7 +457,8 @@ class _UserViewState extends State<UserView> {
           // Retry logic
           if (_retryCount < _maxRetries) {
             _retryCount++;
-            AppLogger.info("UserView - Retrying ($_retryCount/$_maxRetries) for $userId");
+            AppLogger.info(
+                "UserView - Retrying ($_retryCount/$_maxRetries) for $userId");
 
             _retryTimer = Timer(const Duration(seconds: 1), () {
               subscribe();
@@ -479,21 +483,32 @@ class _UserViewState extends State<UserView> {
 
   UserModel? _getCachedUser(String userId) {
     try {
+      // Safety check for initialized Preferences
+      if (!Preferences.pref.containsKey(
+          "")) {} // This is just a dummy access to check late init if needed, but safer to check if initialized if we had a flag.
+      // Since pref is 'late', we catch the error if it's not ready.
+
       final cachedData = Preferences.getString("cached_user_$userId");
-      if (cachedData != null) {
+      if (cachedData.isNotEmpty) {
         return UserModel.fromJson(jsonDecode(cachedData));
       }
     } catch (e) {
-      AppLogger.error("UserView - Cache read error: $e");
+      // This catches LateInitializationError and other read errors
+      AppLogger.error("UserView - Cache read error for $userId: $e");
     }
     return null;
   }
 
   void _saveUserToCache(String userId, UserModel user) {
     try {
-      Preferences.setString("cached_user_$userId", jsonEncode(user.toJson()));
+      // Skip if preferences not ready
+      if (user.id == null) return;
+
+      final String jsonStr = jsonEncode(user.toJson());
+      Preferences.setString("cached_user_$userId", jsonStr);
     } catch (e) {
-      AppLogger.error("UserView - Cache write error: $e");
+      // This catches LateInitializationError and encoding errors
+      AppLogger.error("UserView - Cache write error for $userId: $e");
     }
   }
 
@@ -526,7 +541,8 @@ class _UserViewState extends State<UserView> {
 
         // Handle case where user doesn't exist
         if (snapshot.data == null) {
-          AppLogger.warning("UserView - User data is null for ${widget.userId}");
+          AppLogger.warning(
+              "UserView - User data is null for ${widget.userId}");
           return _buildErrorRetryView(context);
         }
 
@@ -575,22 +591,30 @@ class _UserViewState extends State<UserView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(Constant.amountShow(amount: widget.amount?.toString() ?? "0"),
+                  Text(
+                      Constant.amountShow(
+                          amount: widget.amount?.toString() ?? "0"),
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 18),
                       const SizedBox(width: 5),
-                      Text("${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          "${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 22, color: AppColors.ratingColour),
+                      const Icon(Icons.star,
+                          size: 22, color: AppColors.ratingColour),
                       const SizedBox(width: 5),
-                      Text(Constant.calculateReview(reviewCount: "0.0", reviewSum: "0.0"),
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          Constant.calculateReview(
+                              reviewCount: "0.0", reviewSum: "0.0"),
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ],
@@ -647,7 +671,9 @@ class _UserViewState extends State<UserView> {
               Row(
                 children: [
                   Text("User unavailable",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600])),
                   const SizedBox(width: 8),
                   InkWell(
                     onTap: () {
@@ -655,13 +681,15 @@ class _UserViewState extends State<UserView> {
                       _initUserStream();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text("Retry",
-                          style: GoogleFonts.poppins(fontSize: 10, color: AppColors.primary)),
+                          style: GoogleFonts.poppins(
+                              fontSize: 10, color: AppColors.primary)),
                     ),
                   ),
                 ],
@@ -670,22 +698,30 @@ class _UserViewState extends State<UserView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(Constant.amountShow(amount: widget.amount?.toString() ?? "0"),
+                  Text(
+                      Constant.amountShow(
+                          amount: widget.amount?.toString() ?? "0"),
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 18),
                       const SizedBox(width: 5),
-                      Text("${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          "${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 22, color: AppColors.ratingColour),
+                      const Icon(Icons.star,
+                          size: 22, color: AppColors.ratingColour),
                       const SizedBox(width: 5),
-                      Text(Constant.calculateReview(reviewCount: "0.0", reviewSum: "0.0"),
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          Constant.calculateReview(
+                              reviewCount: "0.0", reviewSum: "0.0"),
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ],
@@ -706,7 +742,8 @@ class _UserViewState extends State<UserView> {
           child: CachedNetworkImage(
             height: 50,
             width: 50,
-            imageUrl: userModel.profilePic?.toString() ?? Constant.userPlaceHolder,
+            imageUrl:
+                userModel.profilePic?.toString() ?? Constant.userPlaceHolder,
             fit: BoxFit.cover,
             placeholder: (context, url) => Container(
               height: 50,
@@ -744,24 +781,31 @@ class _UserViewState extends State<UserView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(Constant.amountShow(amount: widget.amount?.toString() ?? "0"),
+                  Text(
+                      Constant.amountShow(
+                          amount: widget.amount?.toString() ?? "0"),
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 18),
                       const SizedBox(width: 5),
-                      Text("${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          "${_safeParseDistance()} ${widget.distanceType ?? 'km'}",
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 22, color: AppColors.ratingColour),
+                      const Icon(Icons.star,
+                          size: 22, color: AppColors.ratingColour),
                       const SizedBox(width: 5),
-                      Text(Constant.calculateReview(
-                          reviewCount: userModel.reviewsCount ?? "0.0",
-                          reviewSum: userModel.reviewsSum ?? "0.0"),
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      Text(
+                          Constant.calculateReview(
+                              reviewCount: userModel.reviewsCount ?? "0.0",
+                              reviewSum: userModel.reviewsSum ?? "0.0"),
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ],
@@ -777,7 +821,8 @@ class _UserViewState extends State<UserView> {
     try {
       if (widget.distance == null || widget.distance!.isEmpty) return "0.0";
       double parsedDistance = double.parse(widget.distance!);
-      return parsedDistance.toStringAsFixed(Constant.currencyModel?.decimalDigits ?? 2);
+      return parsedDistance
+          .toStringAsFixed(Constant.currencyModel?.decimalDigits ?? 2);
     } catch (e) {
       AppLogger.warning("UserView - Error parsing distance: $e");
       return "0.0";

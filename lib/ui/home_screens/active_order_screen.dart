@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
@@ -24,7 +25,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
 class ActiveOrderScreen extends StatelessWidget {
-  const ActiveOrderScreen({Key? key}) : super(key: key);
+  const ActiveOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -381,7 +382,7 @@ class ActiveOrderScreen extends StatelessWidget {
                 ),
                 enableActiveFill: true,
                 cursorColor: AppColors.primary,
-                controller: controller.otpController.value,
+                controller: controller.otpController,
                 onCompleted: (v) async {},
                 onChanged: (value) {},
               ),
@@ -391,8 +392,9 @@ class ActiveOrderScreen extends StatelessWidget {
             ),
             ButtonThem.buildButton(context, title: "OTP verify".tr,
                 onPress: () async {
-              if (orderModel.otp.toString() ==
-                  controller.otpController.value.text) {
+              log("OTP Check: Expected='${orderModel.otp}', Entered='${controller.otpController.text}'");
+              if (orderModel.otp.toString().trim() ==
+                  controller.otpController.text.trim()) {
                 Get.back();
                 ShowToastDialog.showLoader("Please wait...".tr);
                 orderModel.status = Constant.rideInProgress;

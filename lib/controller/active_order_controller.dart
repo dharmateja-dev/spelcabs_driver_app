@@ -5,12 +5,20 @@ import 'package:driver/utils/app_logger.dart'; //EDIT
 
 class ActiveOrderController extends GetxController {
   HomeController homeController = Get.put(HomeController());
-  Rx<TextEditingController> otpController = TextEditingController().obs;
+  final TextEditingController otpController = TextEditingController();
 
   @override
   void onInit() {
     super.onInit();
-    AppLogger.debug("ActiveOrderController initialized.", tag: "ActiveOrderController");
+    AppLogger.debug("ActiveOrderController initialized.",
+        tag: "ActiveOrderController");
+  }
+
+  @override
+  void onClose() {
+    AppLogger.debug("ActiveOrderController closing, disposing otpController.",
+        tag: "ActiveOrderController");
+    otpController.dispose();
+    super.onClose();
   }
 }
-

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
@@ -589,7 +590,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
                 ),
                 enableActiveFill: true,
                 cursorColor: AppColors.primary,
-                controller: controller.otpController.value,
+                controller: controller.otpController,
                 onCompleted: (v) async {},
                 onChanged: (value) {},
               ),
@@ -599,8 +600,9 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
             ),
             ButtonThem.buildButton(context, title: "OTP verify".tr,
                 onPress: () async {
-              if (orderModel.otp.toString() ==
-                  controller.otpController.value.text) {
+              log("Intercity OTP Check: Expected='${orderModel.otp}', Entered='${controller.otpController.text}'");
+              if (orderModel.otp.toString().trim() ==
+                  controller.otpController.text.trim()) {
                 Get.back();
                 ShowToastDialog.showLoader("Please wait...".tr);
                 orderModel.status = Constant.rideInProgress;

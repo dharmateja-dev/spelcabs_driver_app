@@ -1,5 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
@@ -254,7 +255,7 @@ class FireStoreUtils {
     bool isLoggedInLocally = Preferences.getBoolean(Constant.isLoggedInKey);
     if (isLoggedInLocally) {
       String? driverId = Preferences.getString(Constant.driverIdKey);
-      if (driverId.isNotEmpty) {
+      if (driverId != null && driverId.isNotEmpty) {
         // Attempt to fetch profile from Firestore to ensure data consistency
         DriverUserModel? driverModel = await getDriverProfile(driverId);
         if (driverModel != null) {
@@ -314,7 +315,7 @@ class FireStoreUtils {
     String? uidFromPrefs = Preferences.getString(Constant.driverIdKey);
     User? firebaseUser = FirebaseAuth.instance.currentUser;
 
-    if (uidFromPrefs.isNotEmpty) {
+    if (uidFromPrefs != null && uidFromPrefs.isNotEmpty) {
       AppLogger.debug(
           "getCurrentUid: Returning UID from preferences: $uidFromPrefs",
           tag: "FireStoreUtils");
@@ -1038,7 +1039,7 @@ class FireStoreUtils {
   //         serviceQuery = baseQuery;
   //       }
   //     } catch (e) {
-  //       // if raw get fails, continue with serviceQuery — Geoflutterfire will handle
+  //       // if raw get fails, continue with serviceQuery ΓÇö Geoflutterfire will handle
   //       AppLogger.debug("Error testing serviceQuery: $e", tag: "FireStoreUtils");
   //     }
   //   }
@@ -1171,10 +1172,6 @@ class FireStoreUtils {
   // }
 
   // ************************************************************************************************************
-  // ************************************************************************************************************
-  /// Fetches nearby orders using GeoFlutterFire geo-queries.
-  /// This is optimized to only download orders within the driver's radius,
-  /// instead of downloading ALL orders in the zone and filtering client-side.
   Stream<List<OrderModel>> getOrders(
       DriverUserModel driverUserModel, double? latitude, double? longitude) {
     AppLogger.debug("getOrders called for driver: ${driverUserModel.id}",
@@ -1193,81 +1190,68 @@ class FireStoreUtils {
       return Stream.value(<OrderModel>[]);
     }
 
-    // Calculate radius in km
+    Query<Map<String, dynamic>> baseQuery = fireStore
+        .collection(CollectionName.orders)
+        .where('zoneId', whereIn: driverUserModel.zoneIds)
+        .where('status', isEqualTo: Constant.ridePlaced);
+
+    Query<Map<String, dynamic>> serviceQuery = baseQuery;
+    if (driverUserModel.serviceId != null &&
+        driverUserModel.serviceId!.toString().trim().isNotEmpty) {
+      serviceQuery =
+          baseQuery.where('serviceId', isEqualTo: driverUserModel.serviceId);
+    }
+
+    final double centerLat = latitude!;
+    final double centerLng = longitude!;
     double radiusKm;
-    final parsedRadius = double.tryParse(Constant.radius) ?? 0.0;
+    final parsedRadius = double.tryParse(Constant.radius ?? "") ?? 0.0;
 
     if (parsedRadius > 100.0) {
-      // Assume it's in meters, convert to km
       radiusKm = parsedRadius / 1000.0;
     } else if (parsedRadius > 0) {
       radiusKm = parsedRadius;
     } else {
-      radiusKm = 4.0; // Default 4km
+      radiusKm = 4.0;
     }
 
-    AppLogger.info("Using GeoFlutterFire geo-query with radius: ${radiusKm}km",
-        tag: "FireStoreUtils");
+    AppLogger.debug("Using radius: ${radiusKm}km", tag: "FireStoreUtils");
 
-    // Create the geo-query center point
-    final geo = Geoflutterfire();
-    final center = geo.point(latitude: latitude, longitude: longitude);
-
-    // Build base query - only filter by status at the Firestore level
-    // Zone and service filtering will be done client-side on the smaller result set
-    Query<Map<String, dynamic>> baseQuery = fireStore
-        .collection(CollectionName.orders)
-        .where('status', isEqualTo: Constant.ridePlaced);
-
-    // Create geo collection reference
-    final geoRef = geo.collection(collectionRef: baseQuery);
-
-    // Use the 'within' method for geo-queries
-    // The 'position' field contains the geohash and geopoint
-    return geoRef
-        .within(
-      center: center,
-      radius: radiusKm,
-      field: 'position',
-      strictMode: true, // Only return documents within exact radius
-    )
-        .map((List<DocumentSnapshot<Map<String, dynamic>>> snapshots) {
+    return serviceQuery.snapshots().map((snapshot) {
       AppLogger.info(
-          "GeoFlutterFire returned ${snapshots.length} nearby orders (within ${radiusKm}km)",
+          "Received a new snapshot from Firestore. Total documents: ${snapshot.docs.length}",
           tag: "FireStoreUtils");
-
       List<OrderModel> ordersList = <OrderModel>[];
 
-      for (DocumentSnapshot<Map<String, dynamic>> doc in snapshots) {
+      for (DocumentSnapshot doc in snapshot.docs) {
         try {
-          final data = doc.data();
+          final data = doc.data() as Map<String, dynamic>?;
           if (data != null) {
-            // Client-side zone filtering (from much smaller result set)
-            final orderZoneId = data['zoneId'] as String?;
-            if (orderZoneId == null ||
-                !driverUserModel.zoneIds!.contains(orderZoneId)) {
+            final GeoPoint? orderLocation = _extractGeoPoint(data['position']);
+            if (orderLocation != null) {
+              final double actualDistance = _calculateHaversineDistance(
+                  centerLat,
+                  centerLng,
+                  orderLocation.latitude,
+                  orderLocation.longitude);
+
               AppLogger.debug(
-                  "Order ${doc.id} filtered out: zone '$orderZoneId' not in driver zones",
+                  "Order ${doc.id}: Driver coords=($centerLat, $centerLng), Order coords=(${orderLocation.latitude}, ${orderLocation.longitude}), distance=${actualDistance.toStringAsFixed(2)}km",
                   tag: "FireStoreUtils");
-              continue;
+
+              if (actualDistance <= radiusKm) {
+                final OrderModel order = OrderModel.fromJson(data);
+                ordersList.add(order);
+              } else {
+                AppLogger.debug(
+                    "Order ${doc.id} excluded by distance check (${actualDistance.toStringAsFixed(2)}km > ${radiusKm}km)",
+                    tag: "FireStoreUtils");
+              }
+            } else {
+              // If we can't extract position, include it anyway (fallback)
+              final OrderModel order = OrderModel.fromJson(data);
+              ordersList.add(order);
             }
-
-            // Client-side service filtering (if driver has a specific service)
-            // if (driverUserModel.serviceId != null &&
-            //     driverUserModel.serviceId!.toString().trim().isNotEmpty) {
-            //   final orderServiceId = data['serviceId'] as String?;
-            //   if (orderServiceId != driverUserModel.serviceId) {
-            //     AppLogger.debug(
-            //         "Order ${doc.id} filtered out: service '$orderServiceId' != driver service '${driverUserModel.serviceId}'",
-            //         tag: "FireStoreUtils");
-            //     continue;
-            //   }
-            // }
-
-            final OrderModel order = OrderModel.fromJson(data);
-            ordersList.add(order);
-            AppLogger.debug("Order ${doc.id} added to list",
-                tag: "FireStoreUtils");
           }
         } catch (e) {
           AppLogger.debug("Error parsing order ${doc.id}: $e",
@@ -1275,22 +1259,104 @@ class FireStoreUtils {
         }
       }
 
-      AppLogger.info(
-          "Final list: ${ordersList.length} orders after zone/service filtering",
+      AppLogger.debug(
+          "Yielding ${ordersList.length} orders after manual filtering.",
           tag: "FireStoreUtils");
-
-      // Sort by creation time (Newest First)
-      ordersList.sort((a, b) {
-        final aTime = a.createdDate; // Corrected from createdAt
-        final bTime = b.createdDate; // Corrected from createdAt
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
-      });
-
       return ordersList;
     });
   }
 
+  double _calculateHaversineDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    AppLogger.debug(
+        "Calculating Haversine distance for coordinates: ($lat1, $lon1) and ($lat2, $lon2)",
+        tag: "FireStoreUtils");
+    const double earthRadiusKm = 6371.0;
+
+    final double dLat = (lat2 - lat1) * (math.pi / 180);
+    final double dLon = (lon2 - lon1) * (math.pi / 180);
+
+    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1 * (math.pi / 180)) *
+            math.cos(lat2 * (math.pi / 180)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    final double distance = earthRadiusKm * c;
+    AppLogger.debug("Haversine distance calculated: ${distance} km",
+        tag: "FireStoreUtils");
+    return distance;
+  }
+
+  GeoPoint? _extractGeoPoint(dynamic pos) {
+    AppLogger.debug(
+        "Attempting to extract GeoPoint from data of type: ${pos.runtimeType}",
+        tag: "FireStoreUtils");
+    try {
+      if (pos == null) {
+        AppLogger.debug("GeoPoint extraction: input is null",
+            tag: "FireStoreUtils");
+        return null;
+      }
+      if (pos is GeoPoint) {
+        AppLogger.debug("GeoPoint extraction: input is already a GeoPoint",
+            tag: "FireStoreUtils");
+        return pos;
+      }
+      if (pos is Map) {
+        AppLogger.debug(
+            "GeoPoint extraction: input is a Map. Checking for 'geopoint' key.",
+            tag: "FireStoreUtils");
+        if (pos['geopoint'] is GeoPoint) {
+          AppLogger.debug(
+              "GeoPoint extraction: found GeoPoint at 'geopoint' key",
+              tag: "FireStoreUtils");
+          return pos['geopoint'];
+        }
+        if (pos.containsKey('geopoint') && pos['geopoint'] is Map) {
+          AppLogger.debug(
+              "GeoPoint extraction: found nested Map at 'geopoint' key",
+              tag: "FireStoreUtils");
+          final gp = pos['geopoint'];
+          final lat = (gp['latitude'] ?? gp['lat'])?.toDouble();
+          final lng = (gp['longitude'] ?? gp['lng'] ?? gp['lon'])?.toDouble();
+          if (lat != null && lng != null) {
+            AppLogger.debug("GeoPoint extracted from nested map: ($lat, $lng)",
+                tag: "FireStoreUtils");
+            return GeoPoint(lat, lng);
+          }
+        }
+        if (pos.containsKey('latitude') && pos.containsKey('longitude')) {
+          AppLogger.debug(
+              "GeoPoint extraction: found 'latitude' and 'longitude' keys directly in map",
+              tag: "FireStoreUtils");
+          final lat = (pos['latitude'] as num).toDouble();
+          final lng = (pos['longitude'] as num).toDouble();
+          AppLogger.debug("GeoPoint extracted from map: ($lat, $lng)",
+              tag: "FireStoreUtils");
+          return GeoPoint(lat, lng);
+        }
+      }
+      if (pos is List && pos.length >= 2) {
+        AppLogger.debug(
+            "GeoPoint extraction: input is a List. Assuming [lat, lng] format.",
+            tag: "FireStoreUtils");
+        final lat = (pos[0] as num).toDouble();
+        final lng = (pos[1] as num).toDouble();
+        AppLogger.debug("GeoPoint extracted from list: ($lat, $lng)",
+            tag: "FireStoreUtils");
+        return GeoPoint(lat, lng);
+      }
+    } catch (e, s) {
+      AppLogger.warning("GeoPoint extraction failed with error: $e",
+          tag: "FireStoreUtils");
+    }
+    AppLogger.debug("GeoPoint extraction failed, returning null.",
+        tag: "FireStoreUtils");
+    return null;
+  }
   //*************************************************************************************************************
 
   // Stream<List<OrderModel>> getOrders(DriverUserModel driverUserModel,
@@ -1354,7 +1420,7 @@ class FireStoreUtils {
     List<InterCityOrderModel> ordersList = [];
     Query<Map<String, dynamic>> query = fireStore
         .collection(CollectionName.ordersIntercity)
-        .where('intercityServiceId', isEqualTo: Constant.freightServiceId)
+        .where('intercityServiceId', isEqualTo: "Kn2VEnPI3ikF58uK8YqY")
         .where('status', isEqualTo: Constant.ridePlaced);
     GeoFirePoint center = Geoflutterfire()
         .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
@@ -1362,9 +1428,7 @@ class FireStoreUtils {
         .collection(collectionRef: query)
         .within(
             center: center,
-            radius: (double.tryParse(Constant.radius) ?? 10.0) < 50.0
-                ? 50.0
-                : (double.tryParse(Constant.radius) ?? 10.0),
+            radius: double.parse(Constant.radius),
             field: 'position',
             strictMode: true);
 
@@ -1390,15 +1454,6 @@ class FireStoreUtils {
       AppLogger.info(
           "Nearest freight orders updated: ${ordersList.length} new orders.",
           tag: "FireStoreUtils");
-
-      // Sort by creation time (Newest First)
-      ordersList.sort((a, b) {
-        final aTime = a.createdDate;
-        final bTime = b.createdDate;
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
-      });
-
       getNearestFreightOrderRequestController!.sink.add(ordersList);
     }, onError: (error, s) {
       AppLogger.error("Error in getFreightOrders stream: $error",
@@ -1426,103 +1481,6 @@ class FireStoreUtils {
       getNearestFreightOrderRequestController!.close();
       AppLogger.info("Nearest freight order request stream closed.",
           tag: "FireStoreUtils");
-    }
-  }
-
-  // Stream for InterCity (Outstation) Orders
-  StreamController<List<InterCityOrderModel>>?
-      getNearestInterCityOrderRequestController;
-
-  Stream<List<InterCityOrderModel>> getInterCityOrders(
-      double? latitude, double? longLatitude) async* {
-    AppLogger.debug(
-        "getInterCityOrders called for location: ($latitude, $longLatitude)",
-        tag: "FireStoreUtils");
-    getNearestInterCityOrderRequestController =
-        StreamController<List<InterCityOrderModel>>.broadcast();
-    List<InterCityOrderModel> ordersList = [];
-
-    // Query for intercity orders that are NOT freight (assuming freightServiceId distinguishes them)
-    // If freightServiceId specific logic is needed, ensure it's handled.
-    // Generally 'ordersIntercity' contains both, we should filter by what we want.
-    // Here we want all placed intercity orders. The UI will distinguish or merge them.
-    // If we want NON-freight, we might index differently, but let's fetch all placed ones
-    // and let the UI filter or just show them if they are valid outstation rides.
-    // To match 'Outstation' specifically, usually we check if intercityServiceId != freightServiceId.
-    // But for now, let's fetch 'ridePlaced' from 'ordersIntercity'.
-
-    Query<Map<String, dynamic>> query = fireStore
-        .collection(CollectionName.ordersIntercity)
-        .where('status', isEqualTo: Constant.ridePlaced);
-
-    // Apply strict freight filter if needed:
-    // .where('intercityServiceId', isNotEqualTo: Constant.freightServiceId) // Firestore limitation with inequality
-
-    GeoFirePoint center = Geoflutterfire()
-        .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
-
-    Stream<List<DocumentSnapshot>> stream =
-        Geoflutterfire().collection(collectionRef: query).within(
-            center: center,
-            radius: (double.tryParse(Constant.radius) ?? 10.0) < 50.0
-                ? 50.0 // Minimum 50km radius for intercity usually
-                : (double.tryParse(Constant.radius) ?? 10.0),
-            field: 'position',
-            strictMode: true);
-
-    stream.listen((List<DocumentSnapshot> documentList) {
-      ordersList.clear();
-      for (var document in documentList) {
-        final data = document.data() as Map<String, dynamic>;
-        InterCityOrderModel orderModel = InterCityOrderModel.fromJson(data);
-
-        // Exclude freight from this specific stream if we want to separate them,
-        // OR include everything.
-        // Strategy: Use this for 'Outstation' (Non-Freight).
-        if (orderModel.intercityServiceId == Constant.freightServiceId) {
-          continue;
-        }
-
-        if (orderModel.acceptedDriverId != null &&
-            orderModel.acceptedDriverId!.isNotEmpty) {
-          if (!orderModel.acceptedDriverId!
-              .contains(FireStoreUtils.getCurrentUid())) {
-            ordersList.add(orderModel);
-          } else {
-            AppLogger.debug(
-                "Intercity order ${orderModel.id} already accepted by current driver, skipping.",
-                tag: "FireStoreUtils");
-          }
-        } else {
-          ordersList.add(orderModel);
-        }
-      }
-      AppLogger.info(
-          "Nearest InterCity (Outstation) orders updated: ${ordersList.length} new orders.",
-          tag: "FireStoreUtils");
-
-      // Sort by creation time (Newest First)
-      ordersList.sort((a, b) {
-        final aTime = a.createdDate;
-        final bTime = b.createdDate;
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
-      });
-
-      getNearestInterCityOrderRequestController!.sink.add(ordersList);
-    }, onError: (error, s) {
-      AppLogger.error("Error in getInterCityOrders stream: $error",
-          tag: "FireStoreUtils", error: error, stackTrace: s);
-    });
-
-    yield* getNearestInterCityOrderRequestController!.stream;
-  }
-
-  closeInterCityStream() {
-    AppLogger.debug("closeInterCityStream called.", tag: "FireStoreUtils");
-    if (getNearestInterCityOrderRequestController != null) {
-      getNearestInterCityOrderRequestController!.close();
-      getNearestInterCityOrderRequestController = null;
     }
   }
 
@@ -1874,7 +1832,7 @@ class FireStoreUtils {
     return onBoardingModel;
   }
 
-  static Future<InboxModel?> addInBox(InboxModel inboxModel) async {
+  static Future addInBox(InboxModel inboxModel) async {
     AppLogger.debug("addInBox called for order ID: ${inboxModel.orderId}",
         tag: "FireStoreUtils");
     return await fireStore
@@ -1895,8 +1853,7 @@ class FireStoreUtils {
     });
   }
 
-  static Future<ConversationModel?> addChat(
-      ConversationModel conversationModel) async {
+  static Future addChat(ConversationModel conversationModel) async {
     AppLogger.debug(
         "addChat called for conversation ID: ${conversationModel.id}, order ID: ${conversationModel.orderId}",
         tag: "FireStoreUtils");
@@ -2359,115 +2316,6 @@ class FireStoreUtils {
       return true;
     } catch (e, s) {
       AppLogger.error("FireStoreUtils: Error saving subscription transaction",
-          tag: "FireStoreUtils", error: e, stackTrace: s);
-      return false;
-    }
-  }
-
-  /// Check if email is already registered in the customers (users) collection
-  /// Returns true if email exists
-  static Future<bool> isEmailRegisteredInCustomers(String email) async {
-    try {
-      final String lowercaseEmail = email.toLowerCase();
-      final QuerySnapshot querySnapshot = await fireStore
-          .collection(CollectionName.users)
-          .where('email', isEqualTo: lowercaseEmail)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        AppLogger.info(
-            "Email (lowercase) already registered in customers collection: $lowercaseEmail",
-            tag: "FireStoreUtils");
-        return true;
-      }
-
-      // Fallback: check original email case just in case
-      final QuerySnapshot querySnapshotOriginal = await fireStore
-          .collection(CollectionName.users)
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-
-      if (querySnapshotOriginal.docs.isNotEmpty) {
-        AppLogger.info(
-            "Email (original) already registered in customers collection: $email",
-            tag: "FireStoreUtils");
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      AppLogger.error("Error checking email in customers collection: $e",
-          tag: "FireStoreUtils", error: e);
-      return false;
-    }
-  }
-
-  /// Checks if a vehicle number is already registered by ANY driver
-  /// Returns true if the vehicle number exists and belongs to a DIFFERENT driver
-  /// [vehicleNumber] - The normalized vehicle number to check
-  /// [currentDriverId] - The ID of the current driver (to exclude from check)
-  static Future<bool> checkVehicleNumberExists(
-      String vehicleNumber, String? currentDriverId) async {
-    try {
-      final QuerySnapshot querySnapshot = await fireStore
-          .collection(CollectionName.driverUsers)
-          .where('vehicleInformation.vehicleNumber', isEqualTo: vehicleNumber)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        return false;
-      }
-
-      // If we found a match, check if it belongs to a different driver
-      for (var doc in querySnapshot.docs) {
-        if (doc.id != currentDriverId) {
-          AppLogger.info(
-              "Vehicle number $vehicleNumber already registered by driver ${doc.id}",
-              tag: "FireStoreUtils");
-          return true;
-        }
-      }
-
-      return false;
-    } catch (e) {
-      AppLogger.error("Error checking vehicle number existence: $e",
-          tag: "FireStoreUtils", error: e);
-      return false;
-    }
-  }
-
-  /// Submits a support request to Firestore
-  /// Returns true if successful, false otherwise
-  static Future<bool> submitSupportRequest({
-    required String userEmail,
-    required String message,
-    required String subject,
-    String? supportEmail,
-  }) async {
-    try {
-      String requestId = Constant.getUuid();
-      await fireStore
-          .collection(CollectionName.supportRequests)
-          .doc(requestId)
-          .set({
-        'id': requestId,
-        'userEmail': userEmail,
-        'message': message,
-        'subject': subject,
-        'supportEmail': supportEmail ?? '',
-        'userId': getCurrentUid(),
-        'userType': 'driver', // Since this is the driver app
-        'status': 'pending',
-        'createdAt': Timestamp.now(),
-      });
-      AppLogger.info(
-          "Support request submitted successfully with ID: $requestId",
-          tag: "FireStoreUtils");
-      return true;
-    } catch (e, s) {
-      AppLogger.error("Error submitting support request: $e",
           tag: "FireStoreUtils", error: e, stackTrace: s);
       return false;
     }

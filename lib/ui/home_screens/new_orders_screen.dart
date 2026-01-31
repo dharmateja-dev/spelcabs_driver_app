@@ -27,210 +27,179 @@ class NewOrderScreen extends StatelessWidget {
         builder: (controller) {
           return controller.isLoading.value
               ? Constant.loader(context)
-              : controller.driverModel.value.isOnline == false
-                  ? Center(
-                      child: Text(
-                          "You are Now offline so you can't get nearest order."
-                              .tr),
-                    )
-                  //EDIT: Only fetch orders if location is initialized and available
-                  : Obx(
-                      () => (controller.isLocationInitialized.value &&
-                              controller.searchLocation.value !=
-                                  null) //EDIT: Use observable searchLocation
-                          ? StreamBuilder<List<OrderModel>>(
-                              stream: FireStoreUtils().getOrders(
-                                  controller.driverModel.value,
-                                  controller.searchLocation.value!
-                                      .latitude, //EDIT: Use observable searchLocation
-                                  controller.searchLocation.value!
-                                      .longitude), //EDIT: Use observable searchLocation
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Constant.loader(context);
-                                }
-                                if (!snapshot.hasData ||
-                                    (snapshot.data?.isEmpty ?? true)) {
-                                  return Center(
-                                    child: Text("New Rides Not found".tr),
-                                  );
-                                } else {
-                                  // ordersList = snapshot.data!;
-                                  return ListView.builder(
-                                    itemCount: snapshot.data!.length,
-                                    shrinkWrap: true,
-                                    itemBuilder: (context, index) {
-                                      OrderModel orderModel =
-                                          snapshot.data![index];
-                                      String amount;
-                                      if (Constant.distanceType == "Km") {
-                                        amount = Constant.amountCalculate(
-                                                orderModel.service!.kmCharge
-                                                    .toString(),
-                                                orderModel.distance.toString())
-                                            .toStringAsFixed(Constant
-                                                .currencyModel!.decimalDigits!);
-                                      } else {
-                                        amount = Constant.amountCalculate(
-                                                orderModel.service!.kmCharge
-                                                    .toString(),
-                                                orderModel.distance.toString())
-                                            .toStringAsFixed(Constant
-                                                .currencyModel!.decimalDigits!);
-                                      }
-                                      return InkWell(
-                                        onTap: () {
-                                          Get.to(const OrderMapScreen(),
-                                                  arguments: {
-                                                "orderModel":
-                                                    orderModel.id.toString()
-                                              })!
-                                              .then((value) {
-                                            if (value != null &&
-                                                value == true) {
-                                              controller.selectedIndex.value =
-                                                  1;
-                                            }
-                                          });
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
+              : Obx(
+                  () => (controller.isLocationInitialized.value &&
+                          controller.searchLocation.value != null)
+                      ? StreamBuilder<List<OrderModel>>(
+                          stream: FireStoreUtils().getOrders(
+                              controller.driverModel.value,
+                              controller.searchLocation.value!.latitude,
+                              controller.searchLocation.value!.longitude),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Constant.loader(context);
+                            }
+                            if (!snapshot.hasData ||
+                                (snapshot.data?.isEmpty ?? true)) {
+                              return Center(
+                                child: Text("New Rides Not found".tr),
+                              );
+                            } else {
+                              return ListView.builder(
+                                itemCount: snapshot.data!.length,
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  OrderModel orderModel = snapshot.data![index];
+                                  String amount;
+                                  if (Constant.distanceType == "Km") {
+                                    amount = Constant.amountCalculate(
+                                            orderModel.service!.kmCharge
+                                                .toString(),
+                                            orderModel.distance.toString())
+                                        .toStringAsFixed(Constant
+                                            .currencyModel!.decimalDigits!);
+                                  } else {
+                                    amount = Constant.amountCalculate(
+                                            orderModel.service!.kmCharge
+                                                .toString(),
+                                            orderModel.distance.toString())
+                                        .toStringAsFixed(Constant
+                                            .currencyModel!.decimalDigits!);
+                                  }
+                                  return InkWell(
+                                    onTap: () {
+                                      Get.to(const OrderMapScreen(),
+                                              arguments: {
+                                            "orderModel":
+                                                orderModel.id.toString()
+                                          })!
+                                          .then((value) {
+                                        if (value != null && value == true) {
+                                          controller.selectedIndex.value = 1;
+                                        }
+                                      });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: themeChange.getThem()
+                                              ? AppColors
+                                                  .darkContainerBackground
+                                              : AppColors.containerBackground,
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(10)),
+                                          border: Border.all(
                                               color: themeChange.getThem()
                                                   ? AppColors
-                                                      .darkContainerBackground
-                                                  : AppColors
-                                                      .containerBackground,
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                      Radius.circular(10)),
-                                              border: Border.all(
-                                                  color: themeChange.getThem()
-                                                      ? AppColors
-                                                          .darkContainerBorder
-                                                      : AppColors
-                                                          .containerBorder,
-                                                  width: 0.5),
-                                              boxShadow: themeChange.getThem()
-                                                  ? null
-                                                  : [
-                                                      BoxShadow(
-                                                        color: Colors.grey
-                                                            .withOpacity(0.5),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(0,
-                                                            2), // changes position of shadow
-                                                      ),
-                                                    ],
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 10,
-                                                      horizontal: 10),
-                                              child: Column(
+                                                      .darkContainerBorder
+                                                  : AppColors.containerBorder,
+                                              width: 0.5),
+                                          boxShadow: themeChange.getThem()
+                                              ? null
+                                              : [
+                                                  BoxShadow(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.5),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10, horizontal: 10),
+                                          child: Column(
+                                            children: [
+                                              UserView(
+                                                userId: orderModel.userId,
+                                                amount: orderModel.offerRate,
+                                                distance: orderModel.distance,
+                                                distanceType:
+                                                    orderModel.distanceType,
+                                              ),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 5),
+                                                child: Divider(),
+                                              ),
+                                              LocationView(
+                                                sourceLocation: orderModel
+                                                    .sourceLocationName
+                                                    .toString(),
+                                                destinationLocation: orderModel
+                                                    .destinationLocationName
+                                                    .toString(),
+                                              ),
+                                              Column(
                                                 children: [
-                                                  UserView(
-                                                    userId: orderModel.userId,
-                                                    amount:
-                                                        orderModel.offerRate,
-                                                    distance:
-                                                        orderModel.distance,
-                                                    distanceType:
-                                                        orderModel.distanceType,
+                                                  const SizedBox(
+                                                    height: 10,
                                                   ),
-                                                  const Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 5),
-                                                    child: Divider(),
-                                                  ),
-                                                  LocationView(
-                                                    sourceLocation: orderModel
-                                                        .sourceLocationName
-                                                        .toString(),
-                                                    destinationLocation: orderModel
-                                                        .destinationLocationName
-                                                        .toString(),
-                                                  ),
-                                                  Column(
-                                                    children: [
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      Padding(
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 5),
+                                                    child: Container(
+                                                      width: Responsive.width(
+                                                          100, context),
+                                                      decoration: BoxDecoration(
+                                                          color: themeChange
+                                                                  .getThem()
+                                                              ? AppColors
+                                                                  .darkGray
+                                                              : AppColors.gray,
+                                                          borderRadius:
+                                                              const BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          10))),
+                                                      child: Padding(
                                                         padding:
                                                             const EdgeInsets
                                                                 .symmetric(
                                                                 horizontal: 10,
-                                                                vertical: 5),
-                                                        child: Container(
-                                                          width:
-                                                              Responsive.width(
-                                                                  100, context),
-                                                          decoration: BoxDecoration(
-                                                              color: themeChange
-                                                                      .getThem()
-                                                                  ? AppColors
-                                                                      .darkGray
-                                                                  : AppColors
-                                                                      .gray,
-                                                              borderRadius:
-                                                                  const BorderRadius
-                                                                      .all(
-                                                                      Radius.circular(
-                                                                          10))),
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        10),
-                                                            child: Center(
-                                                              child: Text(
-                                                                'Recommended Price is ${Constant.amountShow(amount: amount)}. Approx distance ${(double.tryParse(orderModel.distance.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)} ${Constant.distanceType}',
-                                                                style: GoogleFonts.poppins(
+                                                                vertical: 10),
+                                                        child: Center(
+                                                          child: Text(
+                                                            'Recommended Price is ${Constant.amountShow(amount: amount)}. Approx distance ${(double.tryParse(orderModel.distance.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)} ${Constant.distanceType}',
+                                                            style: GoogleFonts
+                                                                .poppins(
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .w500),
-                                                              ),
-                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  )
+                                                    ),
+                                                  ),
                                                 ],
-                                              ),
-                                            ),
+                                              )
+                                            ],
                                           ),
                                         ),
-                                      );
-                                    },
+                                      ),
+                                    ),
                                   );
-                                }
-                              })
-                          : Center(
-                              //EDIT: Display message while waiting for location
-                              child: Column(
-                                //EDIT
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center, //EDIT
-                                children: [
-                                  //EDIT
-                                  Constant.loader(context), //EDIT
-                                  const SizedBox(height: 16), //EDIT
-                                  Text(
-                                      "Getting your location to find nearby rides..."
-                                          .tr), //EDIT
-                                ], //EDIT
-                              ), //EDIT
-                            ), //EDIT
-                    );
+                                },
+                              );
+                            }
+                          })
+                      : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Constant.loader(context),
+                              const SizedBox(height: 16),
+                              Text(
+                                  "Getting your location to find nearby rides..."
+                                      .tr),
+                            ],
+                          ),
+                        ),
+                );
         });
   }
 }

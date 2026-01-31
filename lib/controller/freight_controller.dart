@@ -32,6 +32,7 @@ class FreightController extends GetxController {
 
   /// Stream subscriptions for proper cleanup
   StreamSubscription? _driverSubscription;
+  StreamSubscription? _freightSubscription;
   StreamSubscription? _activeRideSubscription;
   StreamSubscription? _locationSubscription;
 
@@ -59,9 +60,12 @@ class FreightController extends GetxController {
     dateAndTime = DateTime.now();
   }
 
-  Future<void> searchFreightOrders() async {
+  void searchFreightOrders() {
     try {
-      print("🔍 [FREIGHT] Starting freight search...");
+      print("🔍 [FREIGHT] Starting freight search [Stream]...");
+
+      _freightSubscription?.cancel();
+
       isSearchLoading.value = true;
       freightServiceOrder.clear();
 
@@ -82,100 +86,96 @@ class FreightController extends GetxController {
         return h == n || h.contains(n);
       }
 
-      // ✅ Build a BROADER query - only filter by status and freight serviceId
+      // Build query
       Query query = FireStoreUtils.fireStore
           .collection(CollectionName.ordersIntercity)
           .where('status', isEqualTo: Constant.ridePlaced)
-          .where('intercityServiceId',
-              isEqualTo: Constant.freightServiceId); // Freight filter
+          .where('intercityServiceId', isEqualTo: Constant.freightServiceId);
 
-      // Add date filter if provided
+      // Add date filter
       if (whenController.value.text.isNotEmpty && dateAndTime != null) {
         String formattedDate = DateFormat("dd-MMM-yyyy").format(dateAndTime!);
         query = query.where('whenDates', isEqualTo: formattedDate);
         print("🔍 [FREIGHT] Date filter: $formattedDate");
       }
 
-      // Add zone filter if driver has zones
-      if (driverModel.value.zoneIds != null &&
-          driverModel.value.zoneIds!.isNotEmpty) {
-        query = query.where('zoneId', whereIn: driverModel.value.zoneIds);
-        print("🔍 [FREIGHT] Zone filter: ${driverModel.value.zoneIds}");
-      }
-
-      print("🔍 [FREIGHT] Executing Firestore query...");
-      QuerySnapshot querySnapshot = await query.get();
-      print(
-          "🔍 [FREIGHT] Found ${querySnapshot.docs.length} freight orders (pre-filter)");
-
-      final uid = FireStoreUtils.getCurrentUid();
-      int kept = 0;
-
-      for (var doc in querySnapshot.docs) {
-        try {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-          // ✅ Client-side SOURCE match (lenient - if source is provided)
-          bool sourceOk = true;
-          if (srcText.isNotEmpty) {
-            sourceOk =
-                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    eqOrContains(data['sourceName_norm'] as String?, srcText);
-          }
-
-          // ✅ Client-side DESTINATION match (lenient - if destination is provided)
-          bool destOk = true;
-          if (dstText.isNotEmpty) {
-            destOk = eqOrContains(
-                    data['destinationLocationName'] as String?, dstText) ||
-                eqOrContains(data['destinationName_norm'] as String?, dstText);
-          }
-
-          if (!(sourceOk && destOk)) {
-            print("   ⏭️ Order ${doc.id} skipped: location mismatch");
-            continue;
-          }
-
-          InterCityOrderModel orderModel = InterCityOrderModel.fromJson(data);
-
-          // Check if already accepted by this driver
-          bool alreadyAccepted = false;
-          if (orderModel.acceptedDriverId != null &&
-              orderModel.acceptedDriverId!.isNotEmpty) {
-            if (orderModel.acceptedDriverId is List) {
-              alreadyAccepted = (orderModel.acceptedDriverId as List)
-                  .cast<String>()
-                  .contains(uid);
-            } else if (orderModel.acceptedDriverId is String) {
-              alreadyAccepted = orderModel.acceptedDriverId == uid;
-            }
-          }
-
-          if (!alreadyAccepted) {
-            freightServiceOrder.add(orderModel);
-            kept++;
-            print("   ✅ Order ${doc.id} added to freight list");
-          } else {
-            print("   ⏭️ Order ${doc.id} already accepted by driver");
-          }
-        } catch (e) {
-          print("   ❌ Error parsing order document ${doc.id}: $e");
-        }
-      }
-
-      print("🔍 [FREIGHT] Final result: $kept freight orders displayed");
-
-      if (kept == 0) {
-        print("⚠️ [FREIGHT] No freight orders found. Check:");
+      // Start Listening
+      _freightSubscription = query.snapshots().listen((querySnapshot) {
         print(
-            "   1. Are there freight orders with intercityServiceId = 'Kn2VEnPI3ikF58uK8YqY'?");
-        print("   2. Are they in 'ridePlaced' status?");
-        print("   3. Do they match the search criteria?");
-        print("   4. Are they in the driver's zones?");
-      }
+            "🔍 [FREIGHT] Stream update: ${querySnapshot.docs.length} docs found.");
+
+        final uid = FireStoreUtils.getCurrentUid();
+        int kept = 0;
+        List<InterCityOrderModel> tempOrders = [];
+
+        for (var doc in querySnapshot.docs) {
+          try {
+            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+            // Zone filtering (client side if needed, or if query didn't handle it)
+            final orderZoneId = data['zoneId'];
+            if (driverModel.value.zoneIds != null &&
+                driverModel.value.zoneIds!.isNotEmpty) {
+              if (orderZoneId == null ||
+                  !driverModel.value.zoneIds!.contains(orderZoneId)) {
+                continue;
+              }
+            }
+
+            // Client-side Source match
+            bool sourceOk = true;
+            if (srcText.isNotEmpty) {
+              sourceOk = eqOrContains(
+                      data['sourceLocationName'] as String?, srcText) ||
+                  eqOrContains(data['sourceName_norm'] as String?, srcText);
+            }
+
+            // Client-side Destination match
+            bool destOk = true;
+            if (dstText.isNotEmpty) {
+              destOk = eqOrContains(
+                      data['destinationLocationName'] as String?, dstText) ||
+                  eqOrContains(
+                      data['destinationName_norm'] as String?, dstText);
+            }
+
+            if (!(sourceOk && destOk)) {
+              continue;
+            }
+
+            InterCityOrderModel orderModel = InterCityOrderModel.fromJson(data);
+
+            // Check if already accepted
+            bool alreadyAccepted = false;
+            if (orderModel.acceptedDriverId != null &&
+                orderModel.acceptedDriverId!.isNotEmpty) {
+              if (orderModel.acceptedDriverId is List) {
+                alreadyAccepted = (orderModel.acceptedDriverId as List)
+                    .cast<String>()
+                    .contains(uid);
+              } else if (orderModel.acceptedDriverId is String) {
+                alreadyAccepted = orderModel.acceptedDriverId == uid;
+              }
+            }
+
+            if (!alreadyAccepted) {
+              tempOrders.add(orderModel);
+              kept++;
+            }
+          } catch (e) {
+            print("   ❌ Error parsing order document ${doc.id}: $e");
+          }
+        }
+
+        freightServiceOrder.assignAll(tempOrders);
+        isSearchLoading.value = false;
+        print("🔍 [FREIGHT] Final result: $kept freight orders displayed");
+      }, onError: (e) {
+        print("❌ [FREIGHT] Stream error: $e");
+        isSearchLoading.value = false;
+      });
     } catch (e) {
-      print("❌ [FREIGHT] Error searching freight orders: $e");
-    } finally {
+      print("❌ [FREIGHT] Error setting up stream: $e");
       isSearchLoading.value = false;
     }
   }
@@ -299,6 +299,7 @@ class FreightController extends GetxController {
   @override
   void onClose() {
     _driverSubscription?.cancel();
+    _freightSubscription?.cancel();
     _activeRideSubscription?.cancel();
     _locationSubscription?.cancel();
     sourceCityController.value.dispose();

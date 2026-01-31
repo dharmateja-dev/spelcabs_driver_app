@@ -762,7 +762,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                     .driverModel.value.walletAmount
                                     .toString()) >=
                                 double.parse(
-                                    Constant.minimumAmountToWithdrawal)) {
+                                    Constant.minimumDepositToRideAccept)) {
                               ShowToastDialog.showLoader("Please wait".tr);
                               List<dynamic> newAcceptedDriverId = [];
                               if (orderModel.acceptedDriverId != null) {
