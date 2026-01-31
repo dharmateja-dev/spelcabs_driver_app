@@ -234,7 +234,9 @@ class SignupScreen extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
+                                    color: themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),

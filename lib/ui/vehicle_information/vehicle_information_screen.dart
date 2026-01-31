@@ -90,10 +90,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                                               .selectedServiceId
                                                               .value ==
                                                           serviceModel.id
-                                                      ? themeChange.getThem()
-                                                          ? AppColors
-                                                              .darkModePrimary
-                                                          : AppColors.primary
+                                                      ? AppColors.primary
                                                       : themeChange.getThem()
                                                           ? AppColors
                                                               .darkService
@@ -163,12 +160,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                                                           .value! ==
                                                                       serviceModel
                                                                           .id
-                                                                  ? themeChange
-                                                                          .getThem()
-                                                                      ? Colors
-                                                                          .black
-                                                                      : Colors
-                                                                          .white
+                                                                  ? Colors.white
                                                                   : themeChange
                                                                           .getThem()
                                                                       ? Colors
@@ -685,9 +677,12 @@ class VehicleInformationScreen extends StatelessWidget {
                                 ListBody(
                                   children: controller.driverRulesList
                                       .map((item) => CheckboxListTile(
-                                            checkColor: themeChange.getThem()
+                                            activeColor: themeChange.getThem()
                                                 ? AppColors.darkModePrimary
                                                 : AppColors.primary,
+                                            checkColor: themeChange.getThem()
+                                                ? Colors.black
+                                                : Colors.white,
                                             value: controller
                                                         .selectedDriverRulesList
                                                         .indexWhere((element) =>

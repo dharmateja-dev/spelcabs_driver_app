@@ -106,7 +106,7 @@ class WalletScreen extends StatelessWidget {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(25),
                                   topRight: Radius.circular(25))),
@@ -389,11 +389,68 @@ class WalletScreen extends StatelessWidget {
                                       fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 5),
-                                TextFieldThem.buildTextFiled(context,
-                                    hintText: 'Enter Amount'.tr,
+                                TextFormField(
                                     controller:
                                         controller.amountController.value,
-                                    keyBoardType: TextInputType.number),
+                                    textAlign: TextAlign.start,
+                                    keyboardType: TextInputType.number,
+                                    style: GoogleFonts.poppins(
+                                        color: themeChange.getThem()
+                                            ? Colors.white
+                                            : Colors.black),
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: themeChange.getThem()
+                                            ? AppColors.darkTextField
+                                            : AppColors.textField,
+                                        contentPadding: const EdgeInsets.only(
+                                            left: 10, right: 10),
+                                        disabledBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          borderSide: BorderSide(
+                                              color: themeChange.getThem()
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              width: 1),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          borderSide: BorderSide(
+                                              color: themeChange.getThem()
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              width: 1),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          borderSide: BorderSide(
+                                              color: themeChange.getThem()
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              width: 1),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          borderSide: BorderSide(
+                                              color: themeChange.getThem()
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              width: 1),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          borderSide: BorderSide(
+                                              color: themeChange.getThem()
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              width: 1),
+                                        ),
+                                        hintText: 'Enter Amount'.tr)),
                                 const SizedBox(height: 10),
                                 Text(
                                   "Select Payment Option".tr,
@@ -538,7 +595,7 @@ class WalletScreen extends StatelessWidget {
                                     paymentName: controller
                                         .paymentModel.value.orangePay!.name
                                         .toString(),
-                                    imagePath: 'assets/images/orangeMoney.png',
+                                    imagePath: 'assets/images/orangepay.png',
                                   ),
 
                                 // PhonePe
@@ -561,8 +618,11 @@ class WalletScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ButtonThem.buildButton(context, title: "Topup".tr,
-                          onPress: () {
+                      const SizedBox(height: 10),
+                      ButtonThem.buildButton(context,
+                          title: "Topup".tr,
+                          btnColor: AppColors.primary,
+                          txtColor: Colors.white, onPress: () {
                         if (controller.amountController.value.text.isEmpty) {
                           ShowToastDialog.showToast("Please enter amount".tr);
                           return;
@@ -885,10 +945,12 @@ class WalletScreen extends StatelessWidget {
               border: Border.all(
                   color: controller.selectedPaymentMethod.value == paymentName
                       ? themeChange.getThem()
-                          ? AppColors.darkModePrimary
-                          : AppColors.primary
-                      : AppColors.textFieldBorder,
-                  width: 1),
+                          ? Colors.white
+                          : Colors.black
+                      : Colors.grey.withOpacity(0.3),
+                  width: controller.selectedPaymentMethod.value == paymentName
+                      ? 2
+                      : 1),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -897,9 +959,18 @@ class WalletScreen extends StatelessWidget {
                   Container(
                     height: 40,
                     width: 80,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                         color: AppColors.lightGray,
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                        border: Border.all(
+                            color: controller.selectedPaymentMethod.value ==
+                                    paymentName
+                                ? themeChange.getThem()
+                                    ? Colors.white
+                                    : Colors.black
+                                : Colors.transparent,
+                            width: 1),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5))),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Image.asset(imagePath),
@@ -909,15 +980,18 @@ class WalletScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       paymentName,
-                      style: GoogleFonts.poppins(),
+                      style: GoogleFonts.poppins(
+                          fontWeight: controller.selectedPaymentMethod.value ==
+                                  paymentName
+                              ? FontWeight.w600
+                              : FontWeight.w400),
                     ),
                   ),
                   Radio(
                     value: paymentName,
                     groupValue: controller.selectedPaymentMethod.value,
-                    activeColor: themeChange.getThem()
-                        ? AppColors.darkModePrimary
-                        : AppColors.primary,
+                    activeColor:
+                        themeChange.getThem() ? Colors.white : Colors.black,
                     onChanged: (value) {
                       controller.selectedPaymentMethod.value = paymentName;
                     },

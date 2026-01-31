@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeIntercityScreen extends StatelessWidget {
-  const HomeIntercityScreen({Key? key}) : super(key: key);
+  const HomeIntercityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class HomeIntercityScreen extends StatelessWidget {
                           height: Responsive.height(100, context),
                           width: Responsive.width(100, context),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(25),
                                   topRight: Radius.circular(25))),
@@ -69,7 +69,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                 width: 18,
                                 color: controller.selectedIndex.value == 0
                                     ? AppColors.darkModePrimary
-                                    : Colors.white),
+                                    : Colors.white.withOpacity(0.5)),
                           ),
                           label: 'New'.tr,
                         ),
@@ -80,7 +80,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                 width: 18,
                                 color: controller.selectedIndex.value == 1
                                     ? AppColors.darkModePrimary
-                                    : Colors.white),
+                                    : Colors.white.withOpacity(0.5)),
                           ),
                           label: 'Accepted'.tr,
                         ),
@@ -91,7 +91,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                 width: 18,
                                 color: controller.selectedIndex.value == 2
                                     ? AppColors.darkModePrimary
-                                    : Colors.white),
+                                    : Colors.white.withOpacity(0.5)),
                           ),
                           label: 'Active'.tr,
                         ),
@@ -102,7 +102,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                 width: 18,
                                 color: controller.selectedIndex.value == 3
                                     ? AppColors.darkModePrimary
-                                    : Colors.white),
+                                    : Colors.white.withOpacity(0.5)),
                           ),
                           label: 'Completed'.tr,
                         ),
@@ -111,7 +111,7 @@ class HomeIntercityScreen extends StatelessWidget {
                       type: BottomNavigationBarType.fixed,
                       currentIndex: controller.selectedIndex.value,
                       selectedItemColor: AppColors.darkModePrimary,
-                      unselectedItemColor: Colors.white,
+                      unselectedItemColor: Colors.white.withOpacity(0.5),
                       selectedFontSize: 12,
                       unselectedFontSize: 12,
                       elevation: 5,

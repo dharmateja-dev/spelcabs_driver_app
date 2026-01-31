@@ -120,6 +120,9 @@ flutter:
   
   assets:
     - assets/images/
+    - assets/images/midtrans.png
+    - assets/images/xendit.png
+    - assets/images/orangepay.png
     - assets/icons/
     - assets/audio/
     - assets/
