@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OnBoardingScreen extends StatelessWidget {
-  const OnBoardingScreen({Key? key}) : super(key: key);
+  const OnBoardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class OnBoardingScreen extends StatelessWidget {
       init: OnBoardingController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.background,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           body: controller.isLoading.value
               ? Constant.loader(context)
               : Stack(
@@ -38,28 +38,41 @@ class OnBoardingScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            controller.pageController.jumpToPage(
-                              controller.onBoardingList.length - 1,
-                            );
-                          },
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(top: 30.0, right: 20.0),
-                            child: Align(
-                              alignment: Alignment.topRight,
-                              child: Text(
-                                'skip'.tr,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  letterSpacing: 1.5,
-                                  fontWeight: FontWeight.w600,
+                        /// SKIP BUTTON (Top Right)
+                        Obx(() {
+                          final isLastPage =
+                              controller.selectedPageIndex.value ==
+                                  controller.onBoardingList.length - 1;
+                          return Visibility(
+                            visible: !isLastPage,
+                            child: SafeArea(
+                              child: Align(
+                                alignment: Alignment.topRight,
+                                child: InkWell(
+                                  onTap: () {
+                                    controller.pageController.jumpToPage(
+                                      controller.onBoardingList.length - 1,
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 20.0, right: 24.0),
+                                    child: Text(
+                                      'skip'.tr,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        letterSpacing: 1.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors
+                                            .white, // Ensure visibility on dark bg
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
 
                         Expanded(
                           flex: 3,

@@ -2022,13 +2022,57 @@ class FireStoreUtils {
   }
 
   static Future<bool?> deleteUser() async {
-    AppLogger.debug("deleteUser called for current UID: ${getCurrentUid()}",
+    String uid = getCurrentUid();
+    AppLogger.debug("deleteUser called for current UID: $uid",
         tag: "FireStoreUtils");
     bool? isDelete;
     try {
+      // 1. Delete Driver Document
+      await fireStore
+          .collection(CollectionName.driverDocument)
+          .doc(uid)
+          .delete();
+
+      // 2. Delete Wallet Transactions
+      QuerySnapshot walletSnapshot = await fireStore
+          .collection(CollectionName.walletTransaction)
+          .where('userId', isEqualTo: uid)
+          .get();
+      for (DocumentSnapshot doc in walletSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // 3. Delete Withdrawal History
+      QuerySnapshot withdrawalSnapshot = await fireStore
+          .collection(CollectionName.withdrawalHistory)
+          .where('userId', isEqualTo: uid)
+          .get();
+      for (DocumentSnapshot doc in withdrawalSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // 4. Disassociate Orders (City)
+      QuerySnapshot ordersSnapshot = await fireStore
+          .collection(CollectionName.orders)
+          .where('driverId', isEqualTo: uid)
+          .get();
+      for (DocumentSnapshot doc in ordersSnapshot.docs) {
+        // Set driverId to null to preserve order for customer but remove driver link
+        await doc.reference.update({'driverId': null});
+      }
+
+      // 5. Disassociate Intercity Orders
+      QuerySnapshot intercitySnapshot = await fireStore
+          .collection(CollectionName.ordersIntercity)
+          .where('driverId', isEqualTo: uid)
+          .get();
+      for (DocumentSnapshot doc in intercitySnapshot.docs) {
+        await doc.reference.update({'driverId': null});
+      }
+
       await fireStore
           .collection(CollectionName.driverUsers)
-          .doc(FireStoreUtils.getCurrentUid())
+          .doc(uid) // Use cached UID
           .delete();
       AppLogger.info(
           "Driver user document deleted from Firestore for current UID.",

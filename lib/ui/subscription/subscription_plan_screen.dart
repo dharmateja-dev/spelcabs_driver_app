@@ -486,9 +486,11 @@ class SubscriptionPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Define active colors that work well in both light and dark modes
-    const activeBorderColor = Colors.green;
-    final activeBackgroundColor =
-        isDark ? Colors.green.withOpacity(0.1) : Colors.green.withOpacity(0.05);
+    // Using AppColors.primary to ensure consistency with the app's blue theme
+    const activeBorderColor = AppColors.primary;
+    final activeBackgroundColor = isDark
+        ? AppColors.primary.withOpacity(0.1)
+        : AppColors.primary.withOpacity(0.05);
 
     return InkWell(
       onTap: onSelect,
@@ -624,10 +626,6 @@ class SubscriptionPlanCard extends StatelessWidget {
     if (isActive) {
       return "Current Plan".tr;
     }
-    // If user has active subscription and this is Commission Model, show "Switch"
-    if (hasActiveSubscription && isCommissionModel) {
-      return "Switch".tr;
-    }
     // For free plans (including Commission Model when no active subscription)
     if ((plan.priceDouble ?? 0) == 0) {
       return "Activate".tr;
@@ -639,10 +637,6 @@ class SubscriptionPlanCard extends StatelessWidget {
   Color _getButtonColor() {
     if (isActive) {
       return Colors.grey.shade400;
-    }
-    // Orange color for switching to Commission Model
-    if (hasActiveSubscription && isCommissionModel) {
-      return Colors.orange;
     }
     return AppColors.primary;
   }

@@ -250,7 +250,7 @@ class DashBoardScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
                 color: i == controller.selectedDrawerIndex.value
-                    ? Theme.of(context).colorScheme.primary
+                    ? AppColors.primary
                     : Colors.transparent,
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             padding: const EdgeInsets.all(12),
@@ -260,9 +260,7 @@ class DashBoardScreen extends StatelessWidget {
                   d.icon,
                   width: 20,
                   color: i == controller.selectedDrawerIndex.value
-                      ? themeChange.getThem()
-                          ? Colors.black
-                          : Colors.white
+                      ? Colors.white
                       : themeChange.getThem()
                           ? Colors.white
                           : AppColors.drawerIcon,
@@ -274,9 +272,7 @@ class DashBoardScreen extends StatelessWidget {
                   d.title,
                   style: GoogleFonts.poppins(
                       color: i == controller.selectedDrawerIndex.value
-                          ? themeChange.getThem()
-                              ? Colors.black
-                              : Colors.white
+                          ? Colors.white
                           : themeChange.getThem()
                               ? Colors.white
                               : Colors.black,

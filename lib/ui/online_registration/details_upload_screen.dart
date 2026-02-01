@@ -16,7 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class DetailsUploadScreen extends StatelessWidget {
-  const DetailsUploadScreen({Key? key}) : super(key: key);
+  const DetailsUploadScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class DetailsUploadScreen extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25))),
@@ -63,12 +63,21 @@ class DetailsUploadScreen extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       top: 20, left: 20, right: 20),
-                                  child: TextFieldThem.buildTextFiled(context,
-                                      // Fixed: Use proper title extraction
-                                      hintText:
-                                          "${Constant.localizationTitle(controller.documentModel.value.title) ?? 'Document'} Number",
-                                      controller: controller
-                                          .documentNumberController.value),
+                                  child: Obx(() =>
+                                      TextFieldThem.buildValidatedTextField(
+                                        context,
+                                        hintText:
+                                            "${Constant.localizationTitle(controller.documentModel.value.title) ?? 'Document'} Number",
+                                        controller: controller
+                                            .documentNumberController.value,
+                                        errorText: controller
+                                                .documentNumberError
+                                                .value
+                                                .isNotEmpty
+                                            ? controller
+                                                .documentNumberError.value
+                                            : null,
+                                      )),
                                 ),
                                 Visibility(
                                   visible:
@@ -98,8 +107,8 @@ class DetailsUploadScreen extends StatelessWidget {
                                               controller: controller
                                                   .expireAtController.value,
                                               enable: false,
-                                              suffixIcon:
-                                                  Icon(Icons.calendar_month)),
+                                              suffixIcon: const Icon(
+                                                  Icons.calendar_month)),
                                     ),
                                   ),
                                 ),
@@ -139,7 +148,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                                         controller, "front");
                                                   }
                                                 },
-                                                child: Container(
+                                                child: SizedBox(
                                                   height: Responsive.height(
                                                       20, context),
                                                   width: double.infinity,
@@ -195,7 +204,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                                   ],
                                                   color:
                                                       AppColors.textFieldBorder,
-                                                  child: Container(
+                                                  child: SizedBox(
                                                       height: Responsive.height(
                                                           20, context),
                                                       width: double.infinity,
@@ -276,7 +285,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                                         controller, "back");
                                                   }
                                                 },
-                                                child: Container(
+                                                child: SizedBox(
                                                   height: Responsive.height(
                                                       20, context),
                                                   width: double.infinity,
@@ -331,7 +340,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                                   ],
                                                   color:
                                                       AppColors.textFieldBorder,
-                                                  child: Container(
+                                                  child: SizedBox(
                                                       height: Responsive.height(
                                                           20, context),
                                                       width: double.infinity,
@@ -395,63 +404,12 @@ class DetailsUploadScreen extends StatelessWidget {
                                       context,
                                       title: "Done".tr,
                                       onPress: () {
-                                        final documentNumber = controller
-                                            .documentNumberController.value.text
-                                            .trim();
-
-                                        // Validate document number is not empty
-                                        if (documentNumber.isEmpty) {
-                                          ShowToastDialog.showToast(
-                                              "Please enter document number"
-                                                  .tr);
+                                        // 1. Validate Document Number (Includes DL logic)
+                                        if (!controller.validateDocument()) {
                                           return;
                                         }
 
-                                        // Get document type from ID
-                                        final docId =
-                                            controller.documentModel.value.id ??
-                                                "";
-
-                                        // Validate document number format based on document type
-                                        if (docId
-                                            .toLowerCase()
-                                            .contains("pan")) {
-                                          // PAN: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)
-                                          if (!RegExp(
-                                                  r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$')
-                                              .hasMatch(documentNumber
-                                                  .toUpperCase())) {
-                                            ShowToastDialog.showToast(
-                                                "Please enter valid PAN number (Format: ABCDE1234F)"
-                                                    .tr);
-                                            return;
-                                          }
-                                        } else if (docId
-                                            .toLowerCase()
-                                            .contains("aadhaar")) {
-                                          // Aadhaar: 12 digits
-                                          if (!RegExp(r'^\d{12}$')
-                                              .hasMatch(documentNumber)) {
-                                            ShowToastDialog.showToast(
-                                                "Please enter valid Aadhaar number (12 digits)"
-                                                    .tr);
-                                            return;
-                                          }
-                                        } else if (docId
-                                            .toLowerCase()
-                                            .contains("dl")) {
-                                          // DL: Minimum 6 alphanumeric characters
-                                          if (!RegExp(r'^[A-Z0-9]{6,}$')
-                                              .hasMatch(documentNumber
-                                                  .toUpperCase())) {
-                                            ShowToastDialog.showToast(
-                                                "Please enter valid Driving License number (minimum 6 characters)"
-                                                    .tr);
-                                            return;
-                                          }
-                                        }
-
-                                        // Validate images
+                                        // 2. Validate Images
                                         if (controller.documentModel.value
                                                     .frontSide ==
                                                 true &&
@@ -531,7 +489,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                   size: 32,
                                 )),
                             Padding(
-                              padding: EdgeInsets.only(top: 3),
+                              padding: const EdgeInsets.only(top: 3),
                               child: Text("Camera".tr),
                             ),
                           ],
@@ -551,7 +509,7 @@ class DetailsUploadScreen extends StatelessWidget {
                                   size: 32,
                                 )),
                             Padding(
-                              padding: EdgeInsets.only(top: 3),
+                              padding: const EdgeInsets.only(top: 3),
                               child: Text("Gallery".tr),
                             ),
                           ],

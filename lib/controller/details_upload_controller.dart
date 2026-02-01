@@ -15,14 +15,67 @@ import 'package:intl/intl.dart';
 class DetailsUploadController extends GetxController {
   Rx<DocumentModel> documentModel = DocumentModel().obs;
 
-  Rx<TextEditingController> documentNumberController = TextEditingController().obs;
+  Rx<TextEditingController> documentNumberController =
+      TextEditingController().obs;
   Rx<TextEditingController> expireAtController = TextEditingController().obs;
   Rx<DateTime?> selectedDate = DateTime.now().obs;
 
   RxString frontImage = "".obs;
   RxString backImage = "".obs;
 
+  RxString documentNumberError = "".obs;
+
   RxBool isLoading = true.obs;
+
+  bool validateDocument() {
+    String docNumber = documentNumberController.value.text.trim();
+    String docType = documentModel.value.id?.toLowerCase() ?? "";
+
+    if (docNumber.isEmpty) {
+      documentNumberError.value = "Please enter document number";
+      return false;
+    }
+
+    if (docType.contains("driving") ||
+        docType.contains("licence") ||
+        docType.contains("dl")) {
+      // Indian Driving License Regex
+      // Matches: SS-RR-YYYY-NNNNNNN or SSRRYYYYNNNNNNN
+      // SS: State Code (2 chars)
+      // RR: RTO Code (2 digits)
+      // YYYY: Year (19xx or 20xx)
+      // NNNNNNN: 7 digits
+      // Total 15 chars (if no separators) or 16 (with space/dash)
+      // We'll strip separators for validation
+      String cleanNumber = docNumber.replaceAll(RegExp(r'[\s-]'), '');
+
+      // Strict regex for 15-character Indian DL
+      // ^[A-Z]{2} : State Code
+      // [0-9]{2} : RTO Code
+      // (19|20)[0-9]{2} : Year 1900-2099
+      // [0-9]{7} : 7 digit unique number
+      RegExp dlRegex = RegExp(r"^[A-Z]{2}[0-9]{2}(19|20)[0-9]{2}[0-9]{7}$");
+
+      if (!dlRegex.hasMatch(cleanNumber.toUpperCase())) {
+        documentNumberError.value = "Invalid format. Use SS-RR-YYYY-NNNNNNN";
+        return false;
+      }
+    } else if (docType.contains("pan")) {
+      if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$')
+          .hasMatch(docNumber.toUpperCase())) {
+        documentNumberError.value = "Invalid PAN format (ABCDE1234F)";
+        return false;
+      }
+    } else if (docType.contains("aadhaar")) {
+      if (!RegExp(r'^\d{12}$').hasMatch(docNumber)) {
+        documentNumberError.value = "Invalid Aadhaar number (12 digits)";
+        return false;
+      }
+    }
+
+    documentNumberError.value = "";
+    return true;
+  }
 
   @override
   void onInit() {
@@ -46,16 +99,19 @@ class DetailsUploadController extends GetxController {
     await FireStoreUtils.getDocumentOfDriver().then((value) {
       isLoading.value = false;
       if (value != null) {
-        var contain = value.documents!.where((element) => element.documentId == documentModel.value.id);
+        var contain = value.documents!
+            .where((element) => element.documentId == documentModel.value.id);
         if (contain.isNotEmpty) {
-          documents.value = value.documents!.firstWhere((itemToCheck) => itemToCheck.documentId == documentModel.value.id);
+          documents.value = value.documents!.firstWhere((itemToCheck) =>
+              itemToCheck.documentId == documentModel.value.id);
 
           documentNumberController.value.text = documents.value.documentNumber!;
           frontImage.value = documents.value.frontImage!;
           backImage.value = documents.value.backImage!;
           if (documents.value.expireAt != null) {
             selectedDate.value = documents.value.expireAt!.toDate();
-            expireAtController.value.text = DateFormat("dd-MM-yyyy").format(selectedDate.value!);
+            expireAtController.value.text =
+                DateFormat("dd-MM-yyyy").format(selectedDate.value!);
           }
         }
       }
@@ -80,17 +136,24 @@ class DetailsUploadController extends GetxController {
     }
   }
 
-
   uploadDocument() async {
     String frontImageFileName = File(frontImage.value).path.split('/').last;
     String backImageFileName = File(backImage.value).path.split('/').last;
 
-    if(frontImage.value.isNotEmpty && Constant().hasValidUrl(frontImage.value) == false){
-      frontImage.value = await Constant.uploadUserImageToFireStorage(File(frontImage.value), "driverDocument/${FireStoreUtils.getCurrentUid()}", frontImageFileName);
+    if (frontImage.value.isNotEmpty &&
+        Constant().hasValidUrl(frontImage.value) == false) {
+      frontImage.value = await Constant.uploadUserImageToFireStorage(
+          File(frontImage.value),
+          "driverDocument/${FireStoreUtils.getCurrentUid()}",
+          frontImageFileName);
     }
 
-    if(backImage.value.isNotEmpty && Constant().hasValidUrl(backImage.value) == false){
-      backImage.value = await Constant.uploadUserImageToFireStorage(File(backImage.value), "driverDocument/${FireStoreUtils.getCurrentUid()}", backImageFileName);
+    if (backImage.value.isNotEmpty &&
+        Constant().hasValidUrl(backImage.value) == false) {
+      backImage.value = await Constant.uploadUserImageToFireStorage(
+          File(backImage.value),
+          "driverDocument/${FireStoreUtils.getCurrentUid()}",
+          backImageFileName);
     }
     documents.value.frontImage = frontImage.value;
     documents.value.documentId = documentModel.value.id;

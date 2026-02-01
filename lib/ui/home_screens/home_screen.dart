@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:badges/badges.dart' as badges;
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,11 @@ class HomeScreen extends StatelessWidget {
                 ? Constant.loader(context)
                 : Column(
                     children: [
-                      (double.tryParse(controller.driverModel.value.walletAmount.toString() ?? '0') ?? 0) >= double.parse(Constant.minimumDepositToRideAccept)
+                      (double.tryParse(controller.driverModel.value.walletAmount
+                                          .toString() ??
+                                      '0') ??
+                                  0) >=
+                              double.parse(Constant.minimumDepositToRideAccept)
                           ? SizedBox(
                               height: Responsive.width(8, context),
                               width: Responsive.width(100, context),
@@ -34,11 +38,13 @@ class HomeScreen extends StatelessWidget {
                               height: Responsive.width(18, context),
                               width: Responsive.width(100, context),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
                                 child: Text(
-                                    "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
+                                    "You have to spend minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
                                         .tr,
-                                    style: GoogleFonts.poppins(color: Colors.white)),
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.white)),
                               ),
                             ),
                       Expanded(
@@ -46,10 +52,14 @@ class HomeScreen extends StatelessWidget {
                           height: Responsive.height(100, context),
                           width: Responsive.width(100, context),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(25),
+                                  topRight: Radius.circular(25))),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: controller.widgetOptions.elementAt(controller.selectedIndex.value),
+                            child: controller.widgetOptions
+                                .elementAt(controller.selectedIndex.value),
                           ),
                         ),
                       ),
@@ -60,23 +70,36 @@ class HomeScreen extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_new.png", width: 18, color: controller.selectedIndex.value == 0 ? AppColors.darkBackground : AppColors.subTitleColor),
+                      child: Image.asset("assets/icons/ic_new.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 0
+                              ? AppColors.darkBackground
+                              : AppColors.subTitleColor),
                     ),
                     label: 'New'.tr,
                   ),
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_accepted.png", width: 18, color: controller.selectedIndex.value == 1 ? AppColors.darkBackground : AppColors.subTitleColor),
+                      child: Image.asset("assets/icons/ic_accepted.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 1
+                              ? AppColors.darkBackground
+                              : AppColors.subTitleColor),
                     ),
                     label: 'Accepted'.tr,
                   ),
                   BottomNavigationBarItem(
                     icon: badges.Badge(
-                      badgeContent: Text(controller.isActiveValue.value.toString()),
+                      badgeContent:
+                          Text(controller.isActiveValue.value.toString()),
                       child: Padding(
                         padding: const EdgeInsets.all(6.0),
-                        child: Image.asset("assets/icons/ic_active.png", width: 18, color: controller.selectedIndex.value == 2 ? AppColors.darkBackground : AppColors.subTitleColor),
+                        child: Image.asset("assets/icons/ic_active.png",
+                            width: 18,
+                            color: controller.selectedIndex.value == 2
+                                ? AppColors.darkBackground
+                                : AppColors.subTitleColor),
                       ),
                     ),
                     label: 'Active'.tr,
@@ -84,7 +107,11 @@ class HomeScreen extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_completed.png", width: 18, color: controller.selectedIndex.value == 3 ? AppColors.darkBackground : AppColors.subTitleColor),
+                      child: Image.asset("assets/icons/ic_completed.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 3
+                              ? AppColors.darkBackground
+                              : AppColors.subTitleColor),
                     ),
                     label: 'Completed'.tr,
                   ),

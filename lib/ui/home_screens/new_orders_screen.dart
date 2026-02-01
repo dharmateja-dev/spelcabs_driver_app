@@ -27,8 +27,22 @@ class NewOrderScreen extends StatelessWidget {
         builder: (controller) {
           return controller.isLoading.value
               ? Constant.loader(context)
-              : Obx(
-                  () => (controller.isLocationInitialized.value &&
+              : Obx(() {
+                  if (controller.driverModel.value.isOnline == false) {
+                    return Center(
+                      child: Text(
+                        "You are Now offline so you can't get nearest order."
+                            .tr,
+                        style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: themeChange.getThem()
+                                ? Colors.white
+                                : Colors.black),
+                      ),
+                    );
+                  }
+                  return (controller.isLocationInitialized.value &&
                           controller.searchLocation.value != null)
                       ? StreamBuilder<List<OrderModel>>(
                           stream: FireStoreUtils().getOrders(
@@ -198,8 +212,8 @@ class NewOrderScreen extends StatelessWidget {
                                       .tr),
                             ],
                           ),
-                        ),
-                );
+                        );
+                });
         });
   }
 }
