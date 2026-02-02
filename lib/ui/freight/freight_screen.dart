@@ -24,9 +24,12 @@ class FreightScreen extends StatelessWidget {
                 ? Constant.loader(context)
                 : Column(
                     children: [
-                      double.parse(controller.driverModel.value.walletAmount
-                                  .toString()) >=
-                              double.parse(Constant.minimumDepositToRideAccept)
+                      (double.tryParse(controller.driverModel.value.walletAmount
+                                      .toString()) ??
+                                  0.0) >=
+                              (double.tryParse(
+                                      Constant.minimumDepositToRideAccept) ??
+                                  0.0)
                           ? SizedBox(
                               height: Responsive.width(8, context),
                               width: Responsive.width(100, context),
@@ -49,7 +52,7 @@ class FreightScreen extends StatelessWidget {
                           height: Responsive.height(100, context),
                           width: Responsive.width(100, context),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(25),
                                   topRight: Radius.circular(25))),

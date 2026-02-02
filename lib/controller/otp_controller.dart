@@ -6,7 +6,7 @@ import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/services/auth_apis.dart';
 
 class OtpController extends GetxController {
-  Rx<TextEditingController> otpController = TextEditingController().obs;
+  TextEditingController otpController = TextEditingController();
 
   RxString countryCode = "".obs;
   RxString phoneNumber = "".obs;
@@ -55,8 +55,7 @@ class OtpController extends GetxController {
     AppLogger.info("OtpController: Initiating OTP verification.",
         tag: "OtpController");
 
-    if (otpController.value.text.isEmpty ||
-        otpController.value.text.length < 6) {
+    if (otpController.text.isEmpty || otpController.text.length < 6) {
       ShowToastDialog.showToast("Please Enter Valid OTP".tr);
       return;
     }
@@ -67,7 +66,7 @@ class OtpController extends GetxController {
       // Create Firebase Phone Auth credential
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId.value,
-        smsCode: otpController.value.text,
+        smsCode: otpController.text,
       );
 
       // Sign in with Firebase credential
@@ -137,7 +136,7 @@ class OtpController extends GetxController {
 
   @override
   void onClose() {
-    otpController.value.dispose();
+    otpController.dispose();
     super.onClose();
   }
 }

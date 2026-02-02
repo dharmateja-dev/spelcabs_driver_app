@@ -1,12 +1,19 @@
+import 'package:driver/themes/app_colors.dart';
+import 'package:driver/utils/DarkThemeProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class AccountDeletionPolicyScreen extends StatelessWidget {
-  const AccountDeletionPolicyScreen({Key? key}) : super(key: key);
+  const AccountDeletionPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final isDark = themeChange.getThem();
+
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -17,6 +24,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 16),
@@ -25,12 +33,13 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 height: 1.6,
-                color: Colors.grey[700],
+                color: isDark ? Colors.white70 : Colors.grey[700],
               ),
             ),
             const SizedBox(height: 24),
             _buildOptionCard(
               context,
+              themeChange,
               icon: Icons.phone_android,
               iconColor: Colors.blue,
               title: 'Option 1: Delete Your Account via the Spelcabs App',
@@ -46,6 +55,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _buildOptionCard(
               context,
+              themeChange,
               icon: Icons.email,
               iconColor: Colors.orange,
               title: 'Option 2: Request Account Deletion via Email',
@@ -62,16 +72,21 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: isDark
+                    ? Colors.red.withOpacity(0.15)
+                    : Colors.red[50], // Darker background for dark mode
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red[200]!),
+                border: Border.all(
+                    color: isDark
+                        ? Colors.red.withOpacity(0.5)
+                        : Colors.red[200]!),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
                     Icons.warning_amber_rounded,
-                    color: Colors.red[700],
+                    color: isDark ? Colors.red[300] : Colors.red[700],
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -84,7 +99,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.red[900],
+                            color: isDark ? Colors.red[200] : Colors.red[900],
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -92,7 +107,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                           'Account deletion is permanent and irreversible. All your data will be lost forever.',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color: Colors.red[800],
+                            color: isDark ? Colors.red[100] : Colors.red[800],
                             height: 1.5,
                           ),
                         ),
@@ -110,7 +125,8 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
   }
 
   Widget _buildOptionCard(
-    BuildContext context, {
+    BuildContext context,
+    DarkThemeProvider themeChange, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -118,19 +134,23 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
     required List<String> steps,
     required String note,
   }) {
+    final isDark = themeChange.getThem();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.darkContainerBackground : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(
+            color: isDark ? AppColors.darkContainerBorder : Colors.grey[300]!),
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
+          if (!isDark) // Use shadow only in light mode mostly, or subtle in dark
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Column(
@@ -157,7 +177,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ),
@@ -169,7 +189,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
               subtitle,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: Colors.grey[700],
+                color: isDark ? Colors.white70 : Colors.grey[700],
                 height: 1.5,
               ),
             ),
@@ -206,28 +226,33 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         height: 1.5,
-                        color: Colors.grey[800],
+                        color: isDark ? Colors.white70 : Colors.grey[800],
                       ),
                     ),
                   ),
                 ],
               ),
             );
-          }).toList(),
+          }),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber[50],
+              color: isDark
+                  ? Colors.amber.withOpacity(0.1)
+                  : Colors.amber[50], // Dark mode amber
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber[200]!),
+              border: Border.all(
+                  color: isDark
+                      ? Colors.amber.withOpacity(0.5)
+                      : Colors.amber[200]!),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: Colors.amber[900],
+                  color: isDark ? Colors.amber[400] : Colors.amber[900],
                   size: 20,
                 ),
                 const SizedBox(width: 10),
@@ -236,7 +261,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                     note,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: Colors.amber[900],
+                      color: isDark ? Colors.amber[200] : Colors.amber[900],
                       height: 1.5,
                     ),
                   ),

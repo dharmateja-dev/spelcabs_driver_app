@@ -98,16 +98,26 @@ class SubscriptionController extends GetxController {
         plans.where((e) => e.isActive == true || e.isEnable == true).toList();
 
     // Sort plans to put the active plan (user's current subscription) at index 0
+    // Sort plans to put the active plan or Commission Model at index 0
     final activeSubscriptionPlanId = userModel.value.subscriptionPlanId;
-    if (activeSubscriptionPlanId != null &&
-        activeSubscriptionPlanId.isNotEmpty) {
-      filteredPlans.sort((a, b) {
-        // Active plan goes first
+
+    filteredPlans.sort((a, b) {
+      // 1. If there is an active paid subscription, put it on top
+      if (activeSubscriptionPlanId != null &&
+          activeSubscriptionPlanId.isNotEmpty) {
         if (a.id == activeSubscriptionPlanId) return -1;
         if (b.id == activeSubscriptionPlanId) return 1;
-        return 0; // Keep original order for other plans
-      });
-    }
+      }
+      // 2. If NO active subscription (Commission Model), put the Commission plan on top
+      else {
+        final bool isACommission = isCommissionModelPlan(a);
+        final bool isBCommission = isCommissionModelPlan(b);
+        if (isACommission && !isBCommission) return -1;
+        if (!isACommission && isBCommission) return 1;
+      }
+
+      return 0; // Keep original order for others
+    });
 
     // Clear and reassign to trigger reactive update
     subscriptionPlanList.clear();

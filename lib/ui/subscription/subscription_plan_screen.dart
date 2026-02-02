@@ -506,13 +506,13 @@ class SubscriptionPlanCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive
-                ? activeBorderColor
+                ? Colors.green.shade400
                 : (isSelected
                     ? AppColors.primary
                     : (isDark
                         ? AppColors.darkContainerBorder
                         : AppColors.containerBorder)),
-            width: isActive ? 2.0 : 1.4,
+            width: isActive ? 1.4 : 1.4,
           ),
           boxShadow: isActive
               ? [
@@ -531,26 +531,31 @@ class SubscriptionPlanCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  plan.name ?? '',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black,
+                Expanded(
+                  child: Text(
+                    plan.name ?? '',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (isActive)
                   Container(
+                    margin: const EdgeInsets.only(left: 8),
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: activeBorderColor,
+                      color: Colors.green.shade400,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      "Activated".tr,
+                      "Active".tr,
                       style: const TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -559,7 +564,7 @@ class SubscriptionPlanCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             /// DESCRIPTION
             Text(
@@ -570,30 +575,48 @@ class SubscriptionPlanCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
             /// PRICE
-            Text(
-              (plan.priceDouble ?? 0) == 0
-                  ? "Free".tr
-                  : Constant.amountShow(amount: plan.price ?? '0'),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.lightBlue,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  (plan.priceDouble ?? 0) == 0
+                      ? "Free".tr
+                      : Constant.amountShow(amount: plan.price ?? '0'),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.lightBlue,
+                  ),
+                ),
+                if ((plan.priceDouble ?? 0) > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      "/ ${_validityPeriodText()}",
+                      style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.subTitleColor,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  )
+              ],
             ),
 
-            const SizedBox(height: 4),
-
-            /// VALIDITY
-            Text(
-              _validityText(),
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.subTitleColor,
+            /// VALIDITY (Hidden if shown in price, but keeping for fallback or detail)
+            if ((plan.priceDouble ?? 0) == 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                _validityText(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.subTitleColor,
+                ),
               ),
-            ),
+            ],
 
             const SizedBox(height: 16),
 
@@ -624,7 +647,7 @@ class SubscriptionPlanCard extends StatelessWidget {
   /// 🔹 GET BUTTON TITLE
   String _getButtonTitle() {
     if (isActive) {
-      return "Current Plan".tr;
+      return "Activated".tr;
     }
     // For free plans (including Commission Model when no active subscription)
     if ((plan.priceDouble ?? 0) == 0) {
@@ -636,9 +659,19 @@ class SubscriptionPlanCard extends StatelessWidget {
   /// 🔹 GET BUTTON COLOR
   Color _getButtonColor() {
     if (isActive) {
-      return Colors.grey.shade400;
+      return Colors.green.shade400;
     }
     return AppColors.primary;
+  }
+
+  /// 🔹 VALIDITY TEXT FOR PRICE ROW
+  String _validityPeriodText() {
+    if (plan.expiryType == 'monthly') {
+      return "Month".tr;
+    } else if (plan.expiryType == 'yearly') {
+      return "Year".tr;
+    }
+    return "";
   }
 
   /// 🔹 VALIDITY TEXT

@@ -56,7 +56,7 @@ class OnBoardingScreen extends StatelessWidget {
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.only(
-                                        top: 20.0, right: 24.0),
+                                        top: 10.0, right: 24.0),
                                     child: Text(
                                       'skip'.tr,
                                       style: GoogleFonts.poppins(

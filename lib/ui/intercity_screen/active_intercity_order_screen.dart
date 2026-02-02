@@ -624,8 +624,13 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
                     .then((value) {
                   if (value == true) {
                     ShowToastDialog.closeLoader();
-                    ShowToastDialog.showToast(
-                        "Customer pickup successfully".tr);
+                    if (orderModel.intercityServiceId == "647f350983ba2") {
+                      ShowToastDialog.showToast(
+                          "Parcel picked up successfully".tr);
+                    } else {
+                      ShowToastDialog.showToast(
+                          "Customer pickup successfully".tr);
+                    }
                   }
                 });
               } else {

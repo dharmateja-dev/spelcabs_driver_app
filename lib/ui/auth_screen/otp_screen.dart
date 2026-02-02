@@ -1,4 +1,3 @@
-
 import 'package:driver/controller/otp_controller.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
@@ -12,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../themes/responsive.dart';
 
 class OtpScreen extends StatelessWidget {
-  const OtpScreen({Key? key}) : super(key: key);
+  const OtpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class OtpScreen extends StatelessWidget {
         init: OtpController(),
         builder: (controller) {
           return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             body: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +78,7 @@ class OtpScreen extends StatelessWidget {
                             ),
                             enableActiveFill: true,
                             cursorColor: AppColors.primary,
-                            controller: controller.otpController.value,
+                            controller: controller.otpController,
                             onCompleted: (v) async {},
                             onChanged: (value) {},
                           ),

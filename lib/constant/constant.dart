@@ -329,22 +329,30 @@ class Constant {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: DateTime(1900),
       lastDate: DateTime(2200),
       builder: (context, child) {
         final themeChange = Provider.of<DarkThemeProvider>(context);
         return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: themeChange.getThem()
-                ? AppColors.darkModePrimary
-                : AppColors.primary,
-            colorScheme: ColorScheme.light(
-                primary: themeChange.getThem()
-                    ? AppColors.darkModePrimary
-                    : AppColors.primary),
-            buttonTheme:
-                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
-          ),
+          data: themeChange.getThem()
+              ? ThemeData.dark().copyWith(
+                  primaryColor: AppColors.darkModePrimary,
+                  colorScheme: const ColorScheme.dark(
+                    primary: AppColors.darkModePrimary,
+                    onPrimary: Colors.black,
+                    onSurface: Colors.white,
+                  ),
+                  buttonTheme:
+                      const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  dialogBackgroundColor: AppColors.darkBackground,
+                )
+              : ThemeData.light().copyWith(
+                  primaryColor: AppColors.primary,
+                  colorScheme:
+                      const ColorScheme.light(primary: AppColors.primary),
+                  buttonTheme:
+                      const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                ),
           child: child!,
         );
       },
@@ -364,16 +372,25 @@ class Constant {
       builder: (context, child) {
         final themeChange = Provider.of<DarkThemeProvider>(context);
         return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor:
-                themeChange.getThem() ? AppColors.primary : AppColors.primary,
-            colorScheme: ColorScheme.light(
-                primary: themeChange.getThem()
-                    ? AppColors.primary
-                    : AppColors.primary),
-            buttonTheme:
-                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
-          ),
+          data: themeChange.getThem()
+              ? ThemeData.dark().copyWith(
+                  primaryColor: AppColors.darkModePrimary,
+                  colorScheme: const ColorScheme.dark(
+                    primary: AppColors.darkModePrimary,
+                    onPrimary: Colors.black,
+                    onSurface: Colors.white,
+                  ),
+                  buttonTheme:
+                      const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  dialogBackgroundColor: AppColors.darkBackground,
+                )
+              : ThemeData.light().copyWith(
+                  primaryColor: AppColors.primary,
+                  colorScheme:
+                      const ColorScheme.light(primary: AppColors.primary),
+                  buttonTheme:
+                      const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                ),
           child: child!,
         );
       },

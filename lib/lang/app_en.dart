@@ -83,6 +83,7 @@ const Map<String, String> enUS = {
   'The ride has officially started. Please follow the designated route to the destination.':
       'The ride has officially started. Please follow the designated route to the destination.',
   "Customer pickup successfully": "Customer pickup successfully",
+  "Parcel picked up successfully": "Parcel picked up successfully",
   "OTP Invalid": "OTP Invalid",
   "Cargo Load successfully": "Cargo Load successfully",
   "You have to minimum  wallet amount to Accept Order and place a bid":

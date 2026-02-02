@@ -960,6 +960,23 @@ class FireStoreUtils {
           tag: "FireStoreUtils", error: error, stackTrace: s);
     });
 
+    if (isAdded && driverDocumentModel.documents != null) {
+      try {
+        await fireStore
+            .collection(_driverUsersCollection)
+            .doc(getCurrentUid())
+            .update({
+          'documents':
+              driverDocumentModel.documents!.map((v) => v.toJson()).toList()
+        });
+        AppLogger.info("Documents synced to driver_users collection.",
+            tag: "FireStoreUtils");
+      } catch (e) {
+        AppLogger.error("Failed to sync documents to driver_users: $e",
+            tag: "FireStoreUtils");
+      }
+    }
+
     return isAdded;
   }
 
@@ -1265,9 +1282,15 @@ class FireStoreUtils {
             // }
 
             final OrderModel order = OrderModel.fromJson(data);
-            ordersList.add(order);
-            AppLogger.debug("Order ${doc.id} added to list",
-                tag: "FireStoreUtils");
+            if (order.status == Constant.ridePlaced) {
+              ordersList.add(order);
+              AppLogger.debug("Order ${doc.id} added to list",
+                  tag: "FireStoreUtils");
+            } else {
+              AppLogger.debug(
+                  "Order ${doc.id} skipped status is : ${order.status}",
+                  tag: "FireStoreUtils");
+            }
           }
         } catch (e) {
           AppLogger.debug("Error parsing order ${doc.id}: $e",
