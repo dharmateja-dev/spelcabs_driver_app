@@ -3,6 +3,8 @@ import 'package:driver/model/driver_rules_model.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/service_model.dart';
 import 'package:driver/model/vehicle_type_model.dart';
+import 'package:driver/model/freight_vehicle.dart';
+import 'package:driver/model/unified_vehicle_model.dart';
 import 'package:driver/model/zone_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/utils/fire_store_utils.dart';
@@ -60,7 +62,7 @@ class VehicleInformationController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
-    getVehicleTye();
+    getVehicleType();
     super.onInit();
   }
 
@@ -132,17 +134,60 @@ class VehicleInformationController extends GetxController {
   bool get isVehicleInfoSubmitted =>
       driverModel.value.vehicleInformation != null;
 
-  getVehicleTye() async {
+  RxList<UnifiedVehicleModel> unifiedVehicleList = <UnifiedVehicleModel>[].obs;
+  Rx<UnifiedVehicleModel?> selectedUnifiedVehicle =
+      Rx<UnifiedVehicleModel?>(null);
+
+  getVehicleType() async {
+    isLoading.value = true;
+
+    // Fetch Services (Passenger)
     await FireStoreUtils.getService().then((value) {
       serviceList.value = value;
     });
 
+    // Fetch Freight
+    List<FreightVehicle> freightList = await FireStoreUtils.getFreightVehicle();
+
+    // Fetch Zones
     await FireStoreUtils.getZone().then((value) {
       if (value != null) {
         zoneList.value = value;
       }
     });
 
+    // Merge Logic
+    Map<String, UnifiedVehicleModel> merger = {};
+
+    // 1. Process Passenger Services
+    for (var s in serviceList) {
+      String name = Constant.localizationTitle(s.title).trim();
+      String key = name.toLowerCase();
+      if (!merger.containsKey(key)) {
+        merger[key] = UnifiedVehicleModel(
+            name: name, image: s.image ?? "", passengerServiceId: s.id);
+      } else {
+        merger[key]!.passengerServiceId = s.id;
+      }
+    }
+
+    // 2. Process Freight Vehicles
+    for (var f in freightList) {
+      String name = Constant.localizationName(f.name).trim();
+      String key = name.toLowerCase();
+      if (key.isNotEmpty) {
+        if (!merger.containsKey(key)) {
+          merger[key] = UnifiedVehicleModel(
+              name: name, image: f.image ?? "", freightServiceId: f.id);
+        } else {
+          merger[key]!.freightServiceId = f.id;
+        }
+      }
+    }
+
+    unifiedVehicleList.value = merger.values.toList();
+
+    // Fetch Driver Profile
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
       driverModel.value = value!;
@@ -159,6 +204,7 @@ class VehicleInformationController extends GetxController {
             driverModel.value.vehicleInformation!.seats ?? "2";
       }
 
+      // Restore Zone Selection
       if (driverModel.value.zoneIds != null) {
         for (var element in driverModel.value.zoneIds!) {
           List<ZoneModel> list =
@@ -171,11 +217,28 @@ class VehicleInformationController extends GetxController {
         }
         zoneNameController.value.text = zoneString.value;
       }
+
+      // Restore Vehicle Selection using activeServices map or fallback to serviceId
+      if (driverModel.value.activeServices != null ||
+          driverModel.value.serviceId != null) {
+        // Logic to find the unified vehicle that matches
+        // For now, simple match on serviceId (legacy) or check map
+        String? targetId = driverModel.value.serviceId;
+        if (targetId != null) {
+          for (var uv in unifiedVehicleList) {
+            if (uv.passengerServiceId == targetId ||
+                uv.freightServiceId == targetId) {
+              selectedUnifiedVehicle.value = uv;
+              // Set service ID for UI consistency if needed
+              selectedServiceId.value = targetId;
+              break;
+            }
+          }
+        }
+      }
     });
 
-    if (driverModel.value.serviceId != null) {
-      selectedServiceId.value = driverModel.value.serviceId;
-    }
+    // Fetch Vehicle Types (for subtypes if used)
     await FireStoreUtils.getVehicleType().then((value) {
       vehicleList = value!;
       if (driverModel.value.vehicleInformation != null) {
@@ -188,6 +251,7 @@ class VehicleInformationController extends GetxController {
       }
     });
 
+    // Fetch Rules
     await FireStoreUtils.getDriverRules().then((value) {
       if (value != null) {
         driverRulesList.value = value;
@@ -203,5 +267,14 @@ class VehicleInformationController extends GetxController {
     });
     isLoading.value = false;
     update();
+  }
+
+  void selectVehicle(UnifiedVehicleModel vehicle) {
+    selectedUnifiedVehicle.value = vehicle;
+    if (vehicle.passengerServiceId != null) {
+      selectedServiceId.value = vehicle.passengerServiceId;
+    } else if (vehicle.freightServiceId != null) {
+      selectedServiceId.value = vehicle.freightServiceId;
+    }
   }
 }

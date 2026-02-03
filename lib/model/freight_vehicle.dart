@@ -14,13 +14,14 @@ class FreightVehicle {
 
   FreightVehicle(
       {this.image,
-        this.enable,
-        this.kmCharge,
-        this.width,
-        this.length,
-        this.name,
-        this.id,
-        this.height,this.description});
+      this.enable,
+      this.kmCharge,
+      this.width,
+      this.length,
+      this.name,
+      this.id,
+      this.height,
+      this.description});
 
   FreightVehicle.fromJson(Map<String, dynamic> json) {
     image = json['image'];

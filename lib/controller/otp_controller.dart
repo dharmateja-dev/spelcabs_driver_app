@@ -62,6 +62,9 @@ class OtpController extends GetxController {
 
     ShowToastDialog.showLoader("Verifying OTP...");
 
+    // Unfocus keyboard to prevent interaction with disposed controller during navigation
+    FocusManager.instance.primaryFocus?.unfocus();
+
     try {
       // Create Firebase Phone Auth credential
       PhoneAuthCredential credential = PhoneAuthProvider.credential(

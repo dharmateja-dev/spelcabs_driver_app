@@ -28,6 +28,7 @@ import 'package:driver/model/subscription_plan_model.dart';
 import 'package:driver/model/subscription_history.dart';
 import 'package:driver/model/user_model.dart';
 import 'package:driver/model/vehicle_type_model.dart';
+import 'package:driver/model/freight_vehicle.dart';
 import 'package:driver/model/wallet_transaction_model.dart';
 import 'package:driver/model/withdraw_model.dart';
 import 'package:driver/model/zone_model.dart';
@@ -1002,6 +1003,26 @@ class FireStoreUtils {
     return vehicleList;
   }
 
+  static Future<List<FreightVehicle>> getFreightVehicle() async {
+    List<FreightVehicle> freightVehicle = [];
+    try {
+      await fireStore
+          .collection(CollectionName.freightVehicle)
+          .where('enable', isEqualTo: true)
+          .get()
+          .then((value) {
+        for (var element in value.docs) {
+          FreightVehicle documentModel =
+              FreightVehicle.fromJson(element.data());
+          freightVehicle.add(documentModel);
+        }
+      });
+    } catch (error) {
+      log(error.toString());
+    }
+    return freightVehicle;
+  }
+
   static Future<List<DriverRulesModel>?> getDriverRules() async {
     AppLogger.debug("getDriverRules called.", tag: "FireStoreUtils");
     List<DriverRulesModel> driverRulesModel = [];
@@ -1269,17 +1290,29 @@ class FireStoreUtils {
               continue;
             }
 
-            // Client-side service filtering (if driver has a specific service)
-            // if (driverUserModel.serviceId != null &&
-            //     driverUserModel.serviceId!.toString().trim().isNotEmpty) {
-            //   final orderServiceId = data['serviceId'] as String?;
-            //   if (orderServiceId != driverUserModel.serviceId) {
-            //     AppLogger.debug(
-            //         "Order ${doc.id} filtered out: service '$orderServiceId' != driver service '${driverUserModel.serviceId}'",
-            //         tag: "FireStoreUtils");
-            //     continue;
-            //   }
-            // }
+            // Client-side service filtering (Strict Type Matching)
+            // Ensure the driver is eligible for this specific order's service type
+            final orderServiceId = data['serviceId'] as String?;
+            if (orderServiceId != null) {
+              // Check if the driver has this service in their activeServices map
+              bool isEligible = false;
+              if (driverUserModel.activeServices != null &&
+                  driverUserModel.activeServices!.containsKey(orderServiceId) &&
+                  driverUserModel.activeServices![orderServiceId] == true) {
+                isEligible = true;
+              }
+              // Fallback for legacy drivers (single serviceId)
+              else if (driverUserModel.serviceId == orderServiceId) {
+                isEligible = true;
+              }
+
+              if (!isEligible) {
+                AppLogger.debug(
+                    "Order ${doc.id} filtered out: service '$orderServiceId' not in driver's active services",
+                    tag: "FireStoreUtils");
+                continue;
+              }
+            }
 
             final OrderModel order = OrderModel.fromJson(data);
             if (order.status == Constant.ridePlaced) {
@@ -2538,5 +2571,16 @@ class FireStoreUtils {
           tag: "FireStoreUtils", error: e, stackTrace: s);
       return false;
     }
+  }
+
+  static Stream<List<DriverRulesModel>> getDriverRulesStream() {
+    return fireStore
+        .collection(CollectionName.driverRules)
+        .where('isDeleted', isEqualTo: false)
+        .where('enable', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => DriverRulesModel.fromJson(doc.data()))
+            .toList());
   }
 }

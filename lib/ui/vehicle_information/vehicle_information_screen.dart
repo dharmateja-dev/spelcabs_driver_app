@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/constant.dart';
@@ -7,8 +5,10 @@ import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/vehicle_information_controller.dart';
 import 'package:driver/controller/home_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
+import 'package:driver/model/driver_rules_model.dart';
 import 'package:driver/model/service_model.dart';
 import 'package:driver/model/vehicle_type_model.dart';
+import 'package:driver/model/unified_vehicle_model.dart';
 import 'package:driver/model/zone_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
@@ -62,22 +62,19 @@ class VehicleInformationScreen extends StatelessWidget {
                                 SizedBox(
                                   height: Responsive.height(18, context),
                                   child: ListView.builder(
-                                    itemCount: controller.serviceList.length,
+                                    itemCount:
+                                        controller.unifiedVehicleList.length,
                                     scrollDirection: Axis.horizontal,
                                     shrinkWrap: true,
                                     itemBuilder: (context, index) {
-                                      ServiceModel serviceModel =
-                                          controller.serviceList[index];
+                                      UnifiedVehicleModel vehicle =
+                                          controller.unifiedVehicleList[index];
                                       return Obx(
                                         () => InkWell(
                                           onTap: () async {
-                                            if (controller.driverModel.value
-                                                        .serviceId ==
-                                                    null &&
-                                                !controller
-                                                    .isVehicleInfoSubmitted) {
-                                              controller.selectedServiceId
-                                                  .value = serviceModel.id;
+                                            if (!controller
+                                                .isVehicleInfoSubmitted) {
+                                              controller.selectVehicle(vehicle);
                                             }
                                           },
                                           child: Padding(
@@ -87,9 +84,9 @@ class VehicleInformationScreen extends StatelessWidget {
                                                   Responsive.width(28, context),
                                               decoration: BoxDecoration(
                                                   color: controller
-                                                              .selectedServiceId
+                                                              .selectedUnifiedVehicle
                                                               .value ==
-                                                          serviceModel.id
+                                                          vehicle
                                                       ? AppColors.primary
                                                       : themeChange.getThem()
                                                           ? AppColors
@@ -125,8 +122,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: CachedNetworkImage(
-                                                        imageUrl: serviceModel
-                                                            .image
+                                                        imageUrl: vehicle.image
                                                             .toString(),
                                                         fit: BoxFit.contain,
                                                         height:
@@ -148,18 +144,18 @@ class VehicleInformationScreen extends StatelessWidget {
                                                   const SizedBox(
                                                     height: 10,
                                                   ),
-                                                  Text(
-                                                      Constant
-                                                          .localizationTitle(
-                                                              serviceModel
-                                                                  .title),
+                                                  Text(vehicle.name,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style:
                                                           GoogleFonts.poppins(
                                                               color: controller
-                                                                          .selectedServiceId
-                                                                          .value! ==
-                                                                      serviceModel
-                                                                          .id
+                                                                          .selectedUnifiedVehicle
+                                                                          .value ==
+                                                                      vehicle
                                                                   ? Colors.white
                                                                   : themeChange
                                                                           .getThem()
@@ -674,51 +670,76 @@ class VehicleInformationScreen extends StatelessWidget {
                                     style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16)),
-                                ListBody(
-                                  children: controller.driverRulesList
-                                      .map((item) => CheckboxListTile(
-                                            activeColor: themeChange.getThem()
-                                                ? AppColors.darkModePrimary
-                                                : AppColors.primary,
-                                            checkColor: themeChange.getThem()
-                                                ? Colors.black
-                                                : Colors.white,
-                                            value: controller
-                                                        .selectedDriverRulesList
-                                                        .indexWhere((element) =>
-                                                            element.id ==
-                                                            item.id) ==
-                                                    -1
-                                                ? false
-                                                : true,
-                                            title: Text(
-                                                Constant.localizationName(
-                                                    item.name),
-                                                style: GoogleFonts.poppins(
-                                                    fontWeight:
-                                                        FontWeight.w400)),
-                                            onChanged: !controller
-                                                    .isVehicleInfoSubmitted
-                                                ? (value) {
-                                                    if (value == true) {
-                                                      controller
-                                                          .selectedDriverRulesList
-                                                          .add(item);
-                                                    } else {
-                                                      controller
-                                                          .selectedDriverRulesList
-                                                          .removeAt(controller
+                                StreamBuilder<List<DriverRulesModel>>(
+                                  stream: FireStoreUtils.getDriverRulesStream(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Text("Error: ${snapshot.error}");
+                                    }
+                                    if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return const SizedBox();
+                                    }
+
+                                    // Update the full list in controller (optional but good for consistency)
+                                    controller.driverRulesList.value =
+                                        snapshot.data!;
+
+                                    return ListBody(
+                                      children: snapshot.data!
+                                          .map((item) => CheckboxListTile(
+                                                activeColor: themeChange
+                                                        .getThem()
+                                                    ? AppColors.darkModePrimary
+                                                    : AppColors.primary,
+                                                checkColor:
+                                                    themeChange.getThem()
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                value: controller
+                                                            .selectedDriverRulesList
+                                                            .indexWhere(
+                                                                (element) =>
+                                                                    element
+                                                                        .id ==
+                                                                    item.id) ==
+                                                        -1
+                                                    ? false
+                                                    : true,
+                                                title: Text(
+                                                    Constant.localizationName(
+                                                        item.name),
+                                                    style: GoogleFonts.poppins(
+                                                        fontWeight:
+                                                            FontWeight.w400)),
+                                                onChanged: !controller
+                                                        .isVehicleInfoSubmitted
+                                                    ? (value) {
+                                                        if (value == true) {
+                                                          controller
                                                               .selectedDriverRulesList
-                                                              .indexWhere(
-                                                                  (element) =>
+                                                              .add(item);
+                                                        } else {
+                                                          controller
+                                                              .selectedDriverRulesList
+                                                              .removeAt(controller
+                                                                  .selectedDriverRulesList
+                                                                  .indexWhere((element) =>
                                                                       element
                                                                           .id ==
                                                                       item.id));
-                                                    }
-                                                  }
-                                                : null,
-                                          ))
-                                      .toList(),
+                                                        }
+                                                      }
+                                                    : null,
+                                              ))
+                                          .toList(),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(
                                   height: 20,
@@ -734,7 +755,8 @@ class VehicleInformationScreen extends StatelessWidget {
                                             "Please wait".tr);
 
                                         if (controller
-                                            .selectedServiceId.value!.isEmpty) {
+                                                .selectedUnifiedVehicle.value ==
+                                            null) {
                                           ShowToastDialog.closeLoader();
                                           ShowToastDialog.showToast(
                                               "Please select service".tr);
@@ -766,39 +788,20 @@ class VehicleInformationScreen extends StatelessWidget {
                                         }
 
                                         // Only require vehicle type when selected service appears to be car-like
-                                        if (controller.serviceList.isNotEmpty &&
+                                        // We use the unified vehicle name or underlying service titles
+                                        UnifiedVehicleModel selected =
                                             controller
-                                                    .selectedServiceId.value !=
-                                                null &&
-                                            controller.selectedServiceId.value!
-                                                .isNotEmpty &&
-                                            ((() {
-                                              try {
-                                                final sel = controller
-                                                    .serviceList
-                                                    .firstWhere(
-                                                        (s) =>
-                                                            s.id ==
-                                                            controller
-                                                                .selectedServiceId
-                                                                .value,
-                                                        orElse: () =>
-                                                            ServiceModel());
-                                                final title = sel.title !=
-                                                            null &&
-                                                        sel.title!.isNotEmpty
-                                                    ? Constant
-                                                            .localizationTitle(
-                                                                sel.title)
-                                                        .toLowerCase()
-                                                    : "";
-                                                return (title.contains('car') ||
-                                                    title.contains('taxi') ||
-                                                    title.contains('cab'));
-                                              } catch (e) {
-                                                return false;
-                                              }
-                                            })()) &&
+                                                .selectedUnifiedVehicle.value!;
+                                        bool isCarLike = false;
+                                        String name =
+                                            selected.name.toLowerCase();
+                                        if (name.contains('car') ||
+                                            name.contains('taxi') ||
+                                            name.contains('cab')) {
+                                          isCarLike = true;
+                                        }
+
+                                        if (isCarLike &&
                                             (controller.selectedVehicle.value
                                                         .id ==
                                                     null ||
@@ -834,52 +837,36 @@ class VehicleInformationScreen extends StatelessWidget {
                                         }
 
                                         // All validations passed, proceed to save
-                                        if (controller
-                                                .driverModel.value.serviceId ==
+
+                                        // Update Active Services Map
+                                        Map<String, bool> activeServices = {};
+                                        if (selected.passengerServiceId !=
+                                            null) {
+                                          activeServices[selected
+                                              .passengerServiceId!] = true;
+                                        }
+                                        if (selected.freightServiceId != null) {
+                                          activeServices[selected
+                                              .freightServiceId!] = true;
+                                        }
+                                        controller.driverModel.value
+                                            .activeServices = activeServices;
+
+                                        // Fallback/Legacy serviceID (use passenger if available, else freight)
+                                        if (selected.passengerServiceId !=
                                             null) {
                                           controller
                                                   .driverModel.value.serviceId =
-                                              controller
-                                                  .selectedServiceId.value;
-                                          await FireStoreUtils.updateDriverUser(
-                                              controller.driverModel.value);
+                                              selected.passengerServiceId;
+                                        } else if (selected.freightServiceId !=
+                                            null) {
+                                          controller
+                                                  .driverModel.value.serviceId =
+                                              selected.freightServiceId;
                                         }
+
                                         controller.driverModel.value.zoneIds =
                                             controller.selectedZone;
-
-                                        // Determine if selected service is car-like to decide vehicleType usage
-                                        bool isCarServiceForSave = false;
-                                        if (controller.serviceList.isNotEmpty &&
-                                            controller
-                                                    .selectedServiceId.value !=
-                                                null &&
-                                            controller.selectedServiceId.value!
-                                                .isNotEmpty) {
-                                          try {
-                                            final sel = controller.serviceList
-                                                .firstWhere(
-                                                    (s) =>
-                                                        s.id ==
-                                                        controller
-                                                            .selectedServiceId
-                                                            .value,
-                                                    orElse: () =>
-                                                        ServiceModel());
-                                            final title = sel.title != null &&
-                                                    sel.title!.isNotEmpty
-                                                ? Constant.localizationTitle(
-                                                        sel.title)
-                                                    .toLowerCase()
-                                                : "";
-                                            if (title.contains('car') ||
-                                                title.contains('taxi') ||
-                                                title.contains('cab')) {
-                                              isCarServiceForSave = true;
-                                            }
-                                          } catch (e) {
-                                            isCarServiceForSave = false;
-                                          }
-                                        }
 
                                         controller.driverModel.value.vehicleInformation = VehicleInformation(
                                             registrationDate: Timestamp.fromDate(
@@ -890,11 +877,11 @@ class VehicleInformationScreen extends StatelessWidget {
                                                 .vehicleNumberController
                                                 .value
                                                 .text,
-                                            vehicleType: isCarServiceForSave
+                                            vehicleType: isCarLike
                                                 ? controller
                                                     .selectedVehicle.value.name
                                                 : null,
-                                            vehicleTypeId: isCarServiceForSave
+                                            vehicleTypeId: isCarLike
                                                 ? controller
                                                     .selectedVehicle.value.id
                                                 : null,

@@ -84,7 +84,7 @@ class AuthApiService {
           AppLogger.info("Firebase: OTP sent successfully for login",
               tag: "AuthApiService");
 
-          Get.to(const OtpScreen(), arguments: {
+          Get.to(() => const OtpScreen(), arguments: {
             "countryCode": countryCode,
             "phoneNumber": phoneNumber,
             "verificationId": verificationId,
@@ -145,7 +145,7 @@ class AuthApiService {
           AppLogger.info("Firebase: OTP sent successfully for signup",
               tag: "AuthApiService");
 
-          Get.to(const OtpScreen(), arguments: {
+          Get.to(() => const OtpScreen(), arguments: {
             "phoneNumber": phoneNumber,
             "countryCode": countryCode,
             "verificationId": verificationId,

@@ -35,6 +35,7 @@ class DriverUserModel {
   double? commission;
 
   List<Documents>? documents;
+  Map<String, bool>? activeServices;
 
   DriverUserModel(
       {this.phoneNumber,
@@ -61,7 +62,8 @@ class DriverUserModel {
       this.subscriptionPlan,
       this.subscriptionExpiryDate,
       this.commission,
-      this.documents});
+      this.documents,
+      this.activeServices});
 
   DriverUserModel.fromJson(Map<String, dynamic> json) {
     phoneNumber = json['phoneNumber'];
@@ -124,6 +126,9 @@ class DriverUserModel {
         documents!.add(Documents.fromJson(v));
       });
     }
+    if (json['activeServices'] != null) {
+      activeServices = Map<String, bool>.from(json['activeServices']);
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -165,6 +170,10 @@ class DriverUserModel {
 
     if (documents != null) {
       data['documents'] = documents!.map((v) => v.toJson()).toList();
+    }
+
+    if (activeServices != null) {
+      data['activeServices'] = activeServices;
     }
 
     return data;

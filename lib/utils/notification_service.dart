@@ -15,6 +15,7 @@ import 'package:driver/utils/fire_store_utils.dart';
 import 'package:driver/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
@@ -141,6 +142,18 @@ class NotificationService {
       if (message.notification != null || message.data.isNotEmpty) {
         log("Data: ${message.data}");
         display(message);
+
+        // Handle immediate dialog for new orders
+        if (message.data['type'] == 'city_order') {
+          _showNewRideDialog(message.data['orderId']);
+        } else if (message.data['type'] == 'order_cancelled' ||
+            message.data['type'] == 'booking_cancelled') {
+          // If a ride is cancelled, and we have a dialog open for it (or just any dialog), close it.
+          // This is a bit aggressive to close *any* dialog, but necessary if the driver is staring at "New Ride" that is now gone.
+          if (Get.isDialogOpen == true) {
+            Get.back();
+          }
+        }
       }
     });
 
@@ -213,6 +226,13 @@ class NotificationService {
       if (message.data['type'] == 'city_order') {
         title = "New City Ride";
         body = "You have a new city ride request";
+      } else if (message.data['type'] == 'order_status_change') {
+        // Generic handler for status updates if backend sends this type
+        // If title/body are empty in data, try to construct meaningful text
+        if (!message.data.containsKey('title')) {
+          title = "Ride Update";
+          body = "A ride status has been updated.";
+        }
       }
     }
 
@@ -264,5 +284,35 @@ class NotificationService {
     } on Exception catch (e) {
       log("Error showing notification: ${e.toString()}");
     }
+  }
+
+  void _showNewRideDialog(String orderId) {
+    if (Get.context == null) return;
+
+    Get.dialog(
+      AlertDialog(
+        title: Text("New Ride Request".tr),
+        content:
+            Text("You have a new ride request. Do you want to view it?".tr),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+            },
+            child: Text("Later".tr),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              Get.to(const OrderMapScreen(),
+                  arguments: {"orderModel": orderId});
+            },
+            child: Text("View".tr,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
   }
 }
