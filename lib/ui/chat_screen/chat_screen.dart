@@ -70,8 +70,13 @@ class _ChatScreensState extends State<ChatScreens> {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
     return Scaffold(
+      backgroundColor: themeChange.getThem()
+          ? AppColors.darkBackground
+          : AppColors.background,
       appBar: AppBar(
-        elevation: 2,
+        elevation: 0,
+        backgroundColor: AppColors.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(widget.customerName.toString(),
             maxLines: 2,
             style: GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
@@ -81,6 +86,7 @@ class _ChatScreensState extends State<ChatScreens> {
             },
             child: const Icon(
               Icons.arrow_back,
+              color: Colors.white,
             )),
       ),
       body: Padding(
@@ -134,49 +140,52 @@ class _ChatScreensState extends State<ChatScreens> {
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.only(left: 10),
                       filled: true,
+                      fillColor: themeChange.getThem()
+                          ? Colors.transparent
+                          : const Color(0xfff0f0f1),
                       disabledBorder: OutlineInputBorder(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
+                            const BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: themeChange.getThem()
-                                ? AppColors.darkTextFieldBorder
-                                : AppColors.textFieldBorder,
+                                ? const Color(0xfff0f0f1)
+                                : AppColors.darkTextFieldBorder,
                             width: 1),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
+                            const BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: themeChange.getThem()
-                                ? AppColors.darkModePrimary
-                                : AppColors.primary,
+                                ? const Color(0xfff0f0f1)
+                                : AppColors.darkTextFieldBorder,
                             width: 1),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
+                            const BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: themeChange.getThem()
-                                ? AppColors.darkTextFieldBorder
-                                : AppColors.textFieldBorder,
+                                ? const Color(0xfff0f0f1)
+                                : AppColors.darkTextFieldBorder,
                             width: 1),
                       ),
                       errorBorder: OutlineInputBorder(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
+                            const BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: themeChange.getThem()
-                                ? AppColors.darkTextFieldBorder
-                                : AppColors.textFieldBorder,
+                                ? const Color(0xfff0f0f1)
+                                : AppColors.darkTextFieldBorder,
                             width: 1),
                       ),
                       border: OutlineInputBorder(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
+                            const BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: themeChange.getThem()
-                                ? AppColors.darkTextFieldBorder
-                                : AppColors.textFieldBorder,
+                                ? const Color(0xfff0f0f1)
+                                : AppColors.darkTextFieldBorder,
                             width: 1),
                       ),
                       suffixIcon: IconButton(
@@ -190,15 +199,28 @@ class _ChatScreensState extends State<ChatScreens> {
                             ShowToastDialog.showToast("Please enter text".tr);
                           }
                         },
-                        icon: const Icon(Icons.send_rounded),
+                        icon: Icon(
+                          Icons.send_rounded,
+                          color: themeChange.getThem()
+                              ? const Color(0xfff0f0f1)
+                              : Colors.black,
+                        ),
                       ),
                       prefixIcon: IconButton(
                         onPressed: () async {
                           _onCameraClick();
                         },
-                        icon: const Icon(Icons.camera_alt),
+                        icon: Icon(
+                          Icons.camera_alt,
+                          color: themeChange.getThem()
+                              ? const Color(0xfff0f0f1)
+                              : Colors.black,
+                        ),
                       ),
                       hintText: 'Start typing ...'.tr,
+                      hintStyle: const TextStyle(
+                          color: Color(0xffa7a6a7),
+                          fontWeight: FontWeight.w400),
                     ),
                     onSubmitted: (value) async {
                       if (_messageController.text.isNotEmpty) {
@@ -215,6 +237,7 @@ class _ChatScreensState extends State<ChatScreens> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -236,7 +259,7 @@ class _ChatScreensState extends State<ChatScreens> {
                       ? Container(
                           decoration: BoxDecoration(
                             color: themeChange.getThem()
-                                ? AppColors.darkModePrimary
+                                ? Colors.white
                                 : AppColors.primary,
                             borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(10),
@@ -312,10 +335,20 @@ class _ChatScreensState extends State<ChatScreens> {
                     children: [
                       Text("Me".tr,
                           style: GoogleFonts.poppins(
-                              fontSize: 12, fontWeight: FontWeight.w400)),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: themeChange.getThem()
+                                ? Colors.white
+                                : Colors.black,
+                          )),
                       Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
                           style: GoogleFonts.poppins(
-                              fontSize: 12, fontWeight: FontWeight.w400)),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: themeChange.getThem()
+                                ? Colors.white
+                                : Colors.black,
+                          )),
                     ],
                   ),
                 ],
@@ -330,20 +363,19 @@ class _ChatScreensState extends State<ChatScreens> {
                   children: [
                     data.messageType == "text"
                         ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(10),
                                   topRight: Radius.circular(10),
                                   bottomRight: Radius.circular(10)),
-                              color: Colors.grey.shade300,
+                              color: Color(0xffa7a6a7),
                             ),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 10),
                             child: Text(
                               data.message.toString(),
                               style: GoogleFonts.poppins(
-                                  color: data.senderId ==
-                                          FireStoreUtils.getCurrentUid()
+                                  color: themeChange.getThem()
                                       ? Colors.white
                                       : Colors.black),
                             ),
@@ -405,10 +437,20 @@ class _ChatScreensState extends State<ChatScreens> {
                   children: [
                     Text(widget.customerName.toString(),
                         style: GoogleFonts.poppins(
-                            fontSize: 12, fontWeight: FontWeight.w400)),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: themeChange.getThem()
+                              ? Colors.white
+                              : Colors.black,
+                        )),
                     Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
                         style: GoogleFonts.poppins(
-                            fontSize: 12, fontWeight: FontWeight.w400)),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: themeChange.getThem()
+                              ? Colors.white
+                              : Colors.black,
+                        )),
                   ],
                 ),
               ],
