@@ -474,10 +474,10 @@ class WalletController extends GetxController {
         ))!
             .then((value) {
           if (value) {
-            ShowToastDialog.showToast("Payment Successful!!");
+            ShowToastDialog.showToast("Payment Successful!!".tr);
             walletTopUp();
           } else {
-            ShowToastDialog.showToast("Payment UnSuccessful!!");
+            ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
           }
         });
       } else {
@@ -521,10 +521,10 @@ class WalletController extends GetxController {
       Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!
           .then((value) {
         if (value) {
-          ShowToastDialog.showToast("Payment Successful!!");
+          ShowToastDialog.showToast("Payment Successful!!".tr);
           walletTopUp();
         } else {
-          ShowToastDialog.showToast("Payment UnSuccessful!!");
+          ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
         }
       });
     } else {
@@ -597,7 +597,7 @@ class WalletController extends GetxController {
         }
 
         if (value.head.version.isEmpty) {
-          ShowToastDialog.showToast("Payment Failed");
+          ShowToastDialog.showToast("Payment Failed".tr);
         } else {
           GetPaymentTxtTokenModel result = value;
           startTransaction(context,
@@ -736,7 +736,7 @@ class WalletController extends GetxController {
 
   void handlePaymentSuccess(PaymentSuccessResponse response) {
     Get.back();
-    ShowToastDialog.showToast("Payment Successful!!");
+    ShowToastDialog.showToast("Payment Successful!!".tr);
     walletTopUp();
   }
 
@@ -748,7 +748,7 @@ class WalletController extends GetxController {
   void handlePaymentError(PaymentFailureResponse response) {
     Get.back();
     // RazorPayFailedModel lom = RazorPayFailedModel.fromJson(jsonDecode(response.message!.toString()));
-    ShowToastDialog.showToast("Payment Failed!!");
+    ShowToastDialog.showToast("Payment Failed!!".tr);
   }
 
   //XenditPayment
@@ -763,7 +763,7 @@ class WalletController extends GetxController {
                 ))!
             .then((value) {
           if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!");
+            ShowToastDialog.showToast("Payment Successful!!".tr);
             walletTopUp();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -838,7 +838,7 @@ class WalletController extends GetxController {
               ))!
           .then((value) {
         if (value == true) {
-          ShowToastDialog.showToast("Payment Successful!!");
+          ShowToastDialog.showToast("Payment Successful!!".tr);
           walletTopUp();
         }
       });
@@ -963,10 +963,10 @@ class WalletController extends GetxController {
                 ))!
             .then((value) {
           if (value == true) {
-            ShowToastDialog.showToast("Payment Successful!!");
+            ShowToastDialog.showToast("Payment Successful!!".tr);
             walletTopUp();
           } else {
-            ShowToastDialog.showToast("Payment Unsuccessful!!");
+            ShowToastDialog.showToast("Payment Unsuccessful!!".tr);
           }
         });
       }
@@ -1003,7 +1003,8 @@ class WalletController extends GetxController {
       final responseData = jsonDecode(response.body);
       return responseData['payment_url'];
     } else {
-      ShowToastDialog.showToast("something went wrong, please contact admin.");
+      ShowToastDialog.showToast(
+          "something went wrong, please contact admin.".tr);
       return '';
     }
   }
