@@ -48,7 +48,7 @@ class ProfileController extends GetxController {
       Get.back();
       profileImage.value = image.path;
     } on PlatformException catch (e) {
-      ShowToastDialog.showToast("Failed to Pick : \n $e");
+      ShowToastDialog.showToast("Failed to Pick : \n $e".tr);
     }
   }
 }

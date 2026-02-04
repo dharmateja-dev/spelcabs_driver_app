@@ -4,6 +4,7 @@ import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/model/order/location_lat_lng.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 class Utils {
@@ -35,7 +36,8 @@ class Utils {
 
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
 
     // When we reach here, permissions are granted and we can
@@ -43,7 +45,8 @@ class Utils {
 
     Position? position = await Geolocator.getCurrentPosition();
 
-    Constant.currentLocation = LocationLatLng(latitude: position.latitude, longitude: position.longitude);
+    Constant.currentLocation = LocationLatLng(
+        latitude: position.latitude, longitude: position.longitude);
     return await Geolocator.getCurrentPosition();
   }
 
@@ -72,8 +75,10 @@ class Utils {
     return await Geolocator.getCurrentPosition();
   }
 
-
-  static redirectMap({required String name, required double latitude, required double longLatitude}) async {
+  static redirectMap(
+      {required String name,
+      required double latitude,
+      required double longLatitude}) async {
     if (Constant.mapType == "google") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.google);
       if (isAvailable == true) {
@@ -84,7 +89,7 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("Google map is not installed");
+        ShowToastDialog.showToast("Google map is not installed".tr);
       }
     } else if (Constant.mapType == "googleGo") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.googleGo);
@@ -96,7 +101,7 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("Google Go map is not installed");
+        ShowToastDialog.showToast("Google Go map is not installed".tr);
       }
     } else if (Constant.mapType == "waze") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.waze);
@@ -108,7 +113,7 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("Waze is not installed");
+        ShowToastDialog.showToast("Waze is not installed".tr);
       }
     } else if (Constant.mapType == "mapswithme") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.mapswithme);
@@ -120,7 +125,7 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("Mapswithme is not installed");
+        ShowToastDialog.showToast("Mapswithme is not installed".tr);
       }
     } else if (Constant.mapType == "yandexNavi") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.yandexNavi);
@@ -132,7 +137,7 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("YandexNavi is not installed");
+        ShowToastDialog.showToast("YandexNavi is not installed".tr);
       }
     } else if (Constant.mapType == "yandexMaps") {
       bool? isAvailable = await MapLauncher.isMapAvailable(MapType.yandexMaps);
@@ -144,10 +149,8 @@ class Utils {
           destination: Coords(latitude, longLatitude),
         );
       } else {
-        ShowToastDialog.showToast("yandexMaps map is not installed");
+        ShowToastDialog.showToast("yandexMaps map is not installed".tr);
       }
     }
   }
-
-
 }

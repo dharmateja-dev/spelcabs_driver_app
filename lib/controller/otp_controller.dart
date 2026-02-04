@@ -118,7 +118,7 @@ class OtpController extends GetxController {
           tag: "OtpController",
         );
       } else {
-        ShowToastDialog.showToast("Verification failed: ${e.message}");
+        ShowToastDialog.showToast("Verification failed: ${e.message}".tr);
         AppLogger.error(
           "OtpController: Firebase OTP verification failed",
           tag: "OtpController",

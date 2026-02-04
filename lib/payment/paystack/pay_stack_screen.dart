@@ -13,7 +13,13 @@ class PayStackScreen extends StatefulWidget {
   final String secretKey;
   final String callBackUrl;
 
-  const PayStackScreen({Key? key, required this.initialURl, required this.reference, required this.amount, required this.secretKey, required this.callBackUrl}) : super(key: key);
+  const PayStackScreen(
+      {super.key,
+      required this.initialURl,
+      required this.reference,
+      required this.amount,
+      required this.secretKey,
+      required this.callBackUrl});
 
   @override
   State<PayStackScreen> createState() => _PayStackScreenState();
@@ -24,8 +30,6 @@ class _PayStackScreenState extends State<PayStackScreen> {
 
   @override
   void initState() {
-
-
     initController();
     super.initState();
   }
@@ -44,17 +48,27 @@ class _PayStackScreenState extends State<PayStackScreen> {
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest navigation) async {
             debugPrint("--->2${navigation.url}");
-            debugPrint("--->2" "${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}");
-            if (navigation.url == 'https://foodieweb.siswebapp.com/success?trxref=${widget.reference}&reference=${widget.reference}' ||
-                navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') {
-              final isDone = await PayStackURLGen.verifyTransaction(secretKey: widget.secretKey, reference: widget.reference, amount: widget.amount);
+            debugPrint("--->2"
+                "${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}");
+            if (navigation.url ==
+                    'https://foodieweb.siswebapp.com/success?trxref=${widget.reference}&reference=${widget.reference}' ||
+                navigation.url ==
+                    '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') {
+              final isDone = await PayStackURLGen.verifyTransaction(
+                  secretKey: widget.secretKey,
+                  reference: widget.reference,
+                  amount: widget.amount);
               Get.back(result: isDone);
             }
-            if ((navigation.url == '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') ||
+            if ((navigation.url ==
+                    '${widget.callBackUrl}?trxref=${widget.reference}&reference=${widget.reference}') ||
                 (navigation.url == "https://hello.pstk.xyz/callback") ||
-                (navigation.url == 'https://standard.paystack.co/close')||
+                (navigation.url == 'https://standard.paystack.co/close') ||
                 (navigation.url == 'https://talazo.app/login')) {
-              final isDone = await PayStackURLGen.verifyTransaction(secretKey: widget.secretKey, reference: widget.reference, amount: widget.amount);
+              final isDone = await PayStackURLGen.verifyTransaction(
+                  secretKey: widget.secretKey,
+                  reference: widget.reference,
+                  amount: widget.amount);
               Get.back(result: isDone);
             }
             return NavigationDecision.navigate;
@@ -74,7 +88,7 @@ class _PayStackScreenState extends State<PayStackScreen> {
       child: Scaffold(
         appBar: AppBar(
             backgroundColor: AppColors.primary,
-            title: const Text("Payment"),
+            title: Text("Payment".tr),
             centerTitle: false,
             leading: GestureDetector(
               onTap: () {
@@ -96,15 +110,15 @@ class _PayStackScreenState extends State<PayStackScreen> {
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cancel Payment'),
-          content: const SingleChildScrollView(
-            child: Text("cancelPayment?"),
+          title: Text('Cancel Payment'.tr),
+          content: SingleChildScrollView(
+            child: Text("cancelPayment?".tr),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.red),
+              child: Text(
+                'Cancel'.tr,
+                style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -112,9 +126,9 @@ class _PayStackScreenState extends State<PayStackScreen> {
               },
             ),
             TextButton(
-              child: const Text(
-                'Continue',
-                style: TextStyle(color: Colors.green),
+              child: Text(
+                'Continue'.tr,
+                style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {
                 Navigator.of(context).pop();

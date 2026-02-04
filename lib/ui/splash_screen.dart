@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +21,14 @@ class SplashScreen extends StatelessWidget {
                   children: [
                     Image.asset("assets/app_logo2.png", width: 200),
                     const SizedBox(height: 20),
-                    const Text(
-                      "Failed to load. Please try again.",
-                      style: TextStyle(color: Colors.white),
+                    Text(
+                      "Failed to load. Please try again.".tr,
+                      style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: controller.retryRedirect,
-                      child: const Text("Retry"),
+                      child: Text("Retry".tr),
                     )
                   ],
                 ),

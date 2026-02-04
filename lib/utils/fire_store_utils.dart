@@ -38,6 +38,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/Preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class FireStoreUtils {
@@ -63,7 +64,8 @@ class FireStoreUtils {
     } catch (e, s) {
       AppLogger.error("FireStoreUtils: Error updating/creating driver user",
           tag: "FireStoreUtils", error: e, stackTrace: s);
-      ShowToastDialog.showToast("Failed to save user data. Please try again.");
+      ShowToastDialog.showToast(
+          "Failed to save user data. Please try again.".tr);
       return false;
     }
   }
@@ -344,11 +346,11 @@ class FireStoreUtils {
       currentDriverUser = null;
       AppLogger.info("FireStoreUtils: User logged out successfully.",
           tag: "FireStoreUtils");
-      ShowToastDialog.showToast("Logged out successfully.");
+      ShowToastDialog.showToast("Logged out successfully.".tr);
     } catch (e, s) {
       AppLogger.error("FireStoreUtils: Error during logout",
           tag: "FireStoreUtils", error: e, stackTrace: s);
-      ShowToastDialog.showToast("Failed to log out: $e");
+      ShowToastDialog.showToast("Failed to log out: $e".tr);
     }
   }
 
@@ -939,7 +941,7 @@ class FireStoreUtils {
           documentsList.insert(index, documents);
           driverDocumentModel.documents = documentsList;
           isAdded = false;
-          ShowToastDialog.showToast("Document is under verification");
+          ShowToastDialog.showToast("Document is under verification".tr);
           AppLogger.info(
               "Existing document updated and marked for verification.",
               tag: "FireStoreUtils");

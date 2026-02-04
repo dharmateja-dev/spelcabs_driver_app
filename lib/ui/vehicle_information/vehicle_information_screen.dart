@@ -679,7 +679,8 @@ class VehicleInformationScreen extends StatelessWidget {
                                           child: CircularProgressIndicator());
                                     }
                                     if (snapshot.hasError) {
-                                      return Text("Error: ${snapshot.error}");
+                                      return Text(
+                                          "Error: ${snapshot.error}".tr);
                                     }
                                     if (!snapshot.hasData ||
                                         snapshot.data!.isEmpty) {
@@ -960,19 +961,19 @@ class VehicleInformationScreen extends StatelessWidget {
 
   zoneDialog(BuildContext context, VehicleInformationController controller) {
     Widget cancelButton = TextButton(
-      child: const Text(
-        "Cancel",
-        style: TextStyle(color: Colors.white70),
+      child: Text(
+        "Cancel".tr,
+        style: const TextStyle(color: Colors.white70),
       ),
       onPressed: () {
         Get.back();
       },
     );
     Widget continueButton = TextButton(
-      child: const Text("Continue"),
+      child: Text("Continue".tr),
       onPressed: () {
         if (controller.selectedZone.isEmpty) {
-          ShowToastDialog.showToast("Please select zone");
+          ShowToastDialog.showToast("Please select zone".tr);
         } else {
           String nameValue = "";
           for (var element in controller.selectedZone) {
@@ -992,7 +993,7 @@ class VehicleInformationScreen extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Zone list'),
+            title: Text('Zone list'.tr),
             content: SizedBox(
               width: Responsive.width(
                   90, context), // Change as per your requirement

@@ -151,8 +151,9 @@ class ParcelDetailsScreen extends StatelessWidget {
                                     Expanded(
                                       child: controller.orderModel.value
                                               .parcelImage!.isEmpty
-                                          ? const Center(
-                                              child: Text("No Image available"))
+                                          ? Center(
+                                              child:
+                                                  Text("No Image available".tr))
                                           : GridView.builder(
                                               itemCount: controller.orderModel
                                                   .value.parcelImage!.length,

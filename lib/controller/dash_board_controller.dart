@@ -76,7 +76,7 @@ class DashBoardController extends GetxController {
       case 14:
         return const SubscriptionPlanScreen();
       default:
-        return const Text("Error");
+        return Text("Error".tr);
     }
   }
 
@@ -111,7 +111,7 @@ class DashBoardController extends GetxController {
     if (now.difference(currentBackPressTime.value) >
         const Duration(seconds: 2)) {
       currentBackPressTime.value = now;
-      ShowToastDialog.showToast("Double press to exit",
+      ShowToastDialog.showToast("Double press to exit".tr,
           position: EasyLoadingToastPosition.center);
       return Future.value(false);
     }
