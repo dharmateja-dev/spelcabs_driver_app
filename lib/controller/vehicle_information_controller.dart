@@ -61,7 +61,6 @@ class VehicleInformationController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getVehicleType();
     super.onInit();
   }
@@ -255,11 +254,17 @@ class VehicleInformationController extends GetxController {
     await FireStoreUtils.getDriverRules().then((value) {
       if (value != null) {
         driverRulesList.value = value;
+        // Clear existing selected rules to prevent duplicates
+        selectedDriverRulesList.clear();
         if (driverModel.value.vehicleInformation != null) {
           if (driverModel.value.vehicleInformation!.driverRules != null) {
             for (var element
                 in driverModel.value.vehicleInformation!.driverRules!) {
-              selectedDriverRulesList.add(element);
+              // Only add if not already present (extra safety check)
+              if (!selectedDriverRulesList
+                  .any((rule) => rule.id == element.id)) {
+                selectedDriverRulesList.add(element);
+              }
             }
           }
         }

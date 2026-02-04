@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name="${applicationName}"
@@ -82,7 +83,8 @@
 
         <service
             android:name="com.example.app.backgroundService"
-            android:exported="false">
+            android:exported="false"
+            android:foregroundServiceType="location">
             <intent-filter>
                 <action android:name="com.example.app.START_BACKGROUND" />
             </intent-filter>

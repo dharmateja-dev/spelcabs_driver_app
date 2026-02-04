@@ -12,7 +12,6 @@ class ContactUsController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getContactUsInformation();
     super.onInit();
   }

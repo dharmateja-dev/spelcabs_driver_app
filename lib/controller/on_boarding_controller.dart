@@ -11,7 +11,6 @@ class OnBoardingController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getOnBoardingData();
     super.onInit();
   }

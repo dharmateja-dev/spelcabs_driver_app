@@ -89,6 +89,9 @@ class NotificationService {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  // Track the currently open ride dialog to prevent closing unrelated dialogs
+  String? _currentRideDialogId;
+
   initInfo() async {
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
@@ -148,10 +151,16 @@ class NotificationService {
           _showNewRideDialog(message.data['orderId']);
         } else if (message.data['type'] == 'order_cancelled' ||
             message.data['type'] == 'booking_cancelled') {
-          // If a ride is cancelled, and we have a dialog open for it (or just any dialog), close it.
-          // This is a bit aggressive to close *any* dialog, but necessary if the driver is staring at "New Ride" that is now gone.
-          if (Get.isDialogOpen == true) {
+          // Only close the dialog if it matches the cancelled ride
+          final cancelledOrderId = message.data['orderId'];
+          if (cancelledOrderId != null &&
+              _currentRideDialogId == cancelledOrderId &&
+              Get.isDialogOpen == true) {
+            log("Closing ride dialog for cancelled order: $cancelledOrderId");
             Get.back();
+            _currentRideDialogId = null;
+          } else {
+            log("Cancellation received but no matching dialog open. Cancelled: $cancelledOrderId, Current: $_currentRideDialogId");
           }
         }
       }
@@ -289,6 +298,10 @@ class NotificationService {
   void _showNewRideDialog(String orderId) {
     if (Get.context == null) return;
 
+    // Track this dialog so we can close it specifically if cancelled
+    _currentRideDialogId = orderId;
+    log("Opening ride dialog for order: $orderId");
+
     Get.dialog(
       AlertDialog(
         title: Text("New Ride Request".tr),
@@ -313,6 +326,10 @@ class NotificationService {
         ],
       ),
       barrierDismissible: false,
-    );
+    ).then((_) {
+      // Clear tracking when dialog is dismissed (by any means)
+      log("Ride dialog closed for order: $orderId");
+      _currentRideDialogId = null;
+    });
   }
 }

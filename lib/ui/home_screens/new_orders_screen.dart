@@ -6,6 +6,7 @@ import 'package:driver/themes/responsive.dart';
 import 'package:driver/ui/home_screens/order_map_screen.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
 import 'package:driver/utils/fire_store_utils.dart';
+import 'package:driver/utils/app_logger.dart';
 import 'package:driver/widget/location_view.dart';
 import 'package:driver/widget/user_view.dart';
 import 'package:flutter/material.dart';
@@ -66,20 +67,33 @@ class NewOrderScreen extends StatelessWidget {
                                 itemBuilder: (context, index) {
                                   OrderModel orderModel = snapshot.data![index];
                                   String amount;
-                                  if (Constant.distanceType == "Km") {
-                                    amount = Constant.amountCalculate(
-                                            orderModel.service!.kmCharge
-                                                .toString(),
-                                            orderModel.distance.toString())
-                                        .toStringAsFixed(Constant
-                                            .currencyModel!.decimalDigits!);
+
+                                  // Add proper null checks to prevent crashes
+                                  if (orderModel.service?.kmCharge != null) {
+                                    if (Constant.distanceType == "Km") {
+                                      amount = Constant.amountCalculate(
+                                              orderModel.service!.kmCharge
+                                                  .toString(),
+                                              orderModel.distance.toString())
+                                          .toStringAsFixed(Constant
+                                                  .currencyModel
+                                                  ?.decimalDigits ??
+                                              2);
+                                    } else {
+                                      amount = Constant.amountCalculate(
+                                              orderModel.service!.kmCharge
+                                                  .toString(),
+                                              orderModel.distance.toString())
+                                          .toStringAsFixed(Constant
+                                                  .currencyModel
+                                                  ?.decimalDigits ??
+                                              2);
+                                    }
                                   } else {
-                                    amount = Constant.amountCalculate(
-                                            orderModel.service!.kmCharge
-                                                .toString(),
-                                            orderModel.distance.toString())
-                                        .toStringAsFixed(Constant
-                                            .currencyModel!.decimalDigits!);
+                                    // Fallback logic when service or kmCharge is null
+                                    amount = "0.00";
+                                    AppLogger.warning(
+                                        "Missing service or kmCharge for order ${orderModel.id}");
                                   }
                                   return InkWell(
                                     onTap: () {

@@ -103,7 +103,6 @@ class DetailsUploadController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getArgument();
     super.onInit();
   }

@@ -8,7 +8,6 @@ class OnlineRegistrationController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getDocument();
     super.onInit();
   }
@@ -23,7 +22,7 @@ class OnlineRegistrationController extends GetxController {
     });
 
     await FireStoreUtils.getDocumentOfDriver().then((value) {
-      if(value != null){
+      if (value != null) {
         driverDocumentList.value = value.documents!;
       }
     });

@@ -18,7 +18,6 @@ class RatingController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     getArgument();
   }
@@ -49,7 +48,10 @@ class RatingController extends GetxController {
     //     userModel.value = value;
     //   }
     // });
-    await FireStoreUtils.getReview(type.value == "orderModel" ? orderModel.value.id.toString() : intercityOrderModel.value.id.toString()).then((value) {
+    await FireStoreUtils.getReview(type.value == "orderModel"
+            ? orderModel.value.id.toString()
+            : intercityOrderModel.value.id.toString())
+        .then((value) {
       if (value != null) {
         reviewModel.value = value;
         rating.value = double.parse(reviewModel.value.rating.toString());

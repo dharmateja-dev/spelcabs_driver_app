@@ -26,7 +26,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class NewOrderFreightScreen extends StatelessWidget {
-  const NewOrderFreightScreen({Key? key}) : super(key: key);
+  const NewOrderFreightScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class NewOrderFreightScreen extends StatelessWidget {
                     height: Responsive.height(100, context),
                     width: Responsive.width(100, context),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
+                      color: Theme.of(context).colorScheme.surface,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10),
@@ -539,7 +539,7 @@ class NewOrderFreightScreen extends StatelessWidget {
         builder: (context) {
           return Container(
             decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(15),
                     topLeft: Radius.circular(15))),

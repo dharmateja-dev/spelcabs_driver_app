@@ -10,7 +10,12 @@ import 'package:get/get.dart';
 
 class HomeIntercityController extends GetxController {
   RxInt selectedIndex = 0.obs;
-  List<Widget> widgetOptions = <Widget>[const NewOrderInterCityScreen(), const AcceptedIntercityOrders(), const ActiveIntercityOrderScreen(),const OrderIntercityScreen()];
+  List<Widget> widgetOptions = <Widget>[
+    const NewOrderInterCityScreen(),
+    const AcceptedIntercityOrders(),
+    const ActiveIntercityOrderScreen(),
+    const OrderIntercityScreen()
+  ];
 
   void onItemTapped(int index) {
     selectedIndex.value = index;
@@ -18,7 +23,6 @@ class HomeIntercityController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getDriver();
     super.onInit();
   }
@@ -28,7 +32,8 @@ class HomeIntercityController extends GetxController {
   RxBool isLoading = true.obs;
 
   getDriver() async {
-    await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid()).then((value) {
+    await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
+        .then((value) {
       driverModel.value = value!;
       isLoading.value = false;
     });

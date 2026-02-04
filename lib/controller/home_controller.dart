@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:driver/utils/app_logger.dart';
+import 'package:driver/utils/location_permission_helper.dart';
 
 class HomeController extends GetxController {
   RxInt selectedIndex = 0.obs;
@@ -110,174 +111,100 @@ class HomeController extends GetxController {
 
   updateCurrentLocation() async {
     AppLogger.debug("updateCurrentLocation called.", tag: "HomeController");
-    PermissionStatus permissionStatus = await location.hasPermission();
-    AppLogger.info("Location permission status: $permissionStatus",
+
+    // Use the new LocationPermissionHelper
+    final hasPermission =
+        await LocationPermissionHelper.checkAndRequestLocationPermission(
+      showEducationalDialog: true,
+    );
+
+    if (!hasPermission) {
+      AppLogger.warning("Location permission not granted.",
+          tag: "HomeController");
+      isLoading.value = false;
+      update();
+      return;
+    }
+
+    // Request background location permission for drivers
+    final hasBackgroundPermission =
+        await LocationPermissionHelper.requestBackgroundLocationPermission();
+    if (!hasBackgroundPermission) {
+      AppLogger.warning(
+          "Background location permission not granted. App will work with limited functionality.",
+          tag: "HomeController");
+      // Continue anyway - app can work with "While Using" permission
+    }
+
+    // Permission granted, set up location tracking
+    location.enableBackgroundMode(enable: true);
+    location.changeSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: double.parse(Constant.driverLocationUpdate.toString()),
+        interval: 2000);
+    AppLogger.info("Location background mode enabled and settings changed.",
         tag: "HomeController");
 
-    if (permissionStatus == PermissionStatus.granted) {
-      location.enableBackgroundMode(enable: true);
-      location.changeSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter:
-              double.parse(Constant.driverLocationUpdate.toString()),
-          interval: 2000);
-      AppLogger.info("Location background mode enabled and settings changed.",
-          tag: "HomeController");
-
-      _locationSubscription = location.onLocationChanged.listen((locationData) {
-        if (locationData.latitude != null && locationData.longitude != null) {
-          //EDIT: Ensure valid location data
-          Constant.currentLocation = LocationLatLng(
-              latitude: locationData.latitude,
-              longitude: locationData.longitude);
-          AppLogger.debug(
-              "Location updated: ${locationData.latitude}, ${locationData.longitude}",
-              tag: "HomeController");
-
-          // Update search location if driver has moved significantly
-          _updateSearchLocationIfNeeded(
-              locationData.latitude!, locationData.longitude!);
-
-          //EDIT: Set location initialized flag to true after first valid location
-          if (!isLocationInitialized.value) {
-            //EDIT
-            isLocationInitialized.value = true; //EDIT
-            AppLogger.info("Location initialized for the first time.",
-                tag: "HomeController"); //EDIT
-          } //EDIT
-
-          FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
-              .then((value) {
-            if (value != null) {
-              DriverUserModel driverUserModel = value;
-              if (driverUserModel.isOnline == true) {
-                driverUserModel.location = LocationLatLng(
-                    latitude: locationData.latitude,
-                    longitude: locationData.longitude);
-                GeoFirePoint position = Geoflutterfire().point(
-                    latitude: locationData.latitude!,
-                    longitude: locationData.longitude!);
-
-                driverUserModel.position = Positions(
-                    geoPoint: position.geoPoint, geohash: position.hash);
-                driverUserModel.rotation = locationData.heading;
-                FireStoreUtils.updateDriverUser(driverUserModel);
-                AppLogger.debug(
-                    "Driver location and rotation updated in Firestore.",
-                    tag: "HomeController");
-              } else {
-                AppLogger.info(
-                    "Driver is offline, not updating location in Firestore.",
-                    tag: "HomeController");
-              }
-            } else {
-              AppLogger.warning(
-                  "Driver profile not found when trying to update location.",
-                  tag: "HomeController");
-            }
-          }).catchError((error) {
-            AppLogger.error(
-                "Error getting driver profile for location update: $error",
-                tag: "HomeController",
-                error: error);
-          });
-        } else {
-          //EDIT
-          AppLogger.warning(
-              "Received null latitude or longitude from location update.",
-              tag: "HomeController"); //EDIT
-        } //EDIT
-      });
-    } else {
-      AppLogger.warning(
-          "Location permission not granted, requesting permission.",
-          tag: "HomeController");
-      location.requestPermission().then((permissionStatus) {
-        AppLogger.info(
-            "Location permission requested, new status: $permissionStatus",
+    _locationSubscription = location.onLocationChanged.listen((locationData) {
+      if (locationData.latitude != null && locationData.longitude != null) {
+        Constant.currentLocation = LocationLatLng(
+            latitude: locationData.latitude, longitude: locationData.longitude);
+        AppLogger.debug(
+            "Location updated: ${locationData.latitude}, ${locationData.longitude}",
             tag: "HomeController");
-        if (permissionStatus == PermissionStatus.granted) {
-          location.enableBackgroundMode(enable: true);
-          location.changeSettings(
-              accuracy: LocationAccuracy.high,
-              distanceFilter:
-                  double.parse(Constant.driverLocationUpdate.toString()),
-              interval: 2000);
-          AppLogger.info(
-              "Location background mode enabled and settings changed after permission request.",
-              tag: "HomeController");
 
-          _locationSubscription =
-              location.onLocationChanged.listen((locationData) async {
-            if (locationData.latitude != null &&
-                locationData.longitude != null) {
-              //EDIT: Ensure valid location data
-              Constant.currentLocation = LocationLatLng(
+        // Update search location if driver has moved significantly
+        _updateSearchLocationIfNeeded(
+            locationData.latitude!, locationData.longitude!);
+
+        if (!isLocationInitialized.value) {
+          isLocationInitialized.value = true;
+          AppLogger.info("Location initialized for the first time.",
+              tag: "HomeController");
+        }
+
+        FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
+            .then((value) {
+          if (value != null) {
+            DriverUserModel driverUserModel = value;
+            if (driverUserModel.isOnline == true) {
+              driverUserModel.location = LocationLatLng(
                   latitude: locationData.latitude,
                   longitude: locationData.longitude);
+              GeoFirePoint position = Geoflutterfire().point(
+                  latitude: locationData.latitude!,
+                  longitude: locationData.longitude!);
+
+              driverUserModel.position = Positions(
+                  geoPoint: position.geoPoint, geohash: position.hash);
+              driverUserModel.rotation = locationData.heading;
+              FireStoreUtils.updateDriverUser(driverUserModel);
               AppLogger.debug(
-                  "Location updated (after permission request): ${locationData.latitude}, ${locationData.longitude}",
+                  "Driver location and rotation updated in Firestore.",
                   tag: "HomeController");
-
-              // Update search location if driver has moved significantly
-              _updateSearchLocationIfNeeded(
-                  locationData.latitude!, locationData.longitude!);
-
-              //EDIT: Set location initialized flag to true after first valid location (after permission request)
-              if (!isLocationInitialized.value) {
-                //EDIT
-                isLocationInitialized.value = true; //EDIT
-                AppLogger.info(
-                    "Location initialized for the first time (after permission request).",
-                    tag: "HomeController"); //EDIT
-              } //EDIT
-
-              FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
-                  .then((value) {
-                if (value != null) {
-                  DriverUserModel driverUserModel = value;
-                  if (driverUserModel.isOnline == true) {
-                    driverUserModel.location = LocationLatLng(
-                        latitude: locationData.latitude,
-                        longitude: locationData.longitude);
-                    driverUserModel.rotation = locationData.heading;
-                    GeoFirePoint position = Geoflutterfire().point(
-                        latitude: locationData.latitude!,
-                        longitude: locationData.longitude!);
-
-                    driverUserModel.position = Positions(
-                        geoPoint: position.geoPoint, geohash: position.hash);
-
-                    FireStoreUtils.updateDriverUser(driverUserModel);
-                    AppLogger.debug(
-                        "Driver location and rotation updated in Firestore (after permission request).",
-                        tag: "HomeController");
-                  } else {
-                    AppLogger.info(
-                        "Driver is offline, not updating location in Firestore (after permission request).",
-                        tag: "HomeController");
-                  }
-                } else {
-                  AppLogger.warning(
-                      "Driver profile not found when trying to update location (after permission request).",
-                      tag: "HomeController");
-                }
-              }).catchError((error) {
-                AppLogger.error(
-                    "Error getting driver profile for location update (after permission request): $error",
-                    tag: "HomeController",
-                    error: error);
-              });
             } else {
-              //EDIT
-              AppLogger.warning(
-                  "Received null latitude or longitude from location update (after permission request).",
-                  tag: "HomeController"); //EDIT
-            } //EDIT
-          });
-        }
-      });
-    }
+              AppLogger.info(
+                  "Driver is offline, not updating location in Firestore.",
+                  tag: "HomeController");
+            }
+          } else {
+            AppLogger.warning(
+                "Driver profile not found when trying to update location.",
+                tag: "HomeController");
+          }
+        }).catchError((error) {
+          AppLogger.error(
+              "Error getting driver profile for location update: $error",
+              tag: "HomeController",
+              error: error);
+        });
+      } else {
+        AppLogger.warning(
+            "Received null latitude or longitude from location update.",
+            tag: "HomeController");
+      }
+    });
+
     isLoading.value = false;
     update();
     AppLogger.debug("HomeController isLoading set to false.",

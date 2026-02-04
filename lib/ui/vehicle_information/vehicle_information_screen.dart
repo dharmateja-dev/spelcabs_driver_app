@@ -690,54 +690,61 @@ class VehicleInformationScreen extends StatelessWidget {
                                     controller.driverRulesList.value =
                                         snapshot.data!;
 
-                                    return ListBody(
-                                      children: snapshot.data!
-                                          .map((item) => CheckboxListTile(
-                                                activeColor: themeChange
-                                                        .getThem()
-                                                    ? AppColors.darkModePrimary
-                                                    : AppColors.primary,
-                                                checkColor:
-                                                    themeChange.getThem()
-                                                        ? Colors.black
-                                                        : Colors.white,
-                                                value: controller
-                                                            .selectedDriverRulesList
-                                                            .indexWhere(
-                                                                (element) =>
-                                                                    element
-                                                                        .id ==
-                                                                    item.id) ==
-                                                        -1
-                                                    ? false
-                                                    : true,
-                                                title: Text(
-                                                    Constant.localizationName(
-                                                        item.name),
-                                                    style: GoogleFonts.poppins(
-                                                        fontWeight:
-                                                            FontWeight.w400)),
-                                                onChanged: !controller
-                                                        .isVehicleInfoSubmitted
-                                                    ? (value) {
-                                                        if (value == true) {
-                                                          controller
-                                                              .selectedDriverRulesList
-                                                              .add(item);
-                                                        } else {
-                                                          controller
-                                                              .selectedDriverRulesList
-                                                              .removeAt(controller
+                                    return Obx(
+                                      () => ListBody(
+                                        children: snapshot.data!
+                                            .map((item) => CheckboxListTile(
+                                                  activeColor:
+                                                      themeChange.getThem()
+                                                          ? AppColors
+                                                              .darkModePrimary
+                                                          : AppColors.primary,
+                                                  checkColor:
+                                                      themeChange.getThem()
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                  value: controller
+                                                      .selectedDriverRulesList
+                                                      .any((element) =>
+                                                          element.id ==
+                                                          item.id),
+                                                  title: Text(
+                                                      Constant.localizationName(
+                                                          item.name),
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400)),
+                                                  onChanged: !controller
+                                                          .isVehicleInfoSubmitted
+                                                      ? (value) {
+                                                          if (value == true) {
+                                                            // Only add if not already present
+                                                            if (!controller
+                                                                .selectedDriverRulesList
+                                                                .any((rule) =>
+                                                                    rule.id ==
+                                                                    item.id)) {
+                                                              controller
                                                                   .selectedDriverRulesList
-                                                                  .indexWhere((element) =>
-                                                                      element
-                                                                          .id ==
-                                                                      item.id));
+                                                                  .add(item);
+                                                            }
+                                                          } else {
+                                                            // Remove by filtering out the item
+                                                            controller
+                                                                .selectedDriverRulesList
+                                                                .removeWhere(
+                                                                    (element) =>
+                                                                        element
+                                                                            .id ==
+                                                                        item.id);
+                                                          }
                                                         }
-                                                      }
-                                                    : null,
-                                              ))
-                                          .toList(),
+                                                      : null,
+                                                ))
+                                            .toList(),
+                                      ),
                                     );
                                   },
                                 ),
@@ -887,8 +894,8 @@ class VehicleInformationScreen extends StatelessWidget {
                                                 : null,
                                             seats: controller
                                                 .seatsController.value.text,
-                                            driverRules: controller
-                                                .selectedDriverRulesList);
+                                            driverRules:
+                                                List<DriverRulesModel>.from(controller.selectedDriverRulesList.toList()));
 
                                         await FireStoreUtils.updateDriverUser(
                                                 controller.driverModel.value)

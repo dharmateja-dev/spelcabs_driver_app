@@ -5,10 +5,10 @@ import 'package:get/get.dart';
 class InterCityOrderController extends GetxController {
   @override
   void onInit() {
-    // TODO: implement onInit\
     getPayment();
     super.onInit();
   }
+
   Rx<PaymentModel> paymentModel = PaymentModel().obs;
   RxBool isLoading = true.obs;
 

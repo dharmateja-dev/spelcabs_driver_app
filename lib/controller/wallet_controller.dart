@@ -58,7 +58,6 @@ class WalletController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     getPaymentData();
     print("getpayementData called successfully");
     super.onInit();
@@ -105,9 +104,7 @@ class WalletController extends GetxController {
 
   getTraction() async {
     await FireStoreUtils.getWalletTransaction().then((value) {
-      if (value != null) {
-        transactionList.value = value;
-      }
+      transactionList.value = value;
     });
   }
 
@@ -167,7 +164,7 @@ class WalletController extends GetxController {
     // Generate checksum (X-VERIFY header)
     // SHA256(base64Payload + "/pg/v1/pay" + saltKey) + ### + saltIndex
     String checksum = sha256
-        .convert(utf8.encode(base64Payload + "/pg/v1/pay" + saltKey))
+        .convert(utf8.encode("$base64Payload/pg/v1/pay$saltKey"))
         .toString();
     String xVerify = "$checksum###$saltIndex";
 
@@ -256,7 +253,7 @@ class WalletController extends GetxController {
       }
     });
 
-    ShowToastDialog.showToast("Amount added in your wallet.");
+    ShowToastDialog.showToast("Amount added in your wallet.".tr);
   }
 
   // Strip
@@ -290,7 +287,7 @@ class WalletController extends GetxController {
       }
     } catch (e, s) {
       log("$e \n$s");
-      ShowToastDialog.showToast("exception:$e \n$s");
+      ShowToastDialog.showToast("exception:$e \n$s".tr);
     }
   }
 
@@ -298,7 +295,7 @@ class WalletController extends GetxController {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) {
         Get.back();
-        ShowToastDialog.showToast("Payment successfully");
+        ShowToastDialog.showToast("Payment successfully".tr);
         walletTopUp();
       });
     } on StripeException catch (e) {
@@ -379,10 +376,10 @@ class WalletController extends GetxController {
       final data = jsonDecode(response.body);
       Get.to(MercadoPagoScreen(initialURl: data['init_point']))!.then((value) {
         if (value) {
-          ShowToastDialog.showToast("Payment Successful!!");
+          ShowToastDialog.showToast("Payment Successful!!".tr);
           walletTopUp();
         } else {
-          ShowToastDialog.showToast("Payment UnSuccessful!!");
+          ShowToastDialog.showToast("Payment UnSuccessful!!".tr);
         }
       });
     } else {
@@ -560,11 +557,11 @@ class WalletController extends GetxController {
           htmlData: value!, payFastSettingData: paymentModel.value.payfast!));
       if (isDone) {
         Get.back();
-        ShowToastDialog.showToast("Payment successfully");
+        ShowToastDialog.showToast("Payment successfully".tr);
         walletTopUp();
       } else {
         Get.back();
-        ShowToastDialog.showToast("Payment Failed");
+        ShowToastDialog.showToast("Payment Failed".tr);
       }
     });
   }
@@ -702,7 +699,8 @@ class WalletController extends GetxController {
     if (data["body"]["txnToken"] == null ||
         data["body"]["txnToken"].toString().isEmpty) {
       Get.back();
-      ShowToastDialog.showToast("something went wrong, please contact admin.");
+      ShowToastDialog.showToast(
+          "something went wrong, please contact admin.".tr);
     }
     return GetPaymentTxtTokenModel.fromJson(data);
   }
@@ -744,7 +742,7 @@ class WalletController extends GetxController {
 
   void handleExternalWaller(ExternalWalletResponse response) {
     Get.back();
-    ShowToastDialog.showToast("Payment Processing!! via");
+    ShowToastDialog.showToast("Payment Processing!! via".tr);
   }
 
   void handlePaymentError(PaymentFailureResponse response) {
@@ -768,8 +766,8 @@ class WalletController extends GetxController {
             ShowToastDialog.showToast("Payment Successful!!");
             walletTopUp();
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Payment Unsuccessful!! \n"),
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("Payment Unsuccessful!! \n".tr),
               backgroundColor: Colors.red,
             ));
           }

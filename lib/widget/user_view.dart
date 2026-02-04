@@ -364,6 +364,7 @@ class _UserViewState extends State<UserView> {
   final int _maxRetries = 3;
   final Map<String, UserModel> _memoryCache = {};
   Stream<UserModel?>? _userStream;
+  StreamController<UserModel?>? _streamController;
   int _retryCount = 0;
   Timer? _retryTimer;
 
@@ -384,6 +385,7 @@ class _UserViewState extends State<UserView> {
   @override
   void dispose() {
     _retryTimer?.cancel();
+    _streamController?.close();
     super.dispose();
   }
 
@@ -402,6 +404,7 @@ class _UserViewState extends State<UserView> {
 
   Stream<UserModel?> _createUserStream(String userId) {
     final StreamController<UserModel?> controller = StreamController();
+    _streamController = controller;
     UserModel? cachedUser;
 
     // 1. Check memory cache

@@ -378,8 +378,8 @@ class FireStoreUtils {
     if (firebaseUser != null) {
       try {
         DocumentSnapshot documentSnapshot = await fireStore
-            .collection(
-                "driverUsers") // Assuming "driverUsers" is the collection name for drivers
+            .collection(CollectionName
+                .driverUsers) // Use constant to ensure consistency with actual Firestore collection
             .doc(firebaseUser.uid)
             .get();
         if (documentSnapshot.exists) {
@@ -606,7 +606,12 @@ class FireStoreUtils {
           .collection(CollectionName.users)
           .doc(uuid)
           .get()
-          .timeout(const Duration(seconds: 5));
+          .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw TimeoutException('Failed to fetch user data');
+        },
+      );
 
       if (document.exists) {
         AppLogger.info("User data retrieved for UID: $uuid",
@@ -617,10 +622,14 @@ class FireStoreUtils {
       AppLogger.warning("User document not found for UID: $uuid",
           tag: "FireStoreUtils");
       return null;
+    } on TimeoutException catch (e) {
+      AppLogger.error("Timeout fetching user $uuid",
+          tag: "FireStoreUtils", error: e);
+      return null; // Return null instead of rethrowing
     } catch (e, s) {
       AppLogger.error("Failed to get user $uuid: $e",
           tag: "FireStoreUtils", error: e, stackTrace: s);
-      rethrow;
+      return null; // Return null instead of rethrowing
     }
   }
   // static Future<UserModel?> getCustomer(String uuid) async {

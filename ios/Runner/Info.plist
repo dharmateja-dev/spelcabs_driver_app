@@ -45,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires access to your location to show nearby ride requests and track your position during rides.</string>
+
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires continuous access to your location, even in the background, to track your position during active rides and update your availability to customers.</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app requires continuous access to your location to track rides and update your position.</string>
+
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+
 </dict>
 </plist>
