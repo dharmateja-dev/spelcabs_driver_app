@@ -15,8 +15,6 @@ class Styles {
           onSecondary: isDarkTheme ? AppColors.darkBackground : AppColors.background,
           error: isDarkTheme ? AppColors.darkBackground : AppColors.background,
           onError: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          background: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onBackground: isDarkTheme ? AppColors.darkBackground : AppColors.background,
           surface: isDarkTheme ? AppColors.darkBackground : AppColors.background,
           onSurface: isDarkTheme ? AppColors.darkBackground : AppColors.background),
       primaryColor: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,

@@ -12,7 +12,7 @@ class PayFastScreen extends StatefulWidget {
   final String htmlData;
   final Payfast payFastSettingData;
 
-  const PayFastScreen({Key? key, required this.htmlData, required this.payFastSettingData}) : super(key: key);
+  const PayFastScreen({super.key, required this.htmlData, required this.payFastSettingData});
 
   @override
   State<PayFastScreen> createState() => _PayFastScreenState();
@@ -27,7 +27,7 @@ class _PayFastScreenState extends State<PayFastScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -92,7 +92,7 @@ class _PayFastScreenState extends State<PayFastScreen> {
             TextButton(
               child:  Text(
                 'Exit'.tr,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
                 Get.back();
@@ -102,7 +102,7 @@ class _PayFastScreenState extends State<PayFastScreen> {
             TextButton(
               child:  Text(
                 'Continue Payment'.tr,
-                style: TextStyle(color: Colors.green),
+                style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {
                 Get.back();

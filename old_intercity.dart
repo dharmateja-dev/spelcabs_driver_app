@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/controller/home_intercity_controller.dart';
@@ -8,7 +8,6 @@ import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'dart:developer';
 
 import 'package:driver/utils/app_logger.dart';
 
@@ -59,7 +58,7 @@ class IntercityController extends GetxController {
     }
   }
 
-  getOrder() async {
+  Future<void> getOrder() async {
     try {
       AppLogger.info("Starting getOrder() function...",
           tag: "IntercityController");
@@ -67,11 +66,11 @@ class IntercityController extends GetxController {
       intercityServiceOrder.clear();
 
       // helpers
-      String _norm(String s) => s.trim().toLowerCase();
-      bool _eqOrContains(String? haystack, String needle) {
+      String norm(String s) => s.trim().toLowerCase();
+      bool eqOrContains(String? haystack, String needle) {
         if (haystack == null) return false;
-        final h = _norm(haystack);
-        final n = _norm(needle);
+        final h = norm(haystack);
+        final n = norm(needle);
         return h == n || h.contains(n);
       }
 
@@ -131,17 +130,17 @@ class IntercityController extends GetxController {
           bool sourceOk = true;
           if (srcText.isNotEmpty) {
             sourceOk =
-                _eqOrContains(data['sourceLocationName'] as String?, srcText) ||
-                    _eqOrContains(data['sourceName_norm'] as String?,
+                eqOrContains(data['sourceLocationName'] as String?, srcText) ||
+                    eqOrContains(data['sourceName_norm'] as String?,
                         srcText); // ok if absent
           }
 
           // ---- Client-side DESTINATION match (lenient) ----
           bool destOk = true;
           if (dstText.isNotEmpty) {
-            destOk = _eqOrContains(
+            destOk = eqOrContains(
                     data['destinationLocationName'] as String?, dstText) ||
-                _eqOrContains(data['destinationName_norm'] as String?,
+                eqOrContains(data['destinationName_norm'] as String?,
                     dstText); // ok if absent
           }
 
@@ -153,12 +152,8 @@ class IntercityController extends GetxController {
           bool alreadyAccepted = false;
           final accepted = orderModel.acceptedDriverId;
           if (accepted != null) {
-            if (accepted is List) {
-              alreadyAccepted = accepted.cast<String>().contains(uid);
-            } else if (accepted is String) {
-              alreadyAccepted = accepted == uid;
-            }
-          }
+            alreadyAccepted = accepted.cast<String>().contains(uid);
+                    }
 
           if (!alreadyAccepted) {
             intercityServiceOrder.add(orderModel);

@@ -11,7 +11,7 @@ class ParcelDetailsController extends GetxController {
   }
 
   Rx<InterCityOrderModel> orderModel = InterCityOrderModel().obs;
-  getArgument() async {
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       orderModel.value = argumentData['orderModel'];

@@ -119,7 +119,7 @@ class ProfileScreen extends StatelessWidget {
                         ? Constant.loader(context)
                         : Container(
                             decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.background,
+                                color: Theme.of(context).colorScheme.surface,
                                 borderRadius: const BorderRadius.only(
                                     topLeft: Radius.circular(25),
                                     topRight: Radius.circular(25))),
@@ -324,7 +324,7 @@ class ProfileScreen extends StatelessWidget {
         });
   }
 
-  buildBottomSheet(BuildContext context, ProfileController controller) {
+  Future<dynamic> buildBottomSheet(BuildContext context, ProfileController controller) {
     return showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -361,7 +361,7 @@ class ProfileScreen extends StatelessWidget {
                                   size: 32,
                                 )),
                             Padding(
-                              padding: EdgeInsets.only(top: 3),
+                              padding: const EdgeInsets.only(top: 3),
                               child: Text("Camera".tr),
                             ),
                           ],
@@ -381,7 +381,7 @@ class ProfileScreen extends StatelessWidget {
                                   size: 32,
                                 )),
                             Padding(
-                              padding: EdgeInsets.only(top: 3),
+                              padding: const EdgeInsets.only(top: 3),
                               child: Text("Gallery".tr),
                             ),
                           ],

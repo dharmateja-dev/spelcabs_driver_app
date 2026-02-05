@@ -451,7 +451,7 @@ class DetailsUploadScreen extends StatelessWidget {
         });
   }
 
-  buildBottomSheet(
+  Future<dynamic> buildBottomSheet(
       BuildContext context, DetailsUploadController controller, String type) {
     return showModalBottomSheet(
         context: context,

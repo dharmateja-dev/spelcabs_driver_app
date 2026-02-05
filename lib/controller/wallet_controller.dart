@@ -18,7 +18,6 @@ import 'package:driver/model/driver_user_model.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:driver/payment/getPaytmTxtToken.dart';
-import 'package:flutter/services.dart';
 
 import 'dart:convert';
 import 'dart:io';
@@ -63,7 +62,7 @@ class WalletController extends GetxController {
     super.onInit();
   }
 
-  getPaymentData() async {
+  Future<void> getPaymentData() async {
     getTraction();
     getUser();
     await FireStoreUtils().getPayment().then((value) {
@@ -87,7 +86,7 @@ class WalletController extends GetxController {
     update();
   }
 
-  getUser() async {
+  Future<void> getUser() async {
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
       if (value != null) {
@@ -102,7 +101,7 @@ class WalletController extends GetxController {
     });
   }
 
-  getTraction() async {
+  Future<void> getTraction() async {
     await FireStoreUtils.getWalletTransaction().then((value) {
       transactionList.value = value;
     });
@@ -230,7 +229,7 @@ class WalletController extends GetxController {
     }
   }
 
-  walletTopUp() async {
+  Future<void> walletTopUp() async {
     WalletTransactionModel transactionModel = WalletTransactionModel(
         id: Constant.getUuid(),
         amount: amountController.value.text,
@@ -291,7 +290,7 @@ class WalletController extends GetxController {
     }
   }
 
-  displayStripePaymentSheet({required String amount}) async {
+  Future<void> displayStripePaymentSheet({required String amount}) async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) {
         Get.back();
@@ -308,7 +307,7 @@ class WalletController extends GetxController {
     }
   }
 
-  createStripeIntent({required String amount}) async {
+  Future<dynamic> createStripeIntent({required String amount}) async {
     try {
       Map<String, dynamic> body = {
         'amount': ((double.parse(amount) * 100).round()).toString(),
@@ -339,7 +338,7 @@ class WalletController extends GetxController {
   }
 
   //mercadoo
-  mercadoPagoMakePayment(
+  Future<Null> mercadoPagoMakePayment(
       {required BuildContext context, required String amount}) async {
     final headers = {
       'Authorization': 'Bearer ${paymentModel.value.mercadoPago!.accessToken}',
@@ -456,7 +455,7 @@ class WalletController extends GetxController {
   // }
 
   ///PayStack Payment Method
-  payStackPayment(String totalAmount) async {
+  Future<void> payStackPayment(String totalAmount) async {
     await PayStackURLGen.payStackURLGen(
             amount: (double.parse(totalAmount) * 100).toString(),
             currency: "NGN",
@@ -488,7 +487,7 @@ class WalletController extends GetxController {
   }
 
   //flutter wave Payment Method
-  flutterWaveInitiatePayment(
+  Future<Null> flutterWaveInitiatePayment(
       {required BuildContext context, required String amount}) async {
     final url = Uri.parse('https://api.flutterwave.com/v3/payments');
     final headers = {
@@ -535,7 +534,7 @@ class WalletController extends GetxController {
 
   String? _ref;
 
-  setRef() {
+  void setRef() {
     maths.Random numRef = maths.Random();
     int year = DateTime.now().year;
     int refNumber = numRef.nextInt(20000);
@@ -547,7 +546,7 @@ class WalletController extends GetxController {
   }
 
   // payFast
-  payFastPayment({required BuildContext context, required String amount}) {
+  void payFastPayment({required BuildContext context, required String amount}) {
     PayStackURLGen.getPayHTML(
             payFastSettingData: paymentModel.value.payfast!,
             amount: amount.toString(),
@@ -567,7 +566,7 @@ class WalletController extends GetxController {
   }
 
   ///Paytm payment function
-  getPaytmCheckSum(context, {required double amount}) async {
+  Future<void> getPaytmCheckSum(context, {required double amount}) async {
     final String orderId = DateTime.now().millisecondsSinceEpoch.toString();
     String getChecksum = "${Constant.globalUrl}payments/getpaytmchecksum";
 
@@ -752,7 +751,7 @@ class WalletController extends GetxController {
   }
 
   //XenditPayment
-  xenditPayment(context, amount) async {
+  Future<void> xenditPayment(context, amount) async {
     await createXenditInvoice(amount: amount).then((model) {
       ShowToastDialog.closeLoader();
       if (model.id != null) {
@@ -820,7 +819,7 @@ class WalletController extends GetxController {
   static String orderId = '';
   static String amount = '';
 
-  orangeMakePayment(
+  Future<void> orangeMakePayment(
       {required String amount, required BuildContext context}) async {
     reset();
     var id = Constant.getUuid();
@@ -945,7 +944,7 @@ class WalletController extends GetxController {
     }
   }
 
-  static reset() {
+  static void reset() {
     accessToken = '';
     payToken = '';
     orderId = '';
@@ -953,7 +952,7 @@ class WalletController extends GetxController {
   }
 
   //Midtrans payment
-  midtransMakePayment(
+  Future<void> midtransMakePayment(
       {required String amount, required BuildContext context}) async {
     await createPaymentLink(amount: amount).then((url) {
       ShowToastDialog.closeLoader();

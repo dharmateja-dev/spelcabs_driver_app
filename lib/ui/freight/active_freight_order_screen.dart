@@ -25,7 +25,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
 class ActiveFreightOrderScreen extends StatelessWidget {
-  const ActiveFreightOrderScreen({Key? key}) : super(key: key);
+  const ActiveFreightOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -473,7 +473,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
         });
   }
 
-  otpDialog(BuildContext context, ActiveInterCityOrderController controller,
+  Dialog otpDialog(BuildContext context, ActiveInterCityOrderController controller,
       InterCityOrderModel orderModel) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 

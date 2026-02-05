@@ -47,7 +47,7 @@ class SignupController extends GetxController {
     phoneError.value = null;
   }
 
-  validateAndSignup() async {
+  Future<void> validateAndSignup() async {
     AppLogger.info("SignupController: Initiating validateAndSignup.",
         tag: "SignupController");
 

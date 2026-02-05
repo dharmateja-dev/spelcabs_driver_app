@@ -217,10 +217,8 @@ class OsmSearchPlaceController extends GetxController with GetSingleTickerProvid
       // Get current position
       GeoPoint? currentPosition = await mapController.myLocation();
 
-      if (currentPosition != null) {
-        onMapTap(currentPosition);
-      }
-    } catch (e, s) {
+      onMapTap(currentPosition);
+        } catch (e, s) {
       log("Error getting current location: $e", stackTrace: s);
       errorMessage.value = "Failed to get current location.";
     } finally {

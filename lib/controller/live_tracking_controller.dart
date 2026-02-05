@@ -62,7 +62,7 @@ class LiveTrackingController extends GetxController {
   RxBool isLoading = true.obs;
   RxString type = "".obs;
 
-  getArgument() async {
+  Future<void> getArgument() async {
     AppLogger.debug("getArgument called.", tag: "LiveTrackingController");
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
@@ -440,7 +440,7 @@ class LiveTrackingController extends GetxController {
 
   RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
 
-  addMarker(
+  void addMarker(
       {required double? latitude,
       required double? longitude,
       required String id,
@@ -457,7 +457,7 @@ class LiveTrackingController extends GetxController {
         tag: "LiveTrackingController");
   }
 
-  addMarkerSetup() async {
+  Future<void> addMarkerSetup() async {
     AppLogger.debug("addMarkerSetup called.", tag: "LiveTrackingController");
     try {
       if (Constant.selectedMapType == 'google') {
@@ -491,7 +491,7 @@ class LiveTrackingController extends GetxController {
   RxMap<PolylineId, Polyline> polyLines = <PolylineId, Polyline>{}.obs;
   PolylinePoints polylinePoints = PolylinePoints();
 
-  _addPolyLine(List<LatLng> polylineCoordinates) {
+  void _addPolyLine(List<LatLng> polylineCoordinates) {
     AppLogger.debug(
         "_addPolyLine called with ${polylineCoordinates.length} points.",
         tag: "LiveTrackingController");
@@ -696,7 +696,7 @@ class LiveTrackingController extends GetxController {
         tag: "LiveTrackingController");
   }
 
-  setOsmMarker(
+  Future<void> setOsmMarker(
       {required GeoPoint departure, required GeoPoint destination}) async {
     AppLogger.debug(
         "setOsmMarker called with departure: $departure, destination: $destination",

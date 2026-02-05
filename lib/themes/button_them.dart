@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class ButtonThem {
   const ButtonThem({Key? key});
 
-  static buildButton(
+  static Visibility buildButton(
     BuildContext context, {
     required String title,
     double btnHeight = 48,
@@ -47,7 +47,7 @@ class ButtonThem {
     );
   }
 
-  static buildBorderButton(
+  static Visibility buildBorderButton(
     BuildContext context, {
     required String title,
     double btnHeight = 50,
@@ -115,7 +115,7 @@ class ButtonThem {
     );
   }
 
-  static roundButton(
+  static Visibility roundButton(
     BuildContext context, {
     required String title,
     double btnHeight = 48,

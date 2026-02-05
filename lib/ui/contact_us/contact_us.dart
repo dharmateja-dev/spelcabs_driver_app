@@ -8,7 +8,6 @@ import 'package:driver/themes/text_field_them.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContactUsScreen extends StatelessWidget {

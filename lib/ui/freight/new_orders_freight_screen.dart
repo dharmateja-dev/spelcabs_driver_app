@@ -529,7 +529,7 @@ class NewOrderFreightScreen extends StatelessWidget {
         });
   }
 
-  offerAcceptDialog(BuildContext context, FreightController controller,
+  Future<dynamic> offerAcceptDialog(BuildContext context, FreightController controller,
       InterCityOrderModel orderModel) {
     return showModalBottomSheet(
         context: context,

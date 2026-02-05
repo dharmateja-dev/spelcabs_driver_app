@@ -18,7 +18,7 @@ class OnBoardingController extends GetxController {
   RxBool isLoading = true.obs;
   RxList<OnBoardingModel> onBoardingList = <OnBoardingModel>[].obs;
 
-  getOnBoardingData() async {
+  Future<void> getOnBoardingData() async {
     await FireStoreUtils.getOnBoardingList().then((value) {
       onBoardingList.value = value;
       isLoading.value = false;

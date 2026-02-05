@@ -214,7 +214,7 @@ class DashBoardScreen extends StatelessWidget {
     );
   }
 
-  buildAppDrawer(BuildContext context, DashBoardController controller) {
+  Drawer buildAppDrawer(BuildContext context, DashBoardController controller) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     List<DrawerItem> drawerItems = [
       DrawerItem('City'.tr, "assets/icons/ic_city.svg"),

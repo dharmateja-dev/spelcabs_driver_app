@@ -92,7 +92,7 @@ class NotificationService {
   // Track the currently open ride dialog to prevent closing unrelated dialogs
   String? _currentRideDialogId;
 
-  initInfo() async {
+  Future<void> initInfo() async {
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
       alert: true,
@@ -211,7 +211,7 @@ class NotificationService {
     log("Subscribed to topics: goRide_driver, global");
   }
 
-  static getToken() async {
+  static Future<String> getToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
     return token!;
   }

@@ -22,7 +22,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class OrderMapScreen extends StatelessWidget {
-  const OrderMapScreen({Key? key}) : super(key: key);
+  const OrderMapScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class OrderMapScreen extends StatelessWidget {
                         child: Container(
                           transform: Matrix4.translationValues(0.0, -20.0, 0.0),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(25),
                                   topRight: Radius.circular(25))),

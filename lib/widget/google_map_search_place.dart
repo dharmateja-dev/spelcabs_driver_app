@@ -33,7 +33,7 @@ class GoogleMapSearchPlacesApiState extends State<GoogleMapSearchPlacesApi> {
     });
   }
 
-  _onChanged() {
+  void _onChanged() {
     if (_sessionToken == null) {
       setState(() {
         _sessionToken = uuid.v4();

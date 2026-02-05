@@ -195,7 +195,7 @@ class FreightController extends GetxController {
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;
   RxBool isLoading = true.obs;
 
-  getDriver() async {
+  Future<void> getDriver() async {
     updateCurrentLocation();
     _driverSubscription = FireStoreUtils.fireStore
         .collection(CollectionName.driverUsers)
@@ -210,7 +210,7 @@ class FreightController extends GetxController {
 
   RxInt isActiveValue = 0.obs;
 
-  getActiveRide() {
+  void getActiveRide() {
     _activeRideSubscription = FirebaseFirestore.instance
         .collection(CollectionName.orders)
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -224,7 +224,7 @@ class FreightController extends GetxController {
 
   Location location = Location();
 
-  updateCurrentLocation() async {
+  Future<void> updateCurrentLocation() async {
     // Use the new LocationPermissionHelper
     final hasPermission =
         await LocationPermissionHelper.checkAndRequestLocationPermission(

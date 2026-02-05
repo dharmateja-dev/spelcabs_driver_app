@@ -12,7 +12,7 @@ class InterCityOrderController extends GetxController {
   Rx<PaymentModel> paymentModel = PaymentModel().obs;
   RxBool isLoading = true.obs;
 
-  getPayment() async {
+  Future<void> getPayment() async {
     await FireStoreUtils().getPayment().then((value) {
       if (value != null) {
         paymentModel.value = value;

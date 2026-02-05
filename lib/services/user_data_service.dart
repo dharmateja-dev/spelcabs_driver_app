@@ -47,10 +47,8 @@ class UserDataService {
   static UserModel? _getCachedUser(String userId) {
     try {
       final cachedData = Preferences.getString("user_$userId");
-      if (cachedData != null) {
-        return UserModel.fromJson(jsonDecode(cachedData));
-      }
-    } catch (e, s) {
+      return UserModel.fromJson(jsonDecode(cachedData));
+        } catch (e, s) {
       AppLogger.error("Cache read error: $e", error: e, stackTrace: s);
     }
     return null;

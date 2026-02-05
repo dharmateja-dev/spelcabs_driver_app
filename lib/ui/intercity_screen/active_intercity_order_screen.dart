@@ -26,7 +26,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
 class ActiveIntercityOrderScreen extends StatelessWidget {
-  const ActiveIntercityOrderScreen({Key? key}) : super(key: key);
+  const ActiveIntercityOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
                     height: Responsive.height(100, context),
                     width: Responsive.width(100, context),
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25))),
@@ -540,7 +540,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
         });
   }
 
-  otpDialog(BuildContext context, ActiveInterCityOrderController controller,
+  Dialog otpDialog(BuildContext context, ActiveInterCityOrderController controller,
       InterCityOrderModel orderModel) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 

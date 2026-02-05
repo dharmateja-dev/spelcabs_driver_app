@@ -41,7 +41,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
     super.initState();
   }
 
-  callTransaction() {
+  void callTransaction() {
     Timer.periodic(const Duration(seconds: 3), (Timer t) {
       transactionstatus(accessToken: widget.accessToken, amount: widget.amount, orderId: widget.orderId, payToken: widget.payToken).then((value) {
         if (value == 'SUCCESS') {
@@ -53,7 +53,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
     });
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -149,7 +149,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
             TextButton(
               child: Text(
                 'Cancel'.tr,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
                 Navigator.of(context).pop(false);
@@ -159,7 +159,7 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
             TextButton(
               child: Text(
                 'Continue'.tr,
-                style: TextStyle(color: Colors.green),
+                style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {
                 Navigator.of(context).pop(false);

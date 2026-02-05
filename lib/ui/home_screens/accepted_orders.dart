@@ -15,7 +15,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class AcceptedOrders extends StatelessWidget {
-  const AcceptedOrders({Key? key}) : super(key: key);
+  const AcceptedOrders({super.key});
 
   @override
   Widget build(BuildContext context) {

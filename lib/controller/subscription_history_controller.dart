@@ -13,7 +13,7 @@ class SubscriptionHistoryController extends GetxController {
     super.onInit();
   }
 
-  getAllSubscriptionList() async {
+  Future<void> getAllSubscriptionList() async {
     isLoading.value = true;
     subscriptionHistoryList.value =
         await FireStoreUtils.getSubscriptionHistory();

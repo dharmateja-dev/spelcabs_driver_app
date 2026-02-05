@@ -421,7 +421,7 @@ class FireStoreUtils {
     return null;
   }
 
-  getGoogleAPIKey() async {
+  Future<void> getGoogleAPIKey() async {
     AppLogger.debug("getGoogleAPIKey called.", tag: "FireStoreUtils");
     await fireStore
         .collection(CollectionName.settings)
@@ -1475,7 +1475,7 @@ class FireStoreUtils {
     yield* getNearestFreightOrderRequestController!.stream;
   }
 
-  closeStream() {
+  void closeStream() {
     AppLogger.debug("closeStream called for nearest order requests.",
         tag: "FireStoreUtils");
     if (getNearestOrderRequestController != null) {
@@ -1485,7 +1485,7 @@ class FireStoreUtils {
     }
   }
 
-  closeFreightStream() {
+  void closeFreightStream() {
     AppLogger.debug(
         "closeFreightStream called for nearest freight order requests.",
         tag: "FireStoreUtils");
@@ -1585,7 +1585,7 @@ class FireStoreUtils {
     yield* getNearestInterCityOrderRequestController!.stream;
   }
 
-  closeInterCityStream() {
+  void closeInterCityStream() {
     AppLogger.debug("closeInterCityStream called.", tag: "FireStoreUtils");
     if (getNearestInterCityOrderRequestController != null) {
       getNearestInterCityOrderRequestController!.close();

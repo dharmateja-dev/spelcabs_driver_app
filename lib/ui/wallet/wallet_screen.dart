@@ -6,7 +6,6 @@ import 'package:driver/model/intercity_order_model.dart';
 import 'package:driver/model/order_model.dart';
 import 'package:driver/model/wallet_transaction_model.dart';
 import 'package:driver/model/withdraw_model.dart';
-import 'package:driver/payment/createRazorPayOrderModel.dart';
 import 'package:driver/payment/rozorpayConroller.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/button_them.dart';
@@ -24,7 +23,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:driver/payment/phonepeModel.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -337,7 +335,7 @@ class WalletScreen extends StatelessWidget {
         });
   }
 
-  paymentMethodDialog(BuildContext context, WalletController controller) {
+  Future<dynamic> paymentMethodDialog(BuildContext context, WalletController controller) {
     return showModalBottomSheet(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -706,7 +704,7 @@ class WalletScreen extends StatelessWidget {
         });
   }
 
-  showTransactionDetails(
+  Future<dynamic> showTransactionDetails(
       {required BuildContext context,
       required WalletTransactionModel walletTransactionModel}) {
     return showModalBottomSheet(
@@ -1005,7 +1003,7 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  withdrawAmountBottomSheet(BuildContext context, WalletController controller) {
+  Future<dynamic> withdrawAmountBottomSheet(BuildContext context, WalletController controller) {
     return showModalBottomSheet(
         context: context,
         isScrollControlled: true,

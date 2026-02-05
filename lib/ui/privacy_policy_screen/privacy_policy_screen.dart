@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class DriverPrivacyPolicyScreen extends StatelessWidget {
-  const DriverPrivacyPolicyScreen({Key? key}) : super(key: key);
+  const DriverPrivacyPolicyScreen({super.key});
 
   // ===== STYLES =====
 

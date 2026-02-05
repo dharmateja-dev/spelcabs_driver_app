@@ -43,12 +43,12 @@ class GeoFirePoint {
     return kmDistanceBetween(from: coords, to: Coordinates(lat, lng));
   }
 
-  get data {
+  Map<String, Object> get data {
     return {'geopoint': geoPoint, 'geohash': hash};
   }
 
   /// haversine distance between [GeoFirePoint] and ([lat], [lng])
-  haversineDistance({required double lat, required double lng}) {
+  double haversineDistance({required double lat, required double lng}) {
     return GeoFirePoint.kmDistanceBetween(
         from: coords, to: Coordinates(lat, lng));
   }

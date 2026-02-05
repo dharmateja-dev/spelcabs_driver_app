@@ -21,7 +21,7 @@ class BankDetailsController extends GetxController {
   RxBool isLoading = true.obs;
   Rx<BankDetailsModel> bankDetailsModel = BankDetailsModel().obs;
 
-  getBankDetails() async {
+  Future<void> getBankDetails() async {
     await FireStoreUtils.getBankDetails().then((value) {
       if (value != null) {
         bankDetailsModel.value = value;

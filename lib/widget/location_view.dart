@@ -11,7 +11,7 @@ class LocationView extends StatelessWidget {
   final String? sourceLocation;
   final String? destinationLocation;
 
-  const LocationView({Key? key, this.sourceLocation, this.destinationLocation}) : super(key: key);
+  const LocationView({super.key, this.sourceLocation, this.destinationLocation});
 
   @override
   Widget build(BuildContext context) {

@@ -32,7 +32,7 @@ class ContactUsController extends GetxController {
     return error == null;
   }
 
-  getContactUsInformation() async {
+  Future<void> getContactUsInformation() async {
     await FireStoreUtils.fireStore
         .collection(CollectionName.settings)
         .doc("contact_us")

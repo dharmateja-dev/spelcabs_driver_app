@@ -22,7 +22,7 @@ class OtpController extends GetxController {
     super.onInit();
   }
 
-  getArgument() async {
+  Future<void> getArgument() async {
     AppLogger.info("OtpController: Retrieving arguments.",
         tag: "OtpController");
     dynamic argumentData = Get.arguments;

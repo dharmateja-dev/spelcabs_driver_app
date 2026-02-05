@@ -75,7 +75,7 @@ class Utils {
     return await Geolocator.getCurrentPosition();
   }
 
-  static redirectMap(
+  static Future<void> redirectMap(
       {required String name,
       required double latitude,
       required double longLatitude}) async {

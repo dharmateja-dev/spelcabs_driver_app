@@ -52,7 +52,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
               children: [
                 // Map
                 OSMFlutter(
-                  controller: controller.mapController!,
+                  controller: controller.mapController,
                   osmOption: OSMOption(
                     userTrackingOption: const UserTrackingOption(
                       enableTracking: true,
@@ -263,7 +263,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                                 // Selected location info
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.location_on,
                                       color: AppColors.primary,
                                       size: 24,
@@ -305,7 +305,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                                       child: OutlinedButton(
                                         onPressed: controller.clearSelection,
                                         style: OutlinedButton.styleFrom(
-                                          side: BorderSide(color: AppColors.primary),
+                                          side: const BorderSide(color: AppColors.primary),
                                           padding: const EdgeInsets.symmetric(vertical: 12),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),

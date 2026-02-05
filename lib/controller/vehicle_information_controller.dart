@@ -137,7 +137,7 @@ class VehicleInformationController extends GetxController {
   Rx<UnifiedVehicleModel?> selectedUnifiedVehicle =
       Rx<UnifiedVehicleModel?>(null);
 
-  getVehicleType() async {
+  Future<void> getVehicleType() async {
     isLoading.value = true;
 
     // Fetch Services (Passenger)

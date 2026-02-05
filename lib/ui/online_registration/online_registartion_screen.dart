@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class OnlineRegistrationScreen extends StatelessWidget {
-  const OnlineRegistrationScreen({Key? key}) : super(key: key);
+  const OnlineRegistrationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class OnlineRegistrationScreen extends StatelessWidget {
                       ),
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
                           child: controller.isLoading.value
                               ? Constant.loader(context)
                               : Padding(

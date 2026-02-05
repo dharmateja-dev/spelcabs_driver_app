@@ -17,7 +17,7 @@ class SettingController extends GetxController {
   Rx<LanguageModel> selectedLanguage = LanguageModel().obs;
   Rx<String> selectedMode = "".obs;
 
-  getLanguage() async {
+  Future<void> getLanguage() async {
     await FireStoreUtils.getLanguage().then((value) {
       if (value != null) {
         languageList.value = value;

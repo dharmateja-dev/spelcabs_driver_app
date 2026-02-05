@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DriverLocationPermissionScreen extends StatefulWidget {
-  const DriverLocationPermissionScreen({Key? key}) : super(key: key);
+  const DriverLocationPermissionScreen({super.key});
 
   @override
   State<DriverLocationPermissionScreen> createState() =>
@@ -191,8 +191,8 @@ class _DriverLocationPermissionScreenState
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.warning_amber, color: Colors.orange),
             SizedBox(width: 10),
             Expanded(child: Text('Location Required')),
@@ -233,7 +233,7 @@ class _DriverLocationPermissionScreenState
               Get.back();
               _onAllowAccess();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xff193751)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
             child: const Text('Enable Location'),
           ),
         ],
@@ -262,8 +262,8 @@ class _DriverLocationPermissionScreenState
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.location_off, color: Colors.red),
             SizedBox(width: 10),
             Expanded(child: Text('Location Services Disabled')),
@@ -294,7 +294,7 @@ class _DriverLocationPermissionScreenState
                 _onSkip();
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xff193751)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
             child: const Text('Open Settings'),
           ),
         ],
@@ -307,8 +307,8 @@ class _DriverLocationPermissionScreenState
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.block, color: Colors.red),
             SizedBox(width: 10),
             Expanded(child: Text('Permission Blocked')),
@@ -339,7 +339,7 @@ class _DriverLocationPermissionScreenState
               _canNavigateAway = true;
               _navigateToDashboard();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Color(0xff193751)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
             child: const Text('Open Settings'),
           ),
         ],
@@ -357,11 +357,11 @@ class _DriverLocationPermissionScreenState
   @override
   Widget build(BuildContext context) {
     if (_isChecking) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(),
               SizedBox(height: 20),
               Text('Preparing Driver App...'),
@@ -390,7 +390,7 @@ class _DriverLocationPermissionScreenState
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Color(0xff193751).withOpacity(0.1),
+                  color: const Color(0xff193751).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -467,15 +467,15 @@ class _DriverLocationPermissionScreenState
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Color(0xff193751).withOpacity(0.1),
+                          color: const Color(0xff193751).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: Color(0xff193751).withOpacity(0.3)),
+                              color: const Color(0xff193751).withOpacity(0.3)),
                         ),
                         child: Column(
                           children: [
-                            Row(
-                              children: const [
+                            const Row(
+                              children: [
                                 Icon(Icons.privacy_tip,
                                     color: Color(0xff193751)),
                                 SizedBox(width: 10),
@@ -500,9 +500,9 @@ class _DriverLocationPermissionScreenState
                             const SizedBox(height: 12),
                             GestureDetector(
                               onTap: _openPrivacyPolicy,
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text(
                                     'Read Privacy Policy',
                                     style: TextStyle(
@@ -531,7 +531,7 @@ class _DriverLocationPermissionScreenState
                 child: ElevatedButton.icon(
                   onPressed: _isRequestingPermission ? null : _onAllowAccess,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff193751),
+                    backgroundColor: const Color(0xff193751),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -573,10 +573,10 @@ class _DriverLocationPermissionScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Color(0xff193751).withOpacity(0.1),
+              color: const Color(0xff193751).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Color(0xff193751), size: 24),
+            child: Icon(icon, color: const Color(0xff193751), size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(

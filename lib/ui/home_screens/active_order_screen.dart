@@ -332,7 +332,7 @@ class ActiveOrderScreen extends StatelessWidget {
         });
   }
 
-  otpDialog(BuildContext context, ActiveOrderController controller,
+  Dialog otpDialog(BuildContext context, ActiveOrderController controller,
       OrderModel orderModel) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 

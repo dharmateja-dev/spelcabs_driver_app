@@ -28,7 +28,7 @@ class LoginController extends GetxController {
   }
 
   // sendCode() is now refactored to use AuthApiService.loginWithOtp
-  sendCode() async {
+  Future<void> sendCode() async {
     AppLogger.info("LoginController: Initiating sendCode for phone login.",
         tag: "LoginController");
 

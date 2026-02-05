@@ -21,7 +21,7 @@ class ProfileController extends GetxController {
     super.onInit();
   }
 
-  getData() async {
+  Future<void> getData() async {
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
       if (value != null) {

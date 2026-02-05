@@ -289,7 +289,7 @@ class SettingScreen extends StatelessWidget {
         });
   }
 
-  showAlertDialog(BuildContext context) {
+  void showAlertDialog(BuildContext context) {
     // set up the button
     Widget okButton = TextButton(
       child: Text("OK".tr),

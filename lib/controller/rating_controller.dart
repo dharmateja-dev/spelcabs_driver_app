@@ -27,7 +27,7 @@ class RatingController extends GetxController {
 
   RxString type = "".obs;
 
-  getArgument() async {
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       type.value = argumentData['type'];

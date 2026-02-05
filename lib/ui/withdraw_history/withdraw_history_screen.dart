@@ -38,7 +38,7 @@ class WithDrawHistoryScreen extends StatelessWidget {
           ),
           Expanded(
             child: Container(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
               child: Padding(
                 padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
                 child: FutureBuilder<List<WithdrawModel>?>(

@@ -9,9 +9,9 @@ class MercadoPagoScreen extends StatefulWidget {
   final String initialURl;
 
   const MercadoPagoScreen({
-    Key? key,
+    super.key,
     required this.initialURl,
-  }) : super(key: key);
+  });
 
   @override
   State<MercadoPagoScreen> createState() => _MercadoPagoScreenState();
@@ -26,7 +26,7 @@ class _MercadoPagoScreenState extends State<MercadoPagoScreen> {
     super.initState();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -89,7 +89,7 @@ class _MercadoPagoScreenState extends State<MercadoPagoScreen> {
             TextButton(
               child:  Text(
                 'Cancel'.tr,
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -99,7 +99,7 @@ class _MercadoPagoScreenState extends State<MercadoPagoScreen> {
             TextButton(
               child:  Text(
                 'Continue'.tr,
-                style: TextStyle(color: Colors.green),
+                style: const TextStyle(color: Colors.green),
               ),
               onPressed: () {
                 Navigator.of(context).pop();

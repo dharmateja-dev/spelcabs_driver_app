@@ -16,7 +16,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class SignupScreen extends StatelessWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({super.key});
 
   // Helper method to build consistent text fields
   Widget _buildConsistentTextField(
@@ -107,7 +107,7 @@ class SignupScreen extends StatelessWidget {
         init: SignupController(),
         builder: (controller) {
           return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             body: SingleChildScrollView(
               child: Form(
                 key: controller.formKey.value,

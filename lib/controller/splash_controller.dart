@@ -53,7 +53,6 @@ class SplashController extends GetxController {
             tag: "SplashController");
 
         if (isLoggedInLocally &&
-            driverIdFromPrefs != null &&
             driverIdFromPrefs.isNotEmpty) {
           // User is marked as logged in locally (likely a phone user)
           DriverUserModel? driverModel =
@@ -117,7 +116,7 @@ class SplashController extends GetxController {
                 rotation: 0.0,
                 zoneIds: [],
               );
-              Get.offAll(() => InformationScreen(),
+              Get.offAll(() => const InformationScreen(),
                   arguments: {'userModel': incompleteDriver});
               return;
             }

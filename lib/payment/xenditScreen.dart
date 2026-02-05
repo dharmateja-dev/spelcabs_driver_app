@@ -60,7 +60,7 @@ class _XenditScreenState extends State<XenditScreen> {
     super.dispose();
   }
 
-  initController() {
+  void initController() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))

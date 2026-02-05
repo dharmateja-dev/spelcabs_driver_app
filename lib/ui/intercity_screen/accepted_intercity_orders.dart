@@ -15,7 +15,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class AcceptedIntercityOrders extends StatelessWidget {
-  const AcceptedIntercityOrders({Key? key}) : super(key: key);
+  const AcceptedIntercityOrders({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class AcceptedIntercityOrders extends StatelessWidget {
             child: Container(
               height: Responsive.height(100, context),
               width: Responsive.width(100, context),
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
               child: Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: StreamBuilder<QuerySnapshot>(

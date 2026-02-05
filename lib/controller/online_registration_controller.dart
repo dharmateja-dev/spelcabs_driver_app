@@ -15,7 +15,7 @@ class OnlineRegistrationController extends GetxController {
   RxList documentList = <DocumentModel>[].obs;
   RxList driverDocumentList = <Documents>[].obs;
 
-  getDocument() async {
+  Future<void> getDocument() async {
     await FireStoreUtils.getDocumentList().then((value) {
       documentList.value = value;
       isLoading.value = false;

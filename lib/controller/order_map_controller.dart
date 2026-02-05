@@ -145,7 +145,7 @@ class OrderMapController extends GetxController {
 
   RxString newAmount = "0.0".obs;
 
-  getArgument() async {
+  Future<void> getArgument() async {
     AppLogger.debug("getArgument called.", tag: "OrderMapController");
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
@@ -195,7 +195,7 @@ class OrderMapController extends GetxController {
         tag: "OrderMapController");
   }
 
-  getData(String id) async {
+  Future<void> getData(String id) async {
     AppLogger.debug("getData called for order ID: $id",
         tag: "OrderMapController");
     await FireStoreUtils.getOrder(id).then((value) {
@@ -216,7 +216,7 @@ class OrderMapController extends GetxController {
   BitmapDescriptor? departureIcon;
   BitmapDescriptor? destinationIcon;
 
-  addMarkerSetup() async {
+  Future<void> addMarkerSetup() async {
     AppLogger.debug("addMarkerSetup called.", tag: "OrderMapController");
     try {
       if (Constant.selectedMapType == 'google') {
@@ -302,7 +302,7 @@ class OrderMapController extends GetxController {
 
   double zoomLevel = 0;
 
-  movePosition() async {
+  Future<void> movePosition() async {
     AppLogger.debug("movePosition called.", tag: "OrderMapController");
     double distance = double.parse((prefix.Geolocator.distanceBetween(
               orderModel.value.sourceLocationLAtLng!.latitude ?? 0.0,
@@ -337,7 +337,7 @@ class OrderMapController extends GetxController {
         tag: "OrderMapController");
   }
 
-  _addPolyLine(List<LatLng> polylineCoordinates) {
+  void _addPolyLine(List<LatLng> polylineCoordinates) {
     AppLogger.debug(
         "_addPolyLine called with ${polylineCoordinates.length} points.",
         tag: "OrderMapController");
@@ -351,7 +351,7 @@ class OrderMapController extends GetxController {
     AppLogger.info("Polyline added to map.", tag: "OrderMapController");
   }
 
-  addMarker(LatLng? position, String id, BitmapDescriptor? descriptor) {
+  void addMarker(LatLng? position, String id, BitmapDescriptor? descriptor) {
     MarkerId markerId = MarkerId(id);
     Marker marker =
         Marker(markerId: markerId, icon: descriptor!, position: position!);
@@ -464,7 +464,7 @@ class OrderMapController extends GetxController {
         tag: "OrderMapController");
   }
 
-  setOsmMarker(
+  Future<void> setOsmMarker(
       {required GeoPoint departure, required GeoPoint destination}) async {
     AppLogger.debug(
         "setOsmMarker called with departure: $departure, destination: $destination",

@@ -566,7 +566,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
         });
   }
 
-  offerAcceptDialog(BuildContext context, IntercityController controller,
+  Future<dynamic> offerAcceptDialog(BuildContext context, IntercityController controller,
       InterCityOrderModel orderModel) {
     return showModalBottomSheet(
         context: context,

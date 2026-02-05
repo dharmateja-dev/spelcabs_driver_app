@@ -959,7 +959,7 @@ class VehicleInformationScreen extends StatelessWidget {
     );
   }
 
-  zoneDialog(BuildContext context, VehicleInformationController controller) {
+  void zoneDialog(BuildContext context, VehicleInformationController controller) {
     Widget cancelButton = TextButton(
       child: Text(
         "Cancel".tr,

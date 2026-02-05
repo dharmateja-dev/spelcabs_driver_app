@@ -31,7 +31,7 @@ class HomeIntercityController extends GetxController {
   Rx<ServiceModel> selectedService = ServiceModel().obs;
   RxBool isLoading = true.obs;
 
-  getDriver() async {
+  Future<void> getDriver() async {
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
       driverModel.value = value!;
@@ -40,11 +40,11 @@ class HomeIntercityController extends GetxController {
 
     if (driverModel.value.serviceId != null) {
       await FireStoreUtils.getService().then((value) {
-        value.forEach((element) {
+        for (var element in value) {
           if (element.id == driverModel.value.serviceId) {
             selectedService.value = element;
           }
-        });
+        }
       });
     }
   }

@@ -43,7 +43,7 @@ class DashBoardController extends GetxController {
     DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
   ];
 
-  getDrawerItemWidget(int pos) {
+  StatelessWidget getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
         return const HomeScreen(); // City
@@ -82,7 +82,7 @@ class DashBoardController extends GetxController {
 
   RxInt selectedDrawerIndex = 0.obs;
 
-  onSelectItem(int index) async {
+  Future<void> onSelectItem(int index) async {
     if (index == 15) {
       // Logout index
       FireStoreUtils.logout();
@@ -100,7 +100,7 @@ class DashBoardController extends GetxController {
     super.onInit();
   }
 
-  getLocation() async {
+  Future<void> getLocation() async {
     await Utils.determinePosition();
   }
 

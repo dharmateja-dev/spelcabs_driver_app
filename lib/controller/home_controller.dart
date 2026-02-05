@@ -64,7 +64,7 @@ class HomeController extends GetxController {
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;
   RxBool isLoading = true.obs;
 
-  getDriver() async {
+  Future<void> getDriver() async {
     AppLogger.debug("getDriver called.", tag: "HomeController");
     _driverSubscription = FireStoreUtils.fireStore
         .collection(CollectionName.driverUsers)
@@ -89,7 +89,7 @@ class HomeController extends GetxController {
 
   RxInt isActiveValue = 0.obs;
 
-  getActiveRide() {
+  void getActiveRide() {
     AppLogger.debug("getActiveRide called.", tag: "HomeController");
     _activeRideSubscription = FirebaseFirestore.instance
         .collection(CollectionName.orders)
@@ -109,7 +109,7 @@ class HomeController extends GetxController {
 
   Location location = Location();
 
-  updateCurrentLocation() async {
+  Future<void> updateCurrentLocation() async {
     AppLogger.debug("updateCurrentLocation called.", tag: "HomeController");
 
     // Use the new LocationPermissionHelper

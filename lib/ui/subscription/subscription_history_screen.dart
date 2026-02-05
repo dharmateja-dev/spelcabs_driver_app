@@ -25,7 +25,7 @@ class SubscriptionHistoryScreen extends StatelessWidget {
               appBar: AppBar(
                 title: Text(
                   "Purchase History".tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600),

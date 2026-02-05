@@ -65,7 +65,7 @@ class IntercityController extends GetxController {
 
   /// Gets intercity orders - simplified version without zone validation.
   /// All orders matching basic criteria (status, date, zone) will be shown.
-  getOrder() {
+  void getOrder() {
     try {
       AppLogger.info("Starting getOrder() [Stream]...",
           tag: "IntercityController");

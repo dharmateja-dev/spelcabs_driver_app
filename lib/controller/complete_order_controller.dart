@@ -32,7 +32,7 @@ class CompleteOrderController extends GetxController {
     return calculatedAmount;
   }
 
-  getArgument() async {
+  Future<void> getArgument() async {
     AppLogger.debug("getArgument called.", tag: "CompleteOrderController");
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {

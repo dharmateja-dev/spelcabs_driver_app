@@ -107,7 +107,7 @@ class DetailsUploadController extends GetxController {
     super.onInit();
   }
 
-  getArgument() async {
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       documentModel.value = argumentData['documentModel'];
@@ -118,7 +118,7 @@ class DetailsUploadController extends GetxController {
 
   Rx<Documents> documents = Documents().obs;
 
-  getDocument() async {
+  Future<void> getDocument() async {
     await FireStoreUtils.getDocumentOfDriver().then((value) {
       isLoading.value = false;
       if (value != null) {
@@ -186,7 +186,7 @@ class DetailsUploadController extends GetxController {
     return sizeInMb <= 5;
   }
 
-  uploadDocument() async {
+  Future<void> uploadDocument() async {
     String frontImageFileName = File(frontImage.value).path.split('/').last;
     String backImageFileName = File(backImage.value).path.split('/').last;
 

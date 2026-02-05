@@ -30,7 +30,7 @@ class _LocationPickerState extends State<LocationPicker> {
     );
   }
 
-  _listerTapPosition() async {
+  Future<void> _listerTapPosition() async {
     mapController.listenerMapSingleTapping.addListener(() async {
       if (mapController.listenerMapSingleTapping.value != null) {
         GeoPoint position = mapController.listenerMapSingleTapping.value!;
@@ -47,7 +47,7 @@ class _LocationPickerState extends State<LocationPicker> {
     });
   }
 
-  addMarker(GeoPoint? position) async {
+  Future<void> addMarker(GeoPoint? position) async {
     if (position != null) {
       for (var marker in _markers) {
         await mapController.removeMarker(marker);
@@ -214,7 +214,7 @@ class _LocationPickerState extends State<LocationPicker> {
       child: TextField(
         controller: textController,
         textInputAction: TextInputAction.done,
-        style: TextStyle(color: Colors.black),
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           prefixIcon: IconButton(
             icon: const Icon(Icons.location_on,color: Colors.black,),
@@ -223,7 +223,7 @@ class _LocationPickerState extends State<LocationPicker> {
           fillColor: Colors.white,
           filled: true,
           hintText: title,
-          hintStyle: TextStyle(color: Colors.black),
+          hintStyle: const TextStyle(color: Colors.black),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),

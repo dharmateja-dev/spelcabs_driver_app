@@ -223,7 +223,7 @@ class TextFieldThem {
     );
   }
 
-  static buildTextFiled(
+  static TextFormField buildTextFiled(
     BuildContext context, {
     required String hintText,
     required TextEditingController controller,
@@ -293,7 +293,7 @@ class TextFieldThem {
             hintText: hintText));
   }
 
-  static buildTextFiledWithPrefixIcon(BuildContext context,
+  static TextFormField buildTextFiledWithPrefixIcon(BuildContext context,
       {required String hintText,
       required TextEditingController controller,
       required Widget prefix,
@@ -360,7 +360,7 @@ class TextFieldThem {
             hintText: hintText));
   }
 
-  static buildTextFiledWithSuffixIcon(
+  static TextFormField buildTextFiledWithSuffixIcon(
     BuildContext context, {
     required String hintText,
     required TextEditingController controller,

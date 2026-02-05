@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:driver/constant/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:googleapis_auth/auth_io.dart';
-import 'package:googleapis_auth/googleapis_auth.dart';
 import 'package:http/http.dart' as http;
 
 class SendNotification {
@@ -29,7 +28,7 @@ class SendNotification {
     return client.credentials.accessToken.data;
   }
 
-  static sendOneNotification(
+  static Future<bool> sendOneNotification(
       {required String token,
       required String title,
       required String body,
@@ -74,7 +73,7 @@ class SendNotification {
     }
   }
 
-  static sendMultiPleNotification(List<String> tokens, String title,
+  static Future<void> sendMultiPleNotification(List<String> tokens, String title,
       String body, Map<String, dynamic>? payload) async {
     final String accessToken = await getAccessToken();
     debugPrint("accessToken=======>");

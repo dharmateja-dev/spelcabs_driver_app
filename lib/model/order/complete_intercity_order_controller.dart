@@ -34,7 +34,7 @@ class CompleteInterCityOrderController extends GetxController {
         double.parse(taxAmount.value);
   }
 
-  getArgument() async {
+  Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       orderModel.value = argumentData['orderModel'];

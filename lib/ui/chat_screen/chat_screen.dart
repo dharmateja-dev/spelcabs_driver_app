@@ -35,7 +35,7 @@ class ChatScreens extends StatefulWidget {
   final String? token;
 
   const ChatScreens(
-      {Key? key,
+      {super.key,
       this.orderId,
       this.customerId,
       this.customerName,
@@ -43,8 +43,7 @@ class ChatScreens extends StatefulWidget {
       this.driverId,
       this.customerProfileImage,
       this.driverProfileImage,
-      this.token})
-      : super(key: key);
+      this.token});
 
   @override
   State<ChatScreens> createState() => _ChatScreensState();
@@ -458,7 +457,7 @@ class _ChatScreensState extends State<ChatScreens> {
     );
   }
 
-  _sendMessage(String message, Url? url, String videoThumbnail,
+  Future<void> _sendMessage(String message, Url? url, String videoThumbnail,
       String messageType) async {
     InboxModel inboxModel = InboxModel(
         lastSenderId: widget.customerId,
@@ -515,7 +514,7 @@ class _ChatScreensState extends State<ChatScreens> {
 
   final ImagePicker _imagePicker = ImagePicker();
 
-  _onCameraClick() {
+  void _onCameraClick() {
     final action = CupertinoActionSheet(
       message: Text(
         'Send Media'.tr,
