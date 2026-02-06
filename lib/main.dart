@@ -14,6 +14,7 @@ import 'dart:developer';
 import 'services/localization_service.dart';
 import 'themes/Styles.dart';
 import 'utils/Preferences.dart';
+import 'services/city_rides_listener_service.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -35,6 +36,9 @@ void main() async {
     log('Date formatting error: $e');
   }
 
+  // Initialize city rides notification listener
+  await CityRidesListenerService().initialize();
+
   runApp(const MyApp());
 }
 
@@ -50,14 +54,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    getCurrentAppTheme();
-    WidgetsBinding.instance.addObserver(this);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    getCurrentAppTheme();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     getCurrentAppTheme();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // Only refresh if using system theme (value 2)
+    if (themeChangeProvider.darkTheme == 2) {
+      setState(() {}); // Trigger rebuild to pick up new system brightness
+    }
   }
 
   void getCurrentAppTheme() async {
@@ -75,13 +93,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return GetMaterialApp(
           title: 'Spelcabs',
           debugShowCheckedModeBanner: false,
-          theme: Styles.themeData(
-              themeChangeProvider.darkTheme == 0
-                  ? true
-                  : themeChangeProvider.darkTheme == 1
-                      ? false
-                      : themeChangeProvider.getSystemThem(),
-              context),
+          themeMode: themeChangeProvider.darkTheme == 0
+              ? ThemeMode.dark
+              : themeChangeProvider.darkTheme == 1
+                  ? ThemeMode.light
+                  : ThemeMode.system,
+          theme: Styles.themeData(false, context),
+          darkTheme: Styles.themeData(true, context),
           localizationsDelegates: const [
             CountryLocalizations.delegate,
           ],

@@ -40,6 +40,7 @@ import 'package:driver/utils/Preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:driver/services/city_rides_listener_service.dart';
 
 class FireStoreUtils {
   static FirebaseFirestore fireStore = FirebaseFirestore.instance;
@@ -339,6 +340,9 @@ class FireStoreUtils {
   static Future<void> logout() async {
     AppLogger.debug("logout called.", tag: "FireStoreUtils");
     try {
+      // Clear city rides listener before logout
+      await CityRidesListenerService().clear();
+
       await FirebaseAuth.instance.signOut();
       await GoogleSignIn().signOut(); // Also sign out from Google if signed in
       await Preferences.clearDriverUserData();

@@ -34,6 +34,14 @@ class OrangeMoneyScreen extends StatefulWidget {
 class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
   WebViewController controller = WebViewController();
   bool isLoading = true;
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     initController();
@@ -42,12 +50,23 @@ class _OrangeMoneyScreenState extends State<OrangeMoneyScreen> {
   }
 
   void callTransaction() {
-    Timer.periodic(const Duration(seconds: 3), (Timer t) {
-      transactionstatus(accessToken: widget.accessToken, amount: widget.amount, orderId: widget.orderId, payToken: widget.payToken).then((value) {
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer t) {
+      transactionstatus(
+              accessToken: widget.accessToken,
+              amount: widget.amount,
+              orderId: widget.orderId,
+              payToken: widget.payToken)
+          .then((value) {
         if (value == 'SUCCESS') {
-          Navigator.of(context).pop(true);
+          t.cancel();
+          if (mounted) {
+            Navigator.of(context).pop(true);
+          }
         } else if (value == 'FAILED') {
-          Navigator.of(context).pop(false);
+          t.cancel();
+          if (mounted) {
+            Navigator.of(context).pop(false);
+          }
         }
       });
     });

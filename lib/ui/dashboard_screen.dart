@@ -112,6 +112,29 @@ class DashBoardScreen extends StatelessWidget {
                               GestureDetector(
                                 onTap: () async {
                                   ShowToastDialog.showLoader("Please wait".tr);
+
+                                  // Check if driver has any active rides before going offline
+                                  final activeRidesSnapshot =
+                                      await FireStoreUtils.fireStore
+                                          .collection(CollectionName.orders)
+                                          .where('driverId',
+                                              isEqualTo: FireStoreUtils
+                                                  .getCurrentUid())
+                                          .where('status', whereIn: [
+                                            Constant.rideInProgress,
+                                            Constant.rideActive
+                                          ])
+                                          .limit(1)
+                                          .get();
+
+                                  if (activeRidesSnapshot.docs.isNotEmpty) {
+                                    ShowToastDialog.closeLoader();
+                                    ShowToastDialog.showToast(
+                                        "You cannot go offline while you have an active ride. Please complete the ride first."
+                                            .tr);
+                                    return;
+                                  }
+
                                   driverModel.isOnline = false;
                                   await FireStoreUtils.updateDriverUser(
                                       driverModel);

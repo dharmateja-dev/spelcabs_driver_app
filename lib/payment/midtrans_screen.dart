@@ -36,12 +36,17 @@ class _MidtransScreenState extends State<MidtransScreen> {
           }),
           onNavigationRequest: (NavigationRequest navigation) async {
             log("URL :: ${navigation.url}");
-            String? orderId = Uri.parse(navigation.url).queryParameters['merchant_order_id'];
+            String? orderId =
+                Uri.parse(navigation.url).queryParameters['merchant_order_id'];
             await Future.delayed(const Duration(seconds: 2));
             if (orderId != null) {
-              Navigator.of(context).pop(true);
+              if (mounted) {
+                Navigator.of(context).pop(true);
+              }
             } else {
-              Navigator.of(context).pop(false);
+              if (mounted) {
+                Navigator.of(context).pop(false);
+              }
             }
             return NavigationDecision.navigate;
           },
@@ -71,9 +76,12 @@ class _MidtransScreenState extends State<MidtransScreen> {
                     color: Colors.white,
                   ),
                 )),
-            body: Stack(
-                alignment: Alignment.center,
-                children: [WebViewWidget(controller: controller), Visibility(visible: isLoading, child: const Center(child: CircularProgressIndicator()))])));
+            body: Stack(alignment: Alignment.center, children: [
+              WebViewWidget(controller: controller),
+              Visibility(
+                  visible: isLoading,
+                  child: const Center(child: CircularProgressIndicator()))
+            ])));
   }
 
   Future<void> _showMyDialog() async {

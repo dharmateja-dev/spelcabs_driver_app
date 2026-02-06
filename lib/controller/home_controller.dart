@@ -17,10 +17,12 @@ import 'package:driver/widget/geoflutterfire/src/models/point.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/location_permission_helper.dart';
+import 'package:driver/services/city_rides_listener_service.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController with WidgetsBindingObserver {
   RxInt selectedIndex = 0.obs;
   List<Widget> widgetOptions = <Widget>[
     const NewOrderScreen(),
@@ -45,6 +47,10 @@ class HomeController extends GetxController {
   StreamSubscription? _driverSubscription;
   StreamSubscription? _activeRideSubscription;
   StreamSubscription? _locationSubscription;
+  StreamSubscription<geo.ServiceStatus>? _serviceStatusSubscription;
+
+  /// Flag to track if we're waiting for location to be enabled
+  bool _waitingForLocationService = false;
 
   void onItemTapped(int index) {
     selectedIndex.value = index;
@@ -55,10 +61,86 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     AppLogger.debug("HomeController onInit called.", tag: "HomeController");
+    WidgetsBinding.instance.addObserver(this);
+    _startLocationServiceMonitoring();
     getDriver();
     getActiveRide();
     updateCurrentLocation(); // Ensure this is called to start location updates
     super.onInit();
+  }
+
+  /// Monitor location service status changes (when user enables/disables GPS)
+  void _startLocationServiceMonitoring() {
+    _serviceStatusSubscription = geo.Geolocator.getServiceStatusStream().listen(
+      (geo.ServiceStatus status) {
+        AppLogger.info("Location service status changed: $status",
+            tag: "HomeController");
+        if (status == geo.ServiceStatus.enabled && _waitingForLocationService) {
+          _waitingForLocationService = false;
+          AppLogger.info(
+              "Location service enabled, re-initializing location...",
+              tag: "HomeController");
+          updateCurrentLocation();
+        }
+      },
+      onError: (error) {
+        AppLogger.error("Error monitoring location service status: $error",
+            tag: "HomeController", error: error);
+      },
+    );
+  }
+
+  /// Handle app lifecycle changes - re-check location when app resumes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    AppLogger.debug("App lifecycle state changed: $state",
+        tag: "HomeController");
+
+    if (state == AppLifecycleState.resumed) {
+      // App came back to foreground - check if location is now available
+      _checkAndReinitializeLocation();
+    }
+  }
+
+  /// Check if location is now available and reinitialize if needed
+  Future<void> _checkAndReinitializeLocation() async {
+    try {
+      final serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+      AppLogger.debug(
+          "Location service enabled check on resume: $serviceEnabled",
+          tag: "HomeController");
+
+      if (serviceEnabled && !isLocationInitialized.value) {
+        AppLogger.info(
+            "Location service now available, initializing location...",
+            tag: "HomeController");
+        await updateCurrentLocation();
+      } else if (serviceEnabled && isLocationInitialized.value) {
+        // Already initialized but came back from settings - refresh location
+        AppLogger.debug("Location already initialized, refreshing...",
+            tag: "HomeController");
+        // Get a fresh location update
+        try {
+          final locationData = await location.getLocation();
+          if (locationData.latitude != null && locationData.longitude != null) {
+            _updateSearchLocationIfNeeded(
+                locationData.latitude!, locationData.longitude!);
+          }
+        } catch (e) {
+          AppLogger.warning("Could not refresh location on resume: $e",
+              tag: "HomeController");
+        }
+      } else if (!serviceEnabled) {
+        _waitingForLocationService = true;
+        AppLogger.debug(
+            "Location service still disabled, waiting for user to enable...",
+            tag: "HomeController");
+      }
+    } catch (e) {
+      AppLogger.error("Error checking location on app resume: $e",
+          tag: "HomeController", error: e);
+    }
   }
 
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;
@@ -75,6 +157,9 @@ class HomeController extends GetxController {
         driverModel.value = DriverUserModel.fromJson(event.data()!);
         AppLogger.info("Driver data updated: ${driverModel.value.fullName}",
             tag: "HomeController");
+
+        // Update city rides listener with driver status
+        CityRidesListenerService().updateDriverStatus(driverModel.value);
       } else {
         AppLogger.warning(
             "Driver document does not exist for current UID: ${FireStoreUtils.getCurrentUid()}",
@@ -121,6 +206,7 @@ class HomeController extends GetxController {
     if (!hasPermission) {
       AppLogger.warning("Location permission not granted.",
           tag: "HomeController");
+      _waitingForLocationService = true;
       isLoading.value = false;
       update();
       return;
@@ -161,6 +247,26 @@ class HomeController extends GetxController {
           isLocationInitialized.value = true;
           AppLogger.info("Location initialized for the first time.",
               tag: "HomeController");
+
+          // Start city rides listener when location is first initialized
+          if (driverModel.value.id != null &&
+              driverModel.value.isOnline == true) {
+            CityRidesListenerService().startListening(
+              driver: driverModel.value,
+              location: LocationLatLng(
+                latitude: locationData.latitude,
+                longitude: locationData.longitude,
+              ),
+            );
+          }
+        } else {
+          // Update listener location when driver moves significantly
+          CityRidesListenerService().updateLocation(
+            LocationLatLng(
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+            ),
+          );
         }
 
         FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
@@ -261,9 +367,15 @@ class HomeController extends GetxController {
   void onClose() {
     AppLogger.debug("HomeController onClose called, cancelling subscriptions.",
         tag: "HomeController");
+    WidgetsBinding.instance.removeObserver(this);
     _driverSubscription?.cancel();
     _activeRideSubscription?.cancel();
     _locationSubscription?.cancel();
+    _serviceStatusSubscription?.cancel();
+
+    // Stop city rides listener (but don't clear - driver may still be logged in)
+    CityRidesListenerService().stopListening();
+
     super.onClose();
   }
 }
