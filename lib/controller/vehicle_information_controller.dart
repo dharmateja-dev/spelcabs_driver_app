@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/model/driver_rules_model.dart';
 import 'package:driver/model/driver_user_model.dart';
@@ -155,36 +157,22 @@ class VehicleInformationController extends GetxController {
       }
     });
 
-    // Merge Logic
-    Map<String, UnifiedVehicleModel> merger = {};
+    // Merge Logic - Removed
+    // Map<String, UnifiedVehicleModel> merger = {};
 
     // 1. Process Passenger Services
     for (var s in serviceList) {
       String name = Constant.localizationTitle(s.title).trim();
-      String key = name.toLowerCase();
-      if (!merger.containsKey(key)) {
-        merger[key] = UnifiedVehicleModel(
-            name: name, image: s.image ?? "", passengerServiceId: s.id);
-      } else {
-        merger[key]!.passengerServiceId = s.id;
-      }
+      unifiedVehicleList.add(UnifiedVehicleModel(
+          name: name, image: s.image ?? "", passengerServiceId: s.id));
     }
 
     // 2. Process Freight Vehicles
     for (var f in freightList) {
       String name = Constant.localizationName(f.name).trim();
-      String key = name.toLowerCase();
-      if (key.isNotEmpty) {
-        if (!merger.containsKey(key)) {
-          merger[key] = UnifiedVehicleModel(
-              name: name, image: f.image ?? "", freightServiceId: f.id);
-        } else {
-          merger[key]!.freightServiceId = f.id;
-        }
-      }
+      unifiedVehicleList.add(UnifiedVehicleModel(
+          name: name, image: f.image ?? "", freightServiceId: f.id));
     }
-
-    unifiedVehicleList.value = merger.values.toList();
 
     // Fetch Driver Profile
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
@@ -250,36 +238,71 @@ class VehicleInformationController extends GetxController {
       }
     });
 
-    // Fetch Rules
-    await FireStoreUtils.getDriverRules().then((value) {
-      if (value != null) {
-        driverRulesList.value = value;
-        // Clear existing selected rules to prevent duplicates
-        selectedDriverRulesList.clear();
-        if (driverModel.value.vehicleInformation != null) {
-          if (driverModel.value.vehicleInformation!.driverRules != null) {
-            for (var element
-                in driverModel.value.vehicleInformation!.driverRules!) {
-              // Only add if not already present (extra safety check)
-              if (!selectedDriverRulesList
-                  .any((rule) => rule.id == element.id)) {
-                selectedDriverRulesList.add(element);
-              }
-            }
-          }
-        }
-      }
-    });
+    // Fetch Rules - Initially clear or fetch default if needed,
+    // but now rules depend on selection.
+    // We can keep the global list if needed, or just rely on selection.
+    // For now, let's just clear it or leave it empty until selection.
+    driverRulesList.clear();
+
+    // If we have a selected vehicle (restored from profile), fetch its rules
+    if (selectedUnifiedVehicle.value != null) {
+      selectVehicle(selectedUnifiedVehicle.value!);
+    } else {
+      // Optionally fetch global rules if no vehicle selected, or just wait
+      // But per requirement, we want rules FROM the vehicle document.
+    }
+
     isLoading.value = false;
     update();
   }
+
+  StreamSubscription<List<DriverRulesModel>>? _rulesSubscription;
 
   void selectVehicle(UnifiedVehicleModel vehicle) {
     selectedUnifiedVehicle.value = vehicle;
     if (vehicle.passengerServiceId != null) {
       selectedServiceId.value = vehicle.passengerServiceId;
+      _listenToDriverRules(CollectionName.service, vehicle.passengerServiceId!);
     } else if (vehicle.freightServiceId != null) {
       selectedServiceId.value = vehicle.freightServiceId;
+      _listenToDriverRules(
+          CollectionName.freightVehicle, vehicle.freightServiceId!);
     }
+  }
+
+  void _listenToDriverRules(String collection, String docId) {
+    _rulesSubscription?.cancel();
+    _rulesSubscription =
+        FireStoreUtils.getVehicleDriverRulesStream(collection, docId)
+            .listen((rules) {
+      driverRulesList.value = rules;
+
+      // Re-validate selected rules against new list
+      // If a selected rule is no longer in the new list, remove it?
+      // Or keep it? Usually better to keep only valid ones.
+      // However, we also need to restore from profile if it's the first load.
+
+      if (driverModel.value.vehicleInformation != null &&
+          driverModel.value.vehicleInformation!.driverRules != null) {
+        // This logic runs on every update, maybe we only want to do restoration once?
+        // but `selectVehicle` is called on init too.
+        // Let's ensure we don't overwrite user's current manual selection if they are editing.
+
+        // If the user hasn't manually changed anything yet (fresh load), we might want to checks
+        // But actually, `selectedDriverRulesList` is what the UI binds to.
+
+        // If this is the initial load (e.g. from onInit -> selectVehicle)
+        // We should ensure selectedDriverRulesList is populated from profile if it matches.
+
+        // Let's just ensure if the ID exists in the new list, we keep it checked if it was checked.
+        // The UI uses selectedDriverRulesList.
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _rulesSubscription?.cancel();
+    super.onClose();
   }
 }

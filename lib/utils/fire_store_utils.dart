@@ -1300,9 +1300,28 @@ class FireStoreUtils {
             if (orderZoneId == null ||
                 !driverUserModel.zoneIds!.contains(orderZoneId)) {
               AppLogger.debug(
-                  "Order ${doc.id} filtered out: zone '$orderZoneId' not in driver zones",
+                  "Order ${doc.id} filtered out: zone '$orderZoneId' not in driver zones ${driverUserModel.zoneIds}",
                   tag: "FireStoreUtils");
+
+              // REMOTE DEBUGGING: Write to Firestore
+              FirebaseFirestore.instance
+                  .collection('debug_ride_allocation')
+                  .add({
+                'type': 'filtering_failure',
+                'reason': 'zone_mismatch',
+                'orderId': doc.id,
+                'driverId': driverUserModel.id,
+                'orderZoneId': orderZoneId,
+                'driverZoneIds': driverUserModel.zoneIds,
+                'timestamp': FieldValue.serverTimestamp(),
+                'driverLocation': driverUserModel.location?.toJson(),
+              });
+
               continue;
+            } else {
+              AppLogger.debug(
+                  "Order ${doc.id} zone '$orderZoneId' matched driver zones ${driverUserModel.zoneIds}",
+                  tag: "FireStoreUtils");
             }
 
             // Client-side service filtering (Strict Type Matching)
@@ -1323,9 +1342,27 @@ class FireStoreUtils {
 
               if (!isEligible) {
                 AppLogger.debug(
-                    "Order ${doc.id} filtered out: service '$orderServiceId' not in driver's active services",
+                    "Order ${doc.id} filtered out: service '$orderServiceId' not in driver's active services ${driverUserModel.activeServices}",
                     tag: "FireStoreUtils");
+
+                // REMOTE DEBUGGING: Write to Firestore
+                FirebaseFirestore.instance
+                    .collection('debug_ride_allocation')
+                    .add({
+                  'type': 'filtering_failure',
+                  'reason': 'service_mismatch',
+                  'orderId': doc.id,
+                  'driverId': driverUserModel.id,
+                  'orderServiceId': orderServiceId,
+                  'driverActiveServices': driverUserModel.activeServices,
+                  'timestamp': FieldValue.serverTimestamp(),
+                });
+
                 continue;
+              } else {
+                AppLogger.debug(
+                    "Order ${doc.id} service '$orderServiceId' matched driver services",
+                    tag: "FireStoreUtils");
               }
             }
 
@@ -2597,5 +2634,44 @@ class FireStoreUtils {
         .map((snapshot) => snapshot.docs
             .map((doc) => DriverRulesModel.fromJson(doc.data()))
             .toList());
+  }
+
+  static Stream<List<DriverRulesModel>> getVehicleDriverRulesStream(
+      String collection, String docId) {
+    return fireStore
+        .collection(collection)
+        .doc(docId)
+        .snapshots()
+        .map((snapshot) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        return [];
+      }
+      if (snapshot.data()!.containsKey("driver_rules")) {
+        try {
+          // It's an array of objects
+          List<dynamic> list = snapshot.data()!["driver_rules"];
+          return list.map((e) {
+            DriverRulesModel rule = DriverRulesModel.fromJson(e);
+            if (rule.id == null || rule.id!.isEmpty) {
+              // Generate a deterministic ID based on the name if missing
+              // We use the first available name as the ID base
+              if (rule.name != null && rule.name!.isNotEmpty) {
+                rule.id = rule.name!.first.name;
+              } else {
+                // Fallback if no name (unlikely but safe)
+                rule.id = "unknown_rule_${list.indexOf(e)}";
+              }
+            }
+            return rule;
+          }).toList();
+        } catch (e) {
+          AppLogger.error(
+              "Error parsing driver_rules for $collection/$docId: $e",
+              tag: "FireStoreUtils");
+          return [];
+        }
+      }
+      return [];
+    });
   }
 }

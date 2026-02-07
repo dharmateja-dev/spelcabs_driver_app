@@ -670,85 +670,62 @@ class VehicleInformationScreen extends StatelessWidget {
                                     style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16)),
-                                StreamBuilder<List<DriverRulesModel>>(
-                                  stream: FireStoreUtils.getDriverRulesStream(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    }
-                                    if (snapshot.hasError) {
-                                      return Text(
-                                          "Error: ${snapshot.error}".tr);
-                                    }
-                                    if (!snapshot.hasData ||
-                                        snapshot.data!.isEmpty) {
-                                      return const SizedBox();
-                                    }
+                                Obx(() {
+                                  if (controller.driverRulesList.isEmpty) {
+                                    // If no rules for the selected vehicle, show nothing or empty state
+                                    // Or if loading...
+                                    return const SizedBox();
+                                  }
 
-                                    // Update the full list in controller (optional but good for consistency)
-                                    controller.driverRulesList.value =
-                                        snapshot.data!;
-
-                                    return Obx(
-                                      () => ListBody(
-                                        children: snapshot.data!
-                                            .map((item) => CheckboxListTile(
-                                                  activeColor:
-                                                      themeChange.getThem()
-                                                          ? AppColors
-                                                              .darkModePrimary
-                                                          : AppColors.primary,
-                                                  checkColor:
-                                                      themeChange.getThem()
-                                                          ? Colors.black
-                                                          : Colors.white,
-                                                  value: controller
-                                                      .selectedDriverRulesList
-                                                      .any((element) =>
-                                                          element.id ==
-                                                          item.id),
-                                                  title: Text(
-                                                      Constant.localizationName(
-                                                          item.name),
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400)),
-                                                  onChanged: !controller
-                                                          .isVehicleInfoSubmitted
-                                                      ? (value) {
-                                                          if (value == true) {
-                                                            // Only add if not already present
-                                                            if (!controller
-                                                                .selectedDriverRulesList
-                                                                .any((rule) =>
-                                                                    rule.id ==
-                                                                    item.id)) {
-                                                              controller
-                                                                  .selectedDriverRulesList
-                                                                  .add(item);
-                                                            }
-                                                          } else {
-                                                            // Remove by filtering out the item
-                                                            controller
-                                                                .selectedDriverRulesList
-                                                                .removeWhere(
-                                                                    (element) =>
-                                                                        element
-                                                                            .id ==
-                                                                        item.id);
-                                                          }
+                                  return ListBody(
+                                    children: controller.driverRulesList
+                                        .map((item) => CheckboxListTile(
+                                              activeColor: themeChange.getThem()
+                                                  ? AppColors.darkModePrimary
+                                                  : AppColors.primary,
+                                              checkColor: themeChange.getThem()
+                                                  ? Colors.black
+                                                  : Colors.white,
+                                              value: controller
+                                                  .selectedDriverRulesList
+                                                  .any((element) =>
+                                                      element.id == item.id),
+                                              title: Text(
+                                                  Constant.localizationName(
+                                                      item.name),
+                                                  style: GoogleFonts.poppins(
+                                                      fontWeight:
+                                                          FontWeight.w400)),
+                                              onChanged: !controller
+                                                      .isVehicleInfoSubmitted
+                                                  ? (value) {
+                                                      if (value == true) {
+                                                        // Only add if not already present
+                                                        if (!controller
+                                                            .selectedDriverRulesList
+                                                            .any((rule) =>
+                                                                rule.id ==
+                                                                item.id)) {
+                                                          controller
+                                                              .selectedDriverRulesList
+                                                              .add(item);
                                                         }
-                                                      : null,
-                                                ))
-                                            .toList(),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                                      } else {
+                                                        // Remove by filtering out the item
+                                                        controller
+                                                            .selectedDriverRulesList
+                                                            .removeWhere(
+                                                                (element) =>
+                                                                    element
+                                                                        .id ==
+                                                                    item.id);
+                                                      }
+                                                    }
+                                                  : null,
+                                            ))
+                                        .toList(),
+                                  );
+                                }),
                                 const SizedBox(
                                   height: 20,
                                 ),
@@ -959,7 +936,8 @@ class VehicleInformationScreen extends StatelessWidget {
     );
   }
 
-  void zoneDialog(BuildContext context, VehicleInformationController controller) {
+  void zoneDialog(
+      BuildContext context, VehicleInformationController controller) {
     Widget cancelButton = TextButton(
       child: Text(
         "Cancel".tr,

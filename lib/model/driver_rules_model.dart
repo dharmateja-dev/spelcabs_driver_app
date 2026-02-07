@@ -15,10 +15,15 @@ class DriverRulesModel {
     isDeleted = json['isDeleted'];
     enable = json['enable'];
     if (json['name'] != null) {
-      name = <LanguageName>[];
-      json['name'].forEach((v) {
-        name!.add(LanguageName.fromJson(v));
-      });
+      if (json['name'] is String) {
+        // Handle old/simple format where name is just a string
+        name = [LanguageName(name: json['name'], type: 'en')];
+      } else if (json['name'] is List) {
+        name = <LanguageName>[];
+        json['name'].forEach((v) {
+          name!.add(LanguageName.fromJson(v));
+        });
+      }
     }
 
     id = json['id'];

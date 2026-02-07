@@ -233,7 +233,8 @@ class _DriverLocationPermissionScreenState
               Get.back();
               _onAllowAccess();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff193751)),
             child: const Text('Enable Location'),
           ),
         ],
@@ -294,7 +295,8 @@ class _DriverLocationPermissionScreenState
                 _onSkip();
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff193751)),
             child: const Text('Open Settings'),
           ),
         ],
@@ -339,7 +341,8 @@ class _DriverLocationPermissionScreenState
               _canNavigateAway = true;
               _navigateToDashboard();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xff193751)),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff193751)),
             child: const Text('Open Settings'),
           ),
         ],
@@ -356,6 +359,18 @@ class _DriverLocationPermissionScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Define theme-aware colors
+    final bool isDark = Get.isDarkMode;
+    const Color primaryColor = Color(0xff193751);
+    final Color iconColor = isDark ? Colors.white : primaryColor;
+    final Color iconBgColor =
+        isDark ? Colors.white.withOpacity(0.1) : primaryColor.withOpacity(0.1);
+    final Color cardBgColor = isDark ? Colors.grey[900]! : Colors.grey[50]!;
+    final Color cardBorderColor =
+        isDark ? Colors.grey[800]! : Colors.grey[200]!;
+    final Color textColor = isDark ? Colors.white : Colors.black;
+    final Color subTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
+
     if (_isChecking) {
       return const Scaffold(
         body: Center(
@@ -380,6 +395,7 @@ class _DriverLocationPermissionScreenState
     }
 
     return Scaffold(
+      backgroundColor: isDark ? Colors.black : Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -390,21 +406,22 @@ class _DriverLocationPermissionScreenState
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xff193751).withOpacity(0.1),
+                  color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.my_location,
                   size: 60,
-                  color: Color(0xff193751),
+                  color: iconColor,
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Location Access Required',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: textColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -413,7 +430,7 @@ class _DriverLocationPermissionScreenState
                 'Enable location to start accepting ride requests',
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: subTextColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -426,94 +443,139 @@ class _DriverLocationPermissionScreenState
                         Icons.notifications_active,
                         'Receive Ride Requests',
                         'Get notified when riders near you request a ride',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.all_inclusive,
                         'Always-On Location Access',
                         'This app requires "Allow all the time" location permission to send you ride requests even when the app is in the background or closed. This ensures you never miss an opportunity to earn.',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.all_inclusive,
                         'Background location access is needed in a driver app to',
                         'Receive ride requests and navigate to pickups even when the app is not actively in use.',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.visibility,
                         'Show Your Location to Riders',
                         'Riders can see your real-time location for better coordination',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.navigation,
                         'Smart Navigation',
                         'Get turn-by-turn directions to pickup and drop-off locations',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.analytics,
                         'Accurate Trip Tracking',
                         'Automatically track trip distance for fair fare calculation',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureCard(
                         Icons.trending_up,
                         'Maximize Earnings',
                         'Stay online and available to accept more rides',
+                        cardBgColor,
+                        cardBorderColor,
+                        iconColor,
+                        iconBgColor,
+                        textColor,
+                        subTextColor,
                       ),
                       const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xff193751).withOpacity(0.1),
+                          color: iconBgColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: const Color(0xff193751).withOpacity(0.3)),
+                              color: isDark
+                                  ? Colors.grey[800]!
+                                  : primaryColor.withOpacity(0.3)),
                         ),
                         child: Column(
                           children: [
-                            const Row(
+                            Row(
                               children: [
-                                Icon(Icons.privacy_tip,
-                                    color: Color(0xff193751)),
-                                SizedBox(width: 10),
+                                Icon(Icons.privacy_tip, color: iconColor),
+                                const SizedBox(width: 10),
                                 Text(
                                   'Your Privacy Matters',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
+                                    color: textColor,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 10),
-                            const Text(
+                            Text(
                               'Your location is only used to:\n'
                               '• Match you with nearby riders\n'
                               '• Navigate during trips\n'
                               '• Track trip distances\n\n'
                               'We do not sell or share your location with third parties for advertising purposes.',
-                              style: TextStyle(fontSize: 13, height: 1.5),
+                              style: TextStyle(
+                                  fontSize: 13, height: 1.5, color: textColor),
                             ),
                             const SizedBox(height: 12),
                             GestureDetector(
                               onTap: _openPrivacyPolicy,
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
                                     'Read Privacy Policy',
                                     style: TextStyle(
-                                      color: Color(0xff193751),
+                                      color: iconColor,
                                       fontWeight: FontWeight.w600,
                                       decoration: TextDecoration.underline,
                                     ),
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Icon(Icons.open_in_new,
-                                      size: 16, color: Color(0xff193751)),
+                                      size: 16, color: iconColor),
                                 ],
                               ),
                             ),
@@ -531,7 +593,7 @@ class _DriverLocationPermissionScreenState
                 child: ElevatedButton.icon(
                   onPressed: _isRequestingPermission ? null : _onAllowAccess,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff193751),
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -544,15 +606,6 @@ class _DriverLocationPermissionScreenState
                   ),
                 ),
               ),
-              // const SizedBox(height: 12),
-              // TextButton(
-              //   onPressed: _isRequestingPermission ? null : _onSkip,
-              //   child: const Text(
-              //     'Skip for Now',
-              //     style: TextStyle(fontSize: 15, color: Colors.grey),
-              //   ),
-              // ),
-              // const SizedBox(height: 20),
             ],
           ),
         ),
@@ -560,23 +613,33 @@ class _DriverLocationPermissionScreenState
     );
   }
 
-  Widget _buildFeatureCard(IconData icon, String title, String description) {
+  Widget _buildFeatureCard(
+    IconData icon,
+    String title,
+    String description,
+    Color bgColor,
+    Color borderColor,
+    Color iconColor,
+    Color iconBgColor,
+    Color textColor,
+    Color subTextColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xff193751).withOpacity(0.1),
+              color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xff193751), size: 24),
+            child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -585,9 +648,10 @@ class _DriverLocationPermissionScreenState
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -595,7 +659,7 @@ class _DriverLocationPermissionScreenState
                   description,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey[600],
+                    color: subTextColor,
                     height: 1.3,
                   ),
                 ),

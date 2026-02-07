@@ -223,13 +223,26 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
 
     // Permission granted, set up location tracking
-    location.enableBackgroundMode(enable: true);
-    location.changeSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: double.parse(Constant.driverLocationUpdate.toString()),
-        interval: 2000);
-    AppLogger.info("Location background mode enabled and settings changed.",
-        tag: "HomeController");
+    try {
+      await location.enableBackgroundMode(enable: true);
+      AppLogger.info("Location background mode enabled.",
+          tag: "HomeController");
+    } catch (e) {
+      AppLogger.warning("Failed to enable background mode: $e",
+          tag: "HomeController");
+    }
+
+    try {
+      location.changeSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter:
+              double.parse(Constant.driverLocationUpdate.toString()),
+          interval: 2000);
+      AppLogger.info("Location settings changed.", tag: "HomeController");
+    } catch (e) {
+      AppLogger.warning("Failed to change location settings: $e",
+          tag: "HomeController");
+    }
 
     _locationSubscription = location.onLocationChanged.listen((locationData) {
       if (locationData.latitude != null && locationData.longitude != null) {
