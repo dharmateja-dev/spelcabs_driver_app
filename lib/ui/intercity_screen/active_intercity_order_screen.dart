@@ -540,7 +540,9 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
         });
   }
 
-  Dialog otpDialog(BuildContext context, ActiveInterCityOrderController controller,
+  Dialog otpDialog(
+      BuildContext context,
+      ActiveInterCityOrderController controller,
       InterCityOrderModel orderModel) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 

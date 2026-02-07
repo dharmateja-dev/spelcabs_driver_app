@@ -1,6 +1,7 @@
 import 'package:driver/constant/constant.dart';
 import 'package:driver/controller/home_controller.dart';
 import 'package:driver/model/order_model.dart';
+import 'package:driver/model/service_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/themes/responsive.dart';
 import 'package:driver/ui/home_screens/order_map_screen.dart';
@@ -68,12 +69,68 @@ class NewOrderScreen extends StatelessWidget {
                                   OrderModel orderModel = snapshot.data![index];
                                   String amount;
 
-                                  // Add proper null checks to prevent crashes
-                                  if (orderModel.service?.kmCharge != null) {
+                                  // Extended pricing logic to handle Zone pricing and fallbacks (Ported from Customer App)
+                                  if (orderModel.service != null) {
+                                    ServiceModel service = orderModel.service!;
+                                    String chargeStr = service.kmCharge ?? "0";
+                                    double charge = double.tryParse(
+                                            chargeStr.replaceAll(
+                                                RegExp(r'[^0-9.]'), '')) ??
+                                        0.0;
+
+                                    // If kmCharge is 0/null, try Fallback fields
+                                    if (charge == 0.0) {
+                                      // Check for zone-specific price first if available
+                                      if (service.prices != null &&
+                                          service.prices!.isNotEmpty &&
+                                          orderModel.zoneId != null) {
+                                        // Try to find price for current zone
+                                        var zonePrice = service.prices!
+                                            .firstWhere(
+                                                (p) =>
+                                                    p.zoneId ==
+                                                    orderModel.zoneId,
+                                                orElse: () =>
+                                                    service.prices!.first);
+
+                                        if (zonePrice.kmCharge != null) {
+                                          chargeStr = zonePrice.kmCharge!;
+                                        } else if (zonePrice.acCharge != null &&
+                                            zonePrice.acCharge != "0") {
+                                          chargeStr = zonePrice.acCharge!;
+                                        } else if (zonePrice.nonAcCharge !=
+                                                null &&
+                                            zonePrice.nonAcCharge != "0") {
+                                          chargeStr = zonePrice.nonAcCharge!;
+                                        } else if (zonePrice.basicFareCharge !=
+                                            null) {
+                                          chargeStr =
+                                              zonePrice.basicFareCharge!;
+                                        }
+                                      }
+                                      // If still 0, try top-level fallback fields
+                                      else {
+                                        if (service.isAcNonAc == true) {
+                                          String? acRaw = service.acCharge;
+                                          String? nonAcRaw =
+                                              service.nonAcCharge;
+
+                                          if (acRaw != null && acRaw != "0") {
+                                            chargeStr = acRaw;
+                                          } else if (nonAcRaw != null &&
+                                              nonAcRaw != "0") {
+                                            chargeStr = nonAcRaw;
+                                          }
+                                        } else if (service.basicFareCharge !=
+                                            null) {
+                                          chargeStr = service.basicFareCharge!;
+                                        }
+                                      }
+                                    }
+
                                     if (Constant.distanceType == "Km") {
                                       amount = Constant.amountCalculate(
-                                              orderModel.service!.kmCharge
-                                                  .toString(),
+                                              chargeStr,
                                               orderModel.distance.toString())
                                           .toStringAsFixed(Constant
                                                   .currencyModel
@@ -81,8 +138,7 @@ class NewOrderScreen extends StatelessWidget {
                                               2);
                                     } else {
                                       amount = Constant.amountCalculate(
-                                              orderModel.service!.kmCharge
-                                                  .toString(),
+                                              chargeStr,
                                               orderModel.distance.toString())
                                           .toStringAsFixed(Constant
                                                   .currencyModel
@@ -90,10 +146,10 @@ class NewOrderScreen extends StatelessWidget {
                                               2);
                                     }
                                   } else {
-                                    // Fallback logic when service or kmCharge is null
+                                    // Fallback when service is missing entirely
                                     amount = "0.00";
                                     AppLogger.warning(
-                                        "Missing service or kmCharge for order ${orderModel.id}");
+                                        "Missing service for order ${orderModel.id}");
                                   }
                                   return InkWell(
                                     onTap: () {

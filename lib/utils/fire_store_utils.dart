@@ -1303,20 +1303,6 @@ class FireStoreUtils {
                   "Order ${doc.id} filtered out: zone '$orderZoneId' not in driver zones ${driverUserModel.zoneIds}",
                   tag: "FireStoreUtils");
 
-              // REMOTE DEBUGGING: Write to Firestore
-              FirebaseFirestore.instance
-                  .collection('debug_ride_allocation')
-                  .add({
-                'type': 'filtering_failure',
-                'reason': 'zone_mismatch',
-                'orderId': doc.id,
-                'driverId': driverUserModel.id,
-                'orderZoneId': orderZoneId,
-                'driverZoneIds': driverUserModel.zoneIds,
-                'timestamp': FieldValue.serverTimestamp(),
-                'driverLocation': driverUserModel.location?.toJson(),
-              });
-
               continue;
             } else {
               AppLogger.debug(
@@ -1344,19 +1330,6 @@ class FireStoreUtils {
                 AppLogger.debug(
                     "Order ${doc.id} filtered out: service '$orderServiceId' not in driver's active services ${driverUserModel.activeServices}",
                     tag: "FireStoreUtils");
-
-                // REMOTE DEBUGGING: Write to Firestore
-                FirebaseFirestore.instance
-                    .collection('debug_ride_allocation')
-                    .add({
-                  'type': 'filtering_failure',
-                  'reason': 'service_mismatch',
-                  'orderId': doc.id,
-                  'driverId': driverUserModel.id,
-                  'orderServiceId': orderServiceId,
-                  'driverActiveServices': driverUserModel.activeServices,
-                  'timestamp': FieldValue.serverTimestamp(),
-                });
 
                 continue;
               } else {

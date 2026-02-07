@@ -10,21 +10,41 @@ class Styles {
       colorScheme: ColorScheme(
           brightness: isDarkTheme ? Brightness.dark : Brightness.light,
           primary: isDarkTheme ? AppColors.darkModePrimary : AppColors.primary,
-          onPrimary: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
-          secondary: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSecondary: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onPrimary:
+              isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
+          secondary:
+              isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onSecondary:
+              isDarkTheme ? AppColors.darkBackground : AppColors.background,
           error: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onError: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          surface: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSurface: isDarkTheme ? AppColors.darkBackground : AppColors.background),
+          onError:
+              isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          surface:
+              isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onSurface:
+              isDarkTheme ? AppColors.darkBackground : AppColors.background),
       primaryColor: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
       hintColor: isDarkTheme ? Colors.white38 : Colors.black38,
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       buttonTheme: ButtonThemeData(
-        textTheme: ButtonTextTheme.primary, //  <-- dark text for light background
-        colorScheme: Theme.of(context).colorScheme.copyWith(primary: isDarkTheme ? AppColors.darkModePrimary : AppColors.primary),
+        textTheme:
+            ButtonTextTheme.primary, //  <-- dark text for light background
+        colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary:
+                isDarkTheme ? AppColors.darkModePrimary : AppColors.primary),
+      ),textSelectionTheme: TextSelectionThemeData(
+        cursorColor: isDarkTheme ? Colors.white : AppColors.primary,
+        selectionColor: isDarkTheme
+            ? Colors.white.withValues(alpha: 0.4)
+            : AppColors.primary.withValues(alpha: 0.4),
+        selectionHandleColor: isDarkTheme ? Colors.white : AppColors.primary,
       ),
-      appBarTheme: AppBarTheme(centerTitle: true, iconTheme: const IconThemeData(color: Colors.white), titleTextStyle: GoogleFonts.poppins(color: Colors.white, fontSize: 16)),
+
+      appBarTheme: AppBarTheme(
+          centerTitle: true,
+          iconTheme: const IconThemeData(color: Colors.white),
+          titleTextStyle:
+              GoogleFonts.poppins(color: Colors.white, fontSize: 16)),
     );
   }
 }
