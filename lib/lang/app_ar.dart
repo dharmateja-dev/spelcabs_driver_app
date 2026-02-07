@@ -262,5 +262,7 @@ const Map<String, String> arAR = {
       "تم التبديل إلى نموذج العمولة بنجاح.",
   "You already have an active subscription. Switch to Commission Model first.":
       "لديك بالفعل اشتراك نشط. قم بالتبديل إلى نموذج العمولة أولاً.",
-  "Switch": "تبديل"
+  "Switch": "تبديل",
+  "drivers rules will update soon": "سيتم تحديث قواعد السائق قريباً",
+  "field required": "حقل مطلوب"
 };

@@ -271,4 +271,7 @@ const Map<String, String> trFr = {
   "You already have an active subscription. Switch to Commission Model first.":
       "Vous avez déjà un abonnement actif. Passez d'abord au modèle de commission.",
   "Switch": "Changer",
+  "drivers rules will update soon":
+      "Les règles des chauffeurs seront bientôt mises à jour",
+  "field required": "Champ obligatoire"
 };

@@ -378,7 +378,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                         ),
                                       ),
                                       validator: (value) => value == null
-                                          ? 'field required'
+                                          ? 'field required'.tr
                                           : null,
                                       initialValue: controller
                                                   .selectedVehicle.value.id ==
@@ -489,8 +489,9 @@ class VehicleInformationScreen extends StatelessWidget {
                                             width: 1),
                                       ),
                                     ),
-                                    validator: (value) =>
-                                        value == null ? 'field required' : null,
+                                    validator: (value) => value == null
+                                        ? 'field required'.tr
+                                        : null,
                                     initialValue:
                                         controller.selectedColor.value.isEmpty
                                             ? null
@@ -566,8 +567,9 @@ class VehicleInformationScreen extends StatelessWidget {
                                             width: 1),
                                       ),
                                     ),
-                                    validator: (value) =>
-                                        value == null ? 'field required' : null,
+                                    validator: (value) => value == null
+                                        ? 'field required'.tr
+                                        : null,
                                     initialValue: controller
                                             .seatsController.value.text.isEmpty
                                         ? null
@@ -672,9 +674,22 @@ class VehicleInformationScreen extends StatelessWidget {
                                         fontSize: 16)),
                                 Obx(() {
                                   if (controller.driverRulesList.isEmpty) {
-                                    // If no rules for the selected vehicle, show nothing or empty state
-                                    // Or if loading...
-                                    return const SizedBox();
+                                    // If no rules for the selected vehicle, show placeholder
+                                    return Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Text(
+                                          "drivers rules will update soon".tr,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            color: themeChange.getThem()
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    );
                                   }
 
                                   return ListBody(

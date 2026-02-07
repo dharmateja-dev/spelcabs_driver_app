@@ -268,4 +268,6 @@ const Map<String, String> enUS = {
   "You already have an active subscription. Switch to Commission Model first.":
       "You already have an active subscription. Switch to Commission Model first.",
   "Switch": "Switch",
+  "drivers rules will update soon": "Drivers rules will update soon",
+  "field required": "Field required",
 };
