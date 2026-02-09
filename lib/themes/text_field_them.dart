@@ -41,6 +41,7 @@ class TextFieldThem {
           controller: controller,
           textAlign: TextAlign.start,
           enabled: enable,
+          cursorColor: themeChange.getThem() ? Colors.white : AppColors.primary,
           keyboardType: keyBoardType,
           textCapitalization: textCapitalization,
           maxLines: maxLine,
@@ -146,6 +147,7 @@ class TextFieldThem {
           controller: controller,
           textAlign: TextAlign.start,
           enabled: enable,
+          cursorColor: themeChange.getThem() ? Colors.white : AppColors.primary,
           keyboardType: const TextInputType.numberWithOptions(
               signed: false, decimal: false),
           maxLength: maxLength,
@@ -238,6 +240,7 @@ class TextFieldThem {
         controller: controller,
         textAlign: TextAlign.start,
         enabled: enable,
+        cursorColor: themeChange.getThem() ? Colors.white : AppColors.primary,
         keyboardType: keyBoardType,
         textCapitalization: textCapitalization,
         maxLines: maxLine,
@@ -306,6 +309,7 @@ class TextFieldThem {
         controller: controller,
         textAlign: TextAlign.start,
         enabled: enable,
+        cursorColor: themeChange.getThem() ? Colors.white : AppColors.primary,
         keyboardType: keyBoardType,
         style: GoogleFonts.poppins(
             color: themeChange.getThem() ? Colors.white : Colors.black),
@@ -374,6 +378,7 @@ class TextFieldThem {
         controller: controller,
         textAlign: TextAlign.start,
         enabled: enable,
+        cursorColor: themeChange.getThem() ? Colors.white : AppColors.primary,
         keyboardType: keyBoardType,
         style: GoogleFonts.poppins(
             color: themeChange.getThem() ? Colors.white : Colors.black),

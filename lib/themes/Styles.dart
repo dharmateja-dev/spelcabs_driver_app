@@ -10,21 +10,24 @@ class Styles {
       colorScheme: ColorScheme(
           brightness: isDarkTheme ? Brightness.dark : Brightness.light,
           primary: isDarkTheme ? AppColors.darkModePrimary : AppColors.primary,
-          onPrimary:
-              isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
+          onPrimary: Colors.white,
           secondary:
               isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSecondary:
-              isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          error: isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onError:
-              isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onSecondary: isDarkTheme ? Colors.white : Colors.black,
+          error: Colors.red,
+          onError: Colors.white,
           surface:
               isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSurface:
-              isDarkTheme ? AppColors.darkBackground : AppColors.background),
+          onSurface: isDarkTheme ? Colors.white : Colors.black),
       primaryColor: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
       hintColor: isDarkTheme ? Colors.white38 : Colors.black38,
+      inputDecorationTheme: InputDecorationTheme(
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
+        ),
+      ),
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       buttonTheme: ButtonThemeData(
         textTheme:
@@ -32,14 +35,14 @@ class Styles {
         colorScheme: Theme.of(context).colorScheme.copyWith(
             primary:
                 isDarkTheme ? AppColors.darkModePrimary : AppColors.primary),
-      ),textSelectionTheme: TextSelectionThemeData(
+      ),
+      textSelectionTheme: TextSelectionThemeData(
         cursorColor: isDarkTheme ? Colors.white : AppColors.primary,
         selectionColor: isDarkTheme
-            ? Colors.white.withValues(alpha: 0.4)
-            : AppColors.primary.withValues(alpha: 0.4),
+            ? const Color(0xff193751).withOpacity(0.5) // Visible blue for dark
+            : const Color(0xff193751).withOpacity(0.3), // Light blue for light
         selectionHandleColor: isDarkTheme ? Colors.white : AppColors.primary,
       ),
-
       appBarTheme: AppBarTheme(
           centerTitle: true,
           iconTheme: const IconThemeData(color: Colors.white),

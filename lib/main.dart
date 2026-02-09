@@ -72,10 +72,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangePlatformBrightness() {
-    // Only refresh if using system theme (value 2)
-    if (themeChangeProvider.darkTheme == 2) {
-      setState(() {}); // Trigger rebuild to pick up new system brightness
-    }
+    themeChangeProvider.updateSystemTheme();
   }
 
   void getCurrentAppTheme() async {
