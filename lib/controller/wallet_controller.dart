@@ -766,7 +766,8 @@ class WalletController extends GetxController {
             walletTopUp();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text("Payment Unsuccessful!! \n".tr),
+              content: Text("Payment Unsuccessful!! \n".tr,
+                  style: const TextStyle(color: Colors.white)),
               backgroundColor: Colors.red,
             ));
           }
@@ -843,7 +844,8 @@ class WalletController extends GetxController {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Payment Unsuccessful!! \n"),
+        content: Text("Payment Unsuccessful!! \n",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.red,
       ));
     }
@@ -884,7 +886,7 @@ class WalletController extends GetxController {
           backgroundColor: Color(0xff635bff),
           content: Text(
             "Something went wrong, please contact admin.",
-            style: TextStyle(fontSize: 17),
+            style: TextStyle(fontSize: 17, color: Colors.white),
           )));
 
       return '';
@@ -938,7 +940,7 @@ class WalletController extends GetxController {
           backgroundColor: Color(0xff635bff),
           content: Text(
             "Something went wrong, please contact admin.",
-            style: TextStyle(fontSize: 17),
+            style: TextStyle(fontSize: 17, color: Colors.white),
           )));
       return '';
     }

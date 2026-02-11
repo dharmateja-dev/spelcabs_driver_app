@@ -105,7 +105,6 @@ class FreightController extends GetxController {
         print(
             "🔍 [FREIGHT] Stream update: ${querySnapshot.docs.length} docs found.");
 
-        final uid = FireStoreUtils.getCurrentUid();
         int kept = 0;
         List<InterCityOrderModel> tempOrders = [];
 
@@ -146,23 +145,24 @@ class FreightController extends GetxController {
 
             InterCityOrderModel orderModel = InterCityOrderModel.fromJson(data);
 
-            // Check if already accepted
-            bool alreadyAccepted = false;
+            // Check if accepted by ANYONE (hide from New Orders)
             if (orderModel.acceptedDriverId != null &&
                 orderModel.acceptedDriverId!.isNotEmpty) {
-              if (orderModel.acceptedDriverId is List) {
-                alreadyAccepted = (orderModel.acceptedDriverId as List)
-                    .cast<String>()
-                    .contains(uid);
-              } else if (orderModel.acceptedDriverId is String) {
-                alreadyAccepted = orderModel.acceptedDriverId == uid;
+              continue;
+            }
+
+            // Check Vehicle Type Eligibility
+            // Only drivers with the registered freight vehicle type should see freight orders.
+            if (orderModel.freightVehicle != null &&
+                driverModel.value.vehicleInformation != null) {
+              if (driverModel.value.vehicleInformation!.vehicleTypeId !=
+                  orderModel.freightVehicle!.id) {
+                continue;
               }
             }
 
-            if (!alreadyAccepted) {
-              tempOrders.add(orderModel);
-              kept++;
-            }
+            tempOrders.add(orderModel);
+            kept++;
           } catch (e) {
             print("   ❌ Error parsing order document ${doc.id}: $e");
           }

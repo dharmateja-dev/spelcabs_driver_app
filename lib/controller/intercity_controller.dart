@@ -111,7 +111,6 @@ class IntercityController extends GetxController {
             "Stream update: ${querySnapshot.docs.length} docs found.",
             tag: "IntercityController");
 
-        final uid = FireStoreUtils.getCurrentUid();
         const freightServiceId = Constant.freightServiceId;
         List<InterCityOrderModel> tempOrders = [];
         int kept = 0;
@@ -157,17 +156,39 @@ class IntercityController extends GetxController {
 
             final orderModel = InterCityOrderModel.fromJson(data);
 
-            // Skip already accepted
-            bool alreadyAccepted = false;
-            final accepted = orderModel.acceptedDriverId;
-            if (accepted != null) {
-              alreadyAccepted = accepted.cast<String>().contains(uid);
+            // Check if accepted by ANYONE (hide from New Orders)
+            if (orderModel.acceptedDriverId != null &&
+                orderModel.acceptedDriverId!.isNotEmpty) {
+              continue;
             }
 
-            if (!alreadyAccepted) {
-              tempOrders.add(orderModel);
-              kept++;
+            // Service Eligibility Check
+            if (driverModel.value.activeServices == null ||
+                !driverModel.value.activeServices!
+                    .containsKey(orderModel.intercityServiceId) ||
+                driverModel
+                        .value.activeServices![orderModel.intercityServiceId] !=
+                    true) {
+              continue;
             }
+
+            // STRICT RULE: Freight Vehicles cannot do Passenger Intercity Rides (Shared/Private/Parcel)
+            // If the driver has the Freight Service enabled, they should only see Freight orders.
+            // (We already filtered OUT freight orders above with `if (serviceId == freightServiceId)`)
+            // So here, if they are a Freight Driver, we must hide these passenger orders from them.
+            if (driverModel.value.activeServices != null &&
+                driverModel.value.activeServices!
+                    .containsKey(Constant.freightServiceId) &&
+                driverModel
+                        .value.activeServices![Constant.freightServiceId] ==
+                    true) {
+              // This is a Freight Driver, and the order is NOT freight (filtered above).
+              // So they should not see it.
+              continue;
+            }
+
+            tempOrders.add(orderModel);
+            kept++;
           } catch (e, s) {
             AppLogger.error("Error parsing order document ${doc.id}: $e",
                 tag: "IntercityController", error: e, stackTrace: s);

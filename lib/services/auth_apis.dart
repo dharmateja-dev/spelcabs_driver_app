@@ -24,11 +24,7 @@ class AuthApiService {
   static void _showSnackbar(BuildContext context, String message) {
     AppLogger.info("Displaying Snackbar: $message", tag: "AuthApiService");
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(message,
-              style:
-                  TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-          duration: const Duration(seconds: 3)),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
     );
   }
 

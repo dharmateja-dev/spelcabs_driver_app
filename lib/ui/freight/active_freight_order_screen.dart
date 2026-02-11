@@ -285,6 +285,61 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                         height: 10,
                                       ),
                                       Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ButtonThem.buildBorderButton(context,
+                                              title: "Get Directions".tr,
+                                              btnHeight: 40,
+                                              btnWidthRatio: 0.35,
+                                              onPress: () {
+                                            if (Constant.mapType == "inappmap") {
+                                              if (orderModel.status ==
+                                                      Constant.rideActive ||
+                                                  orderModel.status ==
+                                                      Constant.rideInProgress) {
+                                                Get.to(
+                                                    const LiveTrackingScreen(),
+                                                    arguments: {
+                                                      "interCityOrderModel":
+                                                          orderModel,
+                                                      "type":
+                                                          "interCityOrderModel",
+                                                    });
+                                              }
+                                            } else {
+                                              if (orderModel.status ==
+                                                  Constant.rideInProgress) {
+                                                Utils.redirectMap(
+                                                    latitude: orderModel
+                                                        .destinationLocationLAtLng!
+                                                        .latitude!,
+                                                    longLatitude: orderModel
+                                                        .destinationLocationLAtLng!
+                                                        .longitude!,
+                                                    name: orderModel
+                                                        .destinationLocationName
+                                                        .toString());
+                                              } else {
+                                                Utils.redirectMap(
+                                                    latitude: orderModel
+                                                        .sourceLocationLAtLng!
+                                                        .latitude!,
+                                                    longLatitude: orderModel
+                                                        .sourceLocationLAtLng!
+                                                        .longitude!,
+                                                    name: orderModel
+                                                        .sourceLocationName
+                                                        .toString());
+                                              }
+                                            }
+                                          }),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
                                         children: [
                                           Expanded(
                                             child: orderModel.status ==

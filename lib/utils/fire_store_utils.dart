@@ -1314,6 +1314,21 @@ class FireStoreUtils {
             // Ensure the driver is eligible for this specific order's service type
             final orderServiceId = data['serviceId'] as String?;
             if (orderServiceId != null) {
+
+              // STRICT RULE: Freight Vehicles cannot do City Rides
+              // If the driver has the Freight Service enabled, they are considered a Freight Vehicle/Driver
+              // and are restricted from doing City Rides.
+              if (driverUserModel.activeServices != null &&
+                  driverUserModel.activeServices!
+                      .containsKey(Constant.freightServiceId) &&
+                  driverUserModel.activeServices![Constant.freightServiceId] ==
+                      true) {
+                AppLogger.debug(
+                    "Order ${doc.id} filtered out: Driver has Freight Service enabled and cannot do City Rides",
+                    tag: "FireStoreUtils");
+                continue;
+              }
+
               // Check if the driver has this service in their activeServices map
               bool isEligible = false;
               if (driverUserModel.activeServices != null &&
