@@ -291,17 +291,23 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                         ),
                                                         const SizedBox(
                                                             height: 10),
-                                                        Text(
-                                                          Constant.amountShow(
-                                                              amount: orderModel
-                                                                  .offerRate
-                                                                  .toString()),
-                                                          style: GoogleFonts
-                                                              .poppins(
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Text(
+                                                              Constant.amountShow(
+                                                                  amount: orderModel
+                                                                      .offerRate
+                                                                      .toString()),
+                                                              style: GoogleFonts.poppins(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
                                                                   fontSize: 18),
+                                                            ),
+                                                          ],
                                                         ),
                                                         const SizedBox(
                                                             height: 10),
@@ -529,8 +535,8 @@ class NewOrderFreightScreen extends StatelessWidget {
         });
   }
 
-  Future<dynamic> offerAcceptDialog(BuildContext context, FreightController controller,
-      InterCityOrderModel orderModel) {
+  Future<dynamic> offerAcceptDialog(BuildContext context,
+      FreightController controller, InterCityOrderModel orderModel) {
     return showModalBottomSheet(
         context: context,
         isDismissible: false,

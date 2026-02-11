@@ -4,12 +4,15 @@ import 'package:driver/themes/responsive.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:driver/utils/DarkThemeProvider.dart';
+import 'package:provider/provider.dart';
 
 class HomeIntercityScreen extends StatelessWidget {
   const HomeIntercityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX<HomeIntercityController>(
         init: HomeIntercityController(),
         dispose: (state) {
@@ -68,8 +71,12 @@ class HomeIntercityScreen extends StatelessWidget {
                             child: Image.asset("assets/icons/ic_new.png",
                                 width: 18,
                                 color: controller.selectedIndex.value == 0
-                                    ? AppColors.darkModePrimary
-                                    : Colors.white.withOpacity(0.5)),
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withOpacity(0.5)
+                                        : Colors.grey)),
                           ),
                           label: 'New'.tr,
                         ),
@@ -79,8 +86,12 @@ class HomeIntercityScreen extends StatelessWidget {
                             child: Image.asset("assets/icons/ic_accepted.png",
                                 width: 18,
                                 color: controller.selectedIndex.value == 1
-                                    ? AppColors.darkModePrimary
-                                    : Colors.white.withOpacity(0.5)),
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withOpacity(0.5)
+                                        : Colors.grey)),
                           ),
                           label: 'Accepted'.tr,
                         ),
@@ -90,8 +101,12 @@ class HomeIntercityScreen extends StatelessWidget {
                             child: Image.asset("assets/icons/ic_active.png",
                                 width: 18,
                                 color: controller.selectedIndex.value == 2
-                                    ? AppColors.darkModePrimary
-                                    : Colors.white.withOpacity(0.5)),
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withOpacity(0.5)
+                                        : Colors.grey)),
                           ),
                           label: 'Active'.tr,
                         ),
@@ -101,17 +116,27 @@ class HomeIntercityScreen extends StatelessWidget {
                             child: Image.asset("assets/icons/ic_completed.png",
                                 width: 18,
                                 color: controller.selectedIndex.value == 3
-                                    ? AppColors.darkModePrimary
-                                    : Colors.white.withOpacity(0.5)),
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withOpacity(0.5)
+                                        : Colors.grey)),
                           ),
                           label: 'Completed'.tr,
                         ),
                       ],
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: themeChange.getThem()
+                          ? AppColors.darkModePrimary
+                          : Colors.white,
                       type: BottomNavigationBarType.fixed,
                       currentIndex: controller.selectedIndex.value,
-                      selectedItemColor: AppColors.darkModePrimary,
-                      unselectedItemColor: Colors.white.withOpacity(0.5),
+                      selectedItemColor: themeChange.getThem()
+                          ? Colors.white
+                          : AppColors.primary,
+                      unselectedItemColor: themeChange.getThem()
+                          ? Colors.white.withOpacity(0.5)
+                          : Colors.grey,
                       selectedFontSize: 12,
                       unselectedFontSize: 12,
                       elevation: 5,

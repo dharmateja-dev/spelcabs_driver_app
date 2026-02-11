@@ -6,7 +6,7 @@ import 'package:driver/ui/auth_screen/information_screen.dart';
 import 'package:driver/ui/auth_screen/login_screen.dart';
 import 'package:driver/ui/dashboard_screen.dart';
 import 'package:driver/ui/on_boarding_screen.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:get/get.dart';
 import 'package:driver/utils/app_logger.dart';
@@ -52,8 +52,7 @@ class SplashController extends GetxController {
             "SplashController: isLoggedInLocally = $isLoggedInLocally, driverIdFromPrefs = $driverIdFromPrefs",
             tag: "SplashController");
 
-        if (isLoggedInLocally &&
-            driverIdFromPrefs.isNotEmpty) {
+        if (isLoggedInLocally && driverIdFromPrefs.isNotEmpty) {
           // User is marked as logged in locally (likely a phone user)
           DriverUserModel? driverModel =
               await FireStoreUtils.getDriverProfile(driverIdFromPrefs);

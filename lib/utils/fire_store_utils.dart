@@ -36,7 +36,7 @@ import 'package:driver/widget/geoflutterfire/src/geoflutterfire.dart';
 import 'package:driver/widget/geoflutterfire/src/models/point.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:driver/utils/app_logger.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -1314,7 +1314,6 @@ class FireStoreUtils {
             // Ensure the driver is eligible for this specific order's service type
             final orderServiceId = data['serviceId'] as String?;
             if (orderServiceId != null) {
-
               // STRICT RULE: Freight Vehicles cannot do City Rides
               // If the driver has the Freight Service enabled, they are considered a Freight Vehicle/Driver
               // and are restricted from doing City Rides.

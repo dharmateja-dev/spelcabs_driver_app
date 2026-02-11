@@ -156,34 +156,41 @@ class IntercityController extends GetxController {
 
             final orderModel = InterCityOrderModel.fromJson(data);
 
-            // Check if accepted by ANYONE (hide from New Orders)
+            // Check if accepted by Current Driver (hide from New Orders only if YOU accepted/bid)
             if (orderModel.acceptedDriverId != null &&
-                orderModel.acceptedDriverId!.isNotEmpty) {
+                orderModel.acceptedDriverId!
+                    .contains(FireStoreUtils.getCurrentUid())) {
               continue;
             }
 
-            // Service Eligibility Check
-            if (driverModel.value.activeServices == null ||
-                !driverModel.value.activeServices!
-                    .containsKey(orderModel.intercityServiceId) ||
-                driverModel
-                        .value.activeServices![orderModel.intercityServiceId] !=
-                    true) {
-              continue;
-            }
-
-            // STRICT RULE: Freight Vehicles cannot do Passenger Intercity Rides (Shared/Private/Parcel)
-            // If the driver has the Freight Service enabled, they should only see Freight orders.
-            // (We already filtered OUT freight orders above with `if (serviceId == freightServiceId)`)
-            // So here, if they are a Freight Driver, we must hide these passenger orders from them.
+            // Determin if the driver is a "Freight Driver" based on active services
+            bool isFreightDriver = false;
             if (driverModel.value.activeServices != null &&
                 driverModel.value.activeServices!
                     .containsKey(Constant.freightServiceId) &&
-                driverModel
-                        .value.activeServices![Constant.freightServiceId] ==
+                driverModel.value.activeServices![Constant.freightServiceId] ==
                     true) {
-              // This is a Freight Driver, and the order is NOT freight (filtered above).
-              // So they should not see it.
+              isFreightDriver = true;
+            } else if (driverModel.value.serviceId ==
+                Constant.freightServiceId) {
+              isFreightDriver = true;
+            }
+
+            // STRICT RULE 1: Freight Drivers should ONLY see Freight Orders.
+            // Since we already skipped Freight orders at the top of this loop (line 124),
+            // any order reaching here is a PASSENGER Intercity Order.
+            // Therefore, if the driver is a FREIGHT driver, they must NOT see this order.
+            if (isFreightDriver) {
+              continue;
+            }
+
+            // STRICT RULE 2: Service Drivers (Non-Freight) should catch ALL Passenger Intercity Orders.
+            // The previous check required strict service ID matching (e.g., driver must have 's_shared' enabled).
+            // The new requirement is: "all types of drivers who registered with service vehicle" should get these rides.
+            // So if they are NOT a freight driver (and have active services), we show the order.
+
+            // Ensure active services is not null just in case
+            if (driverModel.value.activeServices == null) {
               continue;
             }
 

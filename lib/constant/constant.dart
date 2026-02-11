@@ -21,7 +21,7 @@ import 'package:driver/model/order/location_lat_lng.dart';
 import 'package:driver/model/tax_model.dart';
 import 'package:driver/themes/app_colors.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/utils/app_logger.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

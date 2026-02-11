@@ -12,8 +12,8 @@ import 'package:provider/provider.dart';
 import 'dart:developer';
 
 import 'services/localization_service.dart';
-import 'themes/Styles.dart';
-import 'utils/Preferences.dart';
+import 'package:driver/themes/Styles.dart';
+import 'package:driver/utils/preferences.dart';
 import 'services/city_rides_listener_service.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';

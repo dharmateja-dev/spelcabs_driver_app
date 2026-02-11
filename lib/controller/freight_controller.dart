@@ -145,18 +145,32 @@ class FreightController extends GetxController {
 
             InterCityOrderModel orderModel = InterCityOrderModel.fromJson(data);
 
-            // Check if accepted by ANYONE (hide from New Orders)
+            // Check if accepted by Current Driver
             if (orderModel.acceptedDriverId != null &&
-                orderModel.acceptedDriverId!.isNotEmpty) {
+                orderModel.acceptedDriverId!
+                    .contains(FireStoreUtils.getCurrentUid())) {
               continue;
             }
 
             // Check Vehicle Type Eligibility
             // Only drivers with the registered freight vehicle type should see freight orders.
-            if (orderModel.freightVehicle != null &&
-                driverModel.value.vehicleInformation != null) {
-              if (driverModel.value.vehicleInformation!.vehicleTypeId !=
-                  orderModel.freightVehicle!.id) {
+            // STRICT RULE: Freight Orders MUST have freightVehicle data
+            if (orderModel.freightVehicle == null) {
+              continue;
+            }
+
+            // Check Vehicle Type Eligibility
+            // Only drivers with the registered freight vehicle type should see freight orders.
+            if (driverModel.value.vehicleInformation != null &&
+                driverModel.value.vehicleInformation!.vehicleTypeId != null) {
+              String driverVehicleId = driverModel
+                  .value.vehicleInformation!.vehicleTypeId
+                  .toString()
+                  .trim();
+              String orderVehicleId =
+                  orderModel.freightVehicle!.id.toString().trim();
+
+              if (driverVehicleId != orderVehicleId) {
                 continue;
               }
             }

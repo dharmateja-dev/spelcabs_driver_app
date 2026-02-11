@@ -10,7 +10,7 @@ import 'package:driver/constant/constant.dart';
 import 'package:driver/ui/auth_screen/otp_screen.dart';
 import 'package:driver/ui/dashboard_screen.dart';
 import 'package:driver/ui/driver_location_permission_screen.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:driver/model/driver_user_model.dart';

@@ -8,7 +8,7 @@ import 'package:driver/themes/button_them.dart';
 import 'package:driver/themes/text_field_them.dart';
 import 'package:driver/ui/dashboard_screen.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

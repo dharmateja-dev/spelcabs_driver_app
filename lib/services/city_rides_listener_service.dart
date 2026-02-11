@@ -7,7 +7,7 @@ import 'package:driver/model/order_model.dart';
 import 'package:driver/model/order/location_lat_lng.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:driver/utils/app_logger.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/ui/home_screens/order_map_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';

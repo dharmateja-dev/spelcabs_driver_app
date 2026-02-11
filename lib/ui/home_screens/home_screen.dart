@@ -7,12 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:driver/utils/DarkThemeProvider.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX<HomeController>(
         init: HomeController(),
         dispose: (state) {
@@ -73,8 +76,12 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset("assets/icons/ic_new.png",
                           width: 18,
                           color: controller.selectedIndex.value == 0
-                              ? AppColors.darkBackground
-                              : AppColors.subTitleColor),
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withOpacity(0.5)
+                                  : Colors.grey)),
                     ),
                     label: 'New'.tr,
                   ),
@@ -84,8 +91,12 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset("assets/icons/ic_accepted.png",
                           width: 18,
                           color: controller.selectedIndex.value == 1
-                              ? AppColors.darkBackground
-                              : AppColors.subTitleColor),
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withOpacity(0.5)
+                                  : Colors.grey)),
                     ),
                     label: 'Accepted'.tr,
                   ),
@@ -98,8 +109,12 @@ class HomeScreen extends StatelessWidget {
                         child: Image.asset("assets/icons/ic_active.png",
                             width: 18,
                             color: controller.selectedIndex.value == 2
-                                ? AppColors.darkBackground
-                                : AppColors.subTitleColor),
+                                ? (themeChange.getThem()
+                                    ? Colors.white
+                                    : AppColors.primary)
+                                : (themeChange.getThem()
+                                    ? Colors.white.withOpacity(0.5)
+                                    : Colors.grey)),
                       ),
                     ),
                     label: 'Active'.tr,
@@ -110,17 +125,26 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset("assets/icons/ic_completed.png",
                           width: 18,
                           color: controller.selectedIndex.value == 3
-                              ? AppColors.darkBackground
-                              : AppColors.subTitleColor),
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withOpacity(0.5)
+                                  : Colors.grey)),
                     ),
                     label: 'Completed'.tr,
                   ),
                 ],
-                backgroundColor: AppColors.darkModePrimary,
+                backgroundColor: themeChange.getThem()
+                    ? AppColors.darkModePrimary
+                    : Colors.white,
                 type: BottomNavigationBarType.fixed,
                 currentIndex: controller.selectedIndex.value,
-                selectedItemColor: AppColors.darkBackground,
-                unselectedItemColor: AppColors.subTitleColor,
+                selectedItemColor:
+                    themeChange.getThem() ? Colors.white : AppColors.primary,
+                unselectedItemColor: themeChange.getThem()
+                    ? Colors.white.withOpacity(0.5)
+                    : Colors.grey,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,
                 onTap: controller.onItemTapped),

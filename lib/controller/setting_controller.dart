@@ -1,6 +1,6 @@
 import 'package:driver/constant/constant.dart';
 import 'package:driver/model/language_model.dart';
-import 'package:driver/utils/Preferences.dart';
+import 'package:driver/utils/preferences.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:get/get.dart';
 
