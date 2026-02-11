@@ -10,44 +10,21 @@ class Styles {
       colorScheme: ColorScheme(
           brightness: isDarkTheme ? Brightness.dark : Brightness.light,
           primary: isDarkTheme ? AppColors.darkModePrimary : AppColors.primary,
-          onPrimary: Colors.white,
-          secondary:
-              isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSecondary: isDarkTheme ? Colors.white : Colors.black,
-          error: Colors.red,
-          onError: Colors.white,
-          surface:
-              isDarkTheme ? AppColors.darkBackground : AppColors.background,
-          onSurface: isDarkTheme ? Colors.white : Colors.black),
+          onPrimary: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
+          secondary: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onSecondary: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          error: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onError: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          surface: isDarkTheme ? AppColors.darkBackground : AppColors.background,
+          onSurface: isDarkTheme ? AppColors.darkBackground : AppColors.background),
       primaryColor: isDarkTheme ? AppColors.primary : AppColors.darkModePrimary,
       hintColor: isDarkTheme ? Colors.white38 : Colors.black38,
-      inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: isDarkTheme ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       buttonTheme: ButtonThemeData(
-        textTheme:
-            ButtonTextTheme.primary, //  <-- dark text for light background
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-            primary:
-                isDarkTheme ? AppColors.darkModePrimary : AppColors.primary),
+        textTheme: ButtonTextTheme.primary, //  <-- dark text for light background
+        colorScheme: Theme.of(context).colorScheme.copyWith(primary: isDarkTheme ? AppColors.darkModePrimary : AppColors.primary),
       ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: isDarkTheme ? Colors.white : AppColors.primary,
-        selectionColor: isDarkTheme
-            ? const Color(0xff193751).withOpacity(0.5) // Visible blue for dark
-            : const Color(0xff193751).withOpacity(0.3), // Light blue for light
-        selectionHandleColor: isDarkTheme ? Colors.white : AppColors.primary,
-      ),
-      appBarTheme: AppBarTheme(
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Colors.white),
-          titleTextStyle:
-              GoogleFonts.poppins(color: Colors.white, fontSize: 16)),
+      appBarTheme: AppBarTheme(centerTitle: true, iconTheme: const IconThemeData(color: Colors.white), titleTextStyle: GoogleFonts.poppins(color: Colors.white, fontSize: 16)),
     );
   }
 }
