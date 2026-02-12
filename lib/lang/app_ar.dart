@@ -18,6 +18,7 @@ const Map<String, String> arAR = {
       "مرحباً بعودتك! يسعدنا أنك هنا \n معنا",
   "Next": "التالي",
   "OR": "أو",
+  "Don't have an account? ": "ليس لديك حساب؟ ",
   "Login with google": "تسجيل الدخول باستخدام جوجل",
   "Login with apple": "تسجيل الدخول باستخدام آبل",
   'By tapping "Next" you agree to ': 'بالضغط على "التالي" فإنك توافق على ',

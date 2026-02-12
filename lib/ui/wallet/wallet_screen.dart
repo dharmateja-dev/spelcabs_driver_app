@@ -23,7 +23,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
@@ -86,13 +85,12 @@ class WalletScreen extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),
-                                  color: themeChange.getThem()
-                                      ? AppColors.darkModePrimary
-                                      : Colors.white,
+                                  color: Colors.white,
                                   child: Text(
                                     "Topup Wallet".tr.toUpperCase(),
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
+                                        color: AppColors.primary,
                                         fontWeight: FontWeight.w600),
                                   ),
                                 ),
@@ -188,7 +186,8 @@ class WalletScreen extends StatelessWidget {
                                                     : [
                                                         BoxShadow(
                                                           color: Colors.grey
-                                                              .withOpacity(0.5),
+                                                              .withValues(
+                                                                  alpha: 0.5),
                                                           blurRadius: 8,
                                                           offset: const Offset(
                                                               0,
@@ -290,9 +289,11 @@ class WalletScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: ButtonThem.buildBorderButton(
+                    child: ButtonThem.buildButton(
                       context,
                       title: "withdraw".tr,
+                      btnColor: Colors.white,
+                      txtColor: AppColors.primary,
                       onPress: () async {
                         if (double.parse(controller
                                 .driverUserModel.value.walletAmount
@@ -323,6 +324,8 @@ class WalletScreen extends StatelessWidget {
                     child: ButtonThem.buildButton(
                       context,
                       title: "Withdrawal history".tr,
+                      btnColor: AppColors.primary,
+                      txtColor: Colors.white,
                       onPress: () {
                         Get.to(const WithDrawHistoryScreen());
                       },
@@ -335,7 +338,8 @@ class WalletScreen extends StatelessWidget {
         });
   }
 
-  Future<dynamic> paymentMethodDialog(BuildContext context, WalletController controller) {
+  Future<dynamic> paymentMethodDialog(
+      BuildContext context, WalletController controller) {
     return showModalBottomSheet(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -1003,7 +1007,8 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  Future<dynamic> withdrawAmountBottomSheet(BuildContext context, WalletController controller) {
+  Future<dynamic> withdrawAmountBottomSheet(
+      BuildContext context, WalletController controller) {
     return showModalBottomSheet(
         context: context,
         isScrollControlled: true,

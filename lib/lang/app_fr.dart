@@ -18,6 +18,7 @@ const Map<String, String> trFr = {
       "Content de te revoir! Nous sommes heureux de vous retrouver \n",
   "Next": "Suivant",
   "OR": "OU",
+  "Don't have an account? ": "Vous n'avez pas de compte ? ",
   "Login with google": "Connectez-vous avec Google",
   "Login with apple": "Connectez-vous avec Apple",
   'By tapping "Next" you agree to ':

@@ -109,7 +109,7 @@ class LoginScreen extends StatelessWidget {
                                   Get.to(const SignupScreen());
                                 },
                                 child: Text(
-                                  "Sign Up".tr,
+                                  "Sign up".tr,
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -129,11 +129,12 @@ class LoginScreen extends StatelessWidget {
                               children: [
                                 const Expanded(
                                     child: Divider(
+                                  color: Colors.grey,
                                   height: 1,
                                 )),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
+                                      horizontal: 10),
                                   child: Text(
                                     "OR".tr,
                                     style: GoogleFonts.poppins(
@@ -143,6 +144,7 @@ class LoginScreen extends StatelessWidget {
                                 ),
                                 const Expanded(
                                     child: Divider(
+                                  color: Colors.grey,
                                   height: 1,
                                 )),
                               ],
@@ -264,7 +266,7 @@ class LoginScreen extends StatelessWidget {
             ),
             bottomNavigationBar: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                 child: Text.rich(
                   textAlign: TextAlign.center,
                   TextSpan(

@@ -45,11 +45,11 @@ class DashBoardScreen extends StatelessWidget {
                             DriverUserModel.fromJson(snapshot.data!.data()!);
                         return Container(
                           width: Responsive.width(50, context),
-                          height: Responsive.height(5.5, context),
-                          decoration: const BoxDecoration(
-                            color: AppColors.darkBackground,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(50.0),
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(100.0),
                             ),
                           ),
                           child: Stack(
@@ -60,11 +60,11 @@ class DashBoardScreen extends StatelessWidget {
                                 duration: const Duration(milliseconds: 300),
                                 child: Container(
                                   width: Responsive.width(26, context),
-                                  height: Responsive.height(8, context),
+                                  height: 50,
                                   decoration: const BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.all(
-                                      Radius.circular(50.0),
+                                      Radius.circular(100.0),
                                     ),
                                   ),
                                 ),
@@ -101,7 +101,8 @@ class DashBoardScreen extends StatelessWidget {
                                       'Online'.tr,
                                       style: GoogleFonts.poppins(
                                           color: driverModel.isOnline == true
-                                              ? AppColors.primary
+                                              ? Colors
+                                                  .black // Dark text on white indicator
                                               : Colors.white,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 14),
@@ -151,7 +152,8 @@ class DashBoardScreen extends StatelessWidget {
                                       'Offline'.tr,
                                       style: GoogleFonts.poppins(
                                           color: driverModel.isOnline == false
-                                              ? AppColors.primary
+                                              ? Colors
+                                                  .black // Dark text on white indicator
                                               : Colors.white,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 14),

@@ -103,7 +103,7 @@ class ButtonThem {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                     color: themeChange.getThem()
-                        ? AppColors.darkModePrimary
+                        ? Colors.white
                         : AppColors.primary,
                     fontSize: txtSize,
                     fontWeight: FontWeight.w600),

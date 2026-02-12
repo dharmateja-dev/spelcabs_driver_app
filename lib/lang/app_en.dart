@@ -18,6 +18,7 @@ const Map<String, String> enUS = {
       "Welcome Back! We are happy to have \n you back",
   "Next": "Next",
   "OR": "OR",
+  "Don't have an account? ": "Don't have an account? ",
   "Login with google": "Login with google",
   "Login with apple": "Login with apple",
   'By tapping "Next" you agree to ': 'By tapping "Next" you agree to ',
