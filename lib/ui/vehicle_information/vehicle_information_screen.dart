@@ -6,7 +6,6 @@ import 'package:driver/controller/vehicle_information_controller.dart';
 import 'package:driver/controller/home_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/driver_rules_model.dart';
-import 'package:driver/model/service_model.dart';
 import 'package:driver/model/vehicle_type_model.dart';
 import 'package:driver/model/unified_vehicle_model.dart';
 import 'package:driver/model/zone_model.dart';
@@ -281,34 +280,16 @@ class VehicleInformationScreen extends StatelessWidget {
                                   height: 10,
                                 ),
                                 Obx(() {
-                                  // Determine if selected service is a car-like service (Car/Cab/Taxi)
                                   bool isCarService = false;
-                                  if (controller.serviceList.isNotEmpty &&
-                                      controller.selectedServiceId.value !=
-                                          null &&
-                                      controller.selectedServiceId.value!
-                                          .isNotEmpty) {
-                                    try {
-                                      final sel = controller.serviceList
-                                          .firstWhere(
-                                              (s) =>
-                                                  s.id ==
-                                                  controller
-                                                      .selectedServiceId.value,
-                                              orElse: () => ServiceModel());
-                                      final title = sel.title != null &&
-                                              sel.title!.isNotEmpty
-                                          ? Constant.localizationTitle(
-                                                  sel.title)
-                                              .toLowerCase()
-                                          : "";
-                                      if (title.contains('car') ||
-                                          title.contains('taxi') ||
-                                          title.contains('cab')) {
-                                        isCarService = true;
-                                      }
-                                    } catch (e) {
-                                      isCarService = false;
+                                  final selected =
+                                      controller.selectedUnifiedVehicle.value;
+                                  if (selected != null &&
+                                      selected.passengerServiceId != null) {
+                                    final name = selected.name.toLowerCase();
+                                    if (name.contains('car') ||
+                                        name.contains('taxi') ||
+                                        name.contains('cab')) {
+                                      isCarService = true;
                                     }
                                   }
 
@@ -793,12 +774,15 @@ class VehicleInformationScreen extends StatelessWidget {
                                             controller
                                                 .selectedUnifiedVehicle.value!;
                                         bool isCarLike = false;
-                                        String name =
-                                            selected.name.toLowerCase();
-                                        if (name.contains('car') ||
-                                            name.contains('taxi') ||
-                                            name.contains('cab')) {
-                                          isCarLike = true;
+                                        if (selected.passengerServiceId !=
+                                            null) {
+                                          String name =
+                                              selected.name.toLowerCase();
+                                          if (name.contains('car') ||
+                                              name.contains('taxi') ||
+                                              name.contains('cab')) {
+                                            isCarLike = true;
+                                          }
                                         }
 
                                         if (isCarLike &&
@@ -848,11 +832,14 @@ class VehicleInformationScreen extends StatelessWidget {
                                         if (selected.freightServiceId != null) {
                                           activeServices[selected
                                               .freightServiceId!] = true;
+                                          // Also add global freight service ID for generic freight checks
+                                          activeServices[
+                                              Constant.freightServiceId] = true;
                                         }
                                         controller.driverModel.value
                                             .activeServices = activeServices;
 
-                                        // Fallback/Legacy serviceID (use passenger if available, else freight)
+                                        // Fallback/Legacy serviceID
                                         if (selected.passengerServiceId !=
                                             null) {
                                           controller
@@ -860,9 +847,10 @@ class VehicleInformationScreen extends StatelessWidget {
                                               selected.passengerServiceId;
                                         } else if (selected.freightServiceId !=
                                             null) {
+                                          // For freight drivers, use the global freight service ID as primary serviceId
                                           controller
                                                   .driverModel.value.serviceId =
-                                              selected.freightServiceId;
+                                              Constant.freightServiceId;
                                         }
 
                                         controller.driverModel.value.zoneIds =
@@ -880,11 +868,13 @@ class VehicleInformationScreen extends StatelessWidget {
                                             vehicleType: isCarLike
                                                 ? controller
                                                     .selectedVehicle.value.name
-                                                : null,
+                                                : selected.rawNames,
                                             vehicleTypeId: isCarLike
                                                 ? controller
                                                     .selectedVehicle.value.id
-                                                : null,
+                                                : (selected.freightServiceId ??
+                                                    selected
+                                                        .passengerServiceId),
                                             seats: controller
                                                 .seatsController.value.text,
                                             driverRules:

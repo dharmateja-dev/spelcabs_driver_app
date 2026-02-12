@@ -341,6 +341,15 @@ class OrderMapScreen extends StatelessWidget {
                                                   "Accept fare on ${Constant.amountShow(amount: controller.newAmount.value)}"
                                                       .tr,
                                               onPress: () async {
+                                                bool hasActive =
+                                                    await FireStoreUtils
+                                                        .hasActiveRide();
+                                                if (hasActive) {
+                                                  ShowToastDialog.showToast(
+                                                      "You already have an active ride. Please complete it before accepting a new one."
+                                                          .tr);
+                                                  return;
+                                                }
                                                 // Prevent accepting new city rides if there are completed rides with pending payment
                                                 ShowToastDialog.showLoader(
                                                     "Please wait".tr);

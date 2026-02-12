@@ -2661,4 +2661,51 @@ class FireStoreUtils {
       return [];
     });
   }
+
+  static Future<bool> hasActiveRide() async {
+    String uid = getCurrentUid();
+    AppLogger.debug("Checking for active rides for driver: $uid",
+        tag: "FireStoreUtils");
+    try {
+      // Check for active city rides
+      final cityRides = await fireStore
+          .collection(CollectionName.orders)
+          .where('driverId', isEqualTo: uid)
+          .where('status',
+              whereIn: [Constant.rideActive, Constant.rideInProgress])
+          .limit(1)
+          .get();
+
+      if (cityRides.docs.isNotEmpty) {
+        AppLogger.info(
+            "Driver has active city ride: ${cityRides.docs.first.id}",
+            tag: "FireStoreUtils");
+        return true;
+      }
+
+      // Check for active intercity/freight rides
+      final intercityRides = await fireStore
+          .collection(CollectionName.ordersIntercity)
+          .where('driverId', isEqualTo: uid)
+          .where('status',
+              whereIn: [Constant.rideActive, Constant.rideInProgress])
+          .limit(1)
+          .get();
+
+      if (intercityRides.docs.isNotEmpty) {
+        AppLogger.info(
+            "Driver has active intercity/freight ride: ${intercityRides.docs.first.id}",
+            tag: "FireStoreUtils");
+        return true;
+      }
+
+      AppLogger.debug("No active rides found for driver: $uid",
+          tag: "FireStoreUtils");
+      return false;
+    } catch (e) {
+      AppLogger.error("Error checking for active rides: $e",
+          tag: "FireStoreUtils");
+      return false;
+    }
+  }
 }

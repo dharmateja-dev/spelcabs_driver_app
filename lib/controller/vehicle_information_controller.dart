@@ -9,6 +9,7 @@ import 'package:driver/model/freight_vehicle.dart';
 import 'package:driver/model/unified_vehicle_model.dart';
 import 'package:driver/model/zone_model.dart';
 import 'package:driver/themes/app_colors.dart';
+import 'package:driver/model/language_name.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:driver/utils/validation_utils.dart';
 import 'package:flutter/material.dart';
@@ -164,14 +165,22 @@ class VehicleInformationController extends GetxController {
     for (var s in serviceList) {
       String name = Constant.localizationTitle(s.title).trim();
       unifiedVehicleList.add(UnifiedVehicleModel(
-          name: name, image: s.image ?? "", passengerServiceId: s.id));
+          name: name,
+          image: s.image ?? "",
+          passengerServiceId: s.id,
+          rawNames: s.title
+              ?.map((t) => LanguageName(name: t.title, type: t.type))
+              .toList()));
     }
 
     // 2. Process Freight Vehicles
     for (var f in freightList) {
       String name = Constant.localizationName(f.name).trim();
       unifiedVehicleList.add(UnifiedVehicleModel(
-          name: name, image: f.image ?? "", freightServiceId: f.id));
+          name: name,
+          image: f.image ?? "",
+          freightServiceId: f.id,
+          rawNames: f.name));
     }
 
     // Fetch Driver Profile

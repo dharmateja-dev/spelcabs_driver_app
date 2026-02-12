@@ -54,12 +54,27 @@ class GeoFireCollectionRef
   }) {
     // split and fetch geoPoint from the nested Map
     final fieldList = field.split('.');
-    Map<dynamic, dynamic>? geoPointField = snapData[fieldList[0]];
+    dynamic geoPointField = snapData[fieldList[0]];
     if (fieldList.length > 1) {
       for (int i = 1; i < fieldList.length; i++) {
-        geoPointField = geoPointField?[fieldList[i]];
+        if (geoPointField is Map) {
+          geoPointField = geoPointField[fieldList[i]];
+        }
       }
     }
-    return geoPointField?['geopoint'] as GeoPoint?;
+
+    if (geoPointField is Map) {
+      final geo = geoPointField['geopoint'];
+      if (geo is GeoPoint) {
+        return geo;
+      } else if (geo is Map) {
+        final lat = (geo['latitude'] ?? geo['lat'])?.toDouble();
+        final lng = (geo['longitude'] ?? geo['lng'] ?? geo['lon'])?.toDouble();
+        if (lat != null && lng != null) {
+          return GeoPoint(lat, lng);
+        }
+      }
+    }
+    return null;
   }
 }

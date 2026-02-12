@@ -566,8 +566,8 @@ class NewOrderInterCityScreen extends StatelessWidget {
         });
   }
 
-  Future<dynamic> offerAcceptDialog(BuildContext context, IntercityController controller,
-      InterCityOrderModel orderModel) {
+  Future<dynamic> offerAcceptDialog(BuildContext context,
+      IntercityController controller, InterCityOrderModel orderModel) {
     return showModalBottomSheet(
         context: context,
         isDismissible: false,
@@ -758,6 +758,14 @@ class NewOrderInterCityScreen extends StatelessWidget {
                               "Accept fare on ${Constant.amountShow(amount: controller.newAmount.value)}"
                                   .tr,
                           onPress: () async {
+                            bool hasActive =
+                                await FireStoreUtils.hasActiveRide();
+                            if (hasActive) {
+                              ShowToastDialog.showToast(
+                                  "You already have an active ride. Please complete it before bidding on a new one."
+                                      .tr);
+                              return;
+                            }
                             if (double.parse(controller
                                     .driverModel.value.walletAmount
                                     .toString()) >=

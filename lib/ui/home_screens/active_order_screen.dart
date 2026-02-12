@@ -62,41 +62,9 @@ class ActiveOrderScreen extends StatelessWidget {
                         OrderModel orderModel = OrderModel.fromJson(
                             snapshot.data!.docs[index].data()
                                 as Map<String, dynamic>);
-                        return InkWell(
-                          onTap: () {
-                            if (Constant.mapType == "inappmap") {
-                              if (orderModel.status == Constant.rideActive ||
-                                  orderModel.status ==
-                                      Constant.rideInProgress) {
-                                Get.to(const LiveTrackingScreen(), arguments: {
-                                  "orderModel": orderModel,
-                                  "type": "orderModel",
-                                });
-                              }
-                            } else {
-                              if (orderModel.status ==
-                                  Constant.rideInProgress) {
-                                Utils.redirectMap(
-                                    latitude: orderModel
-                                        .destinationLocationLAtLng!.latitude!,
-                                    longLatitude: orderModel
-                                        .destinationLocationLAtLng!.longitude!,
-                                    name: orderModel.destinationLocationName
-                                        .toString());
-                              } else {
-                                Utils.redirectMap(
-                                    latitude: orderModel
-                                        .sourceLocationLAtLng!.latitude!,
-                                    longLatitude: orderModel
-                                        .sourceLocationLAtLng!.longitude!,
-                                    name: orderModel.destinationLocationName
-                                        .toString());
-                              }
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
                               decoration: BoxDecoration(
                                 color: themeChange.getThem()
                                     ? AppColors.darkContainerBackground
@@ -146,15 +114,13 @@ class ActiveOrderScreen extends StatelessWidget {
                                     const SizedBox(
                                       height: 10,
                                     ),
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          ButtonThem.buildBorderButton(context,
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ButtonThem.buildBorderButton(
+                                              context,
                                               title: "Get Directions".tr,
-                                              btnHeight: 40,
-                                              btnWidthRatio: 0.35, onPress: () {
+                                              btnHeight: 40, onPress: () {
                                             if (Constant.mapType ==
                                                 "inappmap") {
                                               if (orderModel.status ==
@@ -195,8 +161,8 @@ class ActiveOrderScreen extends StatelessWidget {
                                               }
                                             }
                                           }),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                     const SizedBox(
                                       height: 10,
@@ -375,8 +341,8 @@ class ActiveOrderScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
-                        );
+                          );
+                    
                       });
             },
           );
