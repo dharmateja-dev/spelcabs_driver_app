@@ -847,10 +847,10 @@ class VehicleInformationScreen extends StatelessWidget {
                                               selected.passengerServiceId;
                                         } else if (selected.freightServiceId !=
                                             null) {
-                                          // For freight drivers, use the global freight service ID as primary serviceId
+                                          // FIX: Save the specific freight vehicle ID as serviceId so admin panel can identify it
                                           controller
                                                   .driverModel.value.serviceId =
-                                              Constant.freightServiceId;
+                                              selected.freightServiceId;
                                         }
 
                                         controller.driverModel.value.zoneIds =

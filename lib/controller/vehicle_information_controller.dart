@@ -142,6 +142,7 @@ class VehicleInformationController extends GetxController {
 
   Future<void> getVehicleType() async {
     isLoading.value = true;
+    unifiedVehicleList.clear(); // Clear list to avoid duplicates
 
     // Fetch Services (Passenger)
     await FireStoreUtils.getService().then((value) {
@@ -217,9 +218,18 @@ class VehicleInformationController extends GetxController {
       // Restore Vehicle Selection using activeServices map or fallback to serviceId
       if (driverModel.value.activeServices != null ||
           driverModel.value.serviceId != null) {
-        // Logic to find the unified vehicle that matches
-        // For now, simple match on serviceId (legacy) or check map
         String? targetId = driverModel.value.serviceId;
+
+        // Fallback to activeServices if serviceId is null
+        if (targetId == null && driverModel.value.activeServices != null) {
+          for (var entry in driverModel.value.activeServices!.entries) {
+            if (entry.value == true) {
+              targetId = entry.key;
+              break;
+            }
+          }
+        }
+
         if (targetId != null) {
           for (var uv in unifiedVehicleList) {
             if (uv.passengerServiceId == targetId ||
@@ -286,25 +296,18 @@ class VehicleInformationController extends GetxController {
             .listen((rules) {
       driverRulesList.value = rules;
 
-      // Re-validate selected rules against new list
-      // If a selected rule is no longer in the new list, remove it?
-      // Or keep it? Usually better to keep only valid ones.
-      // However, we also need to restore from profile if it's the first load.
-
+      // Restore selected rules from profile if available
       if (driverModel.value.vehicleInformation != null &&
           driverModel.value.vehicleInformation!.driverRules != null) {
-        // This logic runs on every update, maybe we only want to do restoration once?
-        // but `selectVehicle` is called on init too.
-        // Let's ensure we don't overwrite user's current manual selection if they are editing.
-
-        // If the user hasn't manually changed anything yet (fresh load), we might want to checks
-        // But actually, `selectedDriverRulesList` is what the UI binds to.
-
-        // If this is the initial load (e.g. from onInit -> selectVehicle)
-        // We should ensure selectedDriverRulesList is populated from profile if it matches.
-
-        // Let's just ensure if the ID exists in the new list, we keep it checked if it was checked.
-        // The UI uses selectedDriverRulesList.
+        selectedDriverRulesList.clear(); // Clear previous selection
+        for (var rule in rules) {
+          // Check if this rule exists in the user's saved rules
+          bool isSelected = driverModel.value.vehicleInformation!.driverRules!
+              .any((savedRule) => savedRule.id == rule.id);
+          if (isSelected) {
+            selectedDriverRulesList.add(rule);
+          }
+        }
       }
     });
   }

@@ -288,52 +288,55 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
-                                          ButtonThem.buildBorderButton(context,
-                                              title: "Get Directions".tr,
-                                              btnHeight: 40,
-                                              btnWidthRatio: 0.35,
-                                              onPress: () {
-                                            if (Constant.mapType == "inappmap") {
-                                              if (orderModel.status ==
-                                                      Constant.rideActive ||
-                                                  orderModel.status ==
-                                                      Constant.rideInProgress) {
-                                                Get.to(
-                                                    const LiveTrackingScreen(),
-                                                    arguments: {
-                                                      "interCityOrderModel":
-                                                          orderModel,
-                                                      "type":
-                                                          "interCityOrderModel",
-                                                    });
-                                              }
-                                            } else {
-                                              if (orderModel.status ==
-                                                  Constant.rideInProgress) {
-                                                Utils.redirectMap(
-                                                    latitude: orderModel
-                                                        .destinationLocationLAtLng!
-                                                        .latitude!,
-                                                    longLatitude: orderModel
-                                                        .destinationLocationLAtLng!
-                                                        .longitude!,
-                                                    name: orderModel
-                                                        .destinationLocationName
-                                                        .toString());
+                                          Expanded(
+                                            child: ButtonThem.buildBorderButton(
+                                                context,
+                                                title: "Get Directions".tr,
+                                                btnHeight: 40, onPress: () {
+                                              if (Constant.mapType ==
+                                                  "inappmap") {
+                                                if (orderModel.status ==
+                                                        Constant.rideActive ||
+                                                    orderModel.status ==
+                                                        Constant
+                                                            .rideInProgress) {
+                                                  Get.to(
+                                                      const LiveTrackingScreen(),
+                                                      arguments: {
+                                                        "interCityOrderModel":
+                                                            orderModel,
+                                                        "type":
+                                                            "interCityOrderModel",
+                                                      });
+                                                }
                                               } else {
-                                                Utils.redirectMap(
-                                                    latitude: orderModel
-                                                        .sourceLocationLAtLng!
-                                                        .latitude!,
-                                                    longLatitude: orderModel
-                                                        .sourceLocationLAtLng!
-                                                        .longitude!,
-                                                    name: orderModel
-                                                        .sourceLocationName
-                                                        .toString());
+                                                if (orderModel.status ==
+                                                    Constant.rideInProgress) {
+                                                  Utils.redirectMap(
+                                                      latitude: orderModel
+                                                          .destinationLocationLAtLng!
+                                                          .latitude!,
+                                                      longLatitude: orderModel
+                                                          .destinationLocationLAtLng!
+                                                          .longitude!,
+                                                      name: orderModel
+                                                          .destinationLocationName
+                                                          .toString());
+                                                } else {
+                                                  Utils.redirectMap(
+                                                      latitude: orderModel
+                                                          .sourceLocationLAtLng!
+                                                          .latitude!,
+                                                      longLatitude: orderModel
+                                                          .sourceLocationLAtLng!
+                                                          .longitude!,
+                                                      name: orderModel
+                                                          .sourceLocationName
+                                                          .toString());
+                                                }
                                               }
-                                            }
-                                          }),
+                                            }),
+                                          ),
                                         ],
                                       ),
                                       const SizedBox(
@@ -472,11 +475,8 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               5)),
-                                                  child: Icon(Icons.chat,
-                                                      color:
-                                                          themeChange.getThem()
-                                                              ? Colors.black
-                                                              : Colors.white),
+                                                  child: const Icon(Icons.chat,
+                                                      color: Colors.white),
                                                 ),
                                               ),
                                               const SizedBox(
@@ -504,11 +504,8 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               5)),
-                                                  child: Icon(Icons.call,
-                                                      color:
-                                                          themeChange.getThem()
-                                                              ? Colors.black
-                                                              : Colors.white),
+                                                  child: const Icon(Icons.call,
+                                                      color: Colors.white),
                                                 ),
                                               )
                                             ],
