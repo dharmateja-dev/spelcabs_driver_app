@@ -52,6 +52,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   /// Flag to track if we're waiting for location to be enabled
   bool _waitingForLocationService = false;
 
+  /// Time of the last successful Firestore location update (for throttling)
+  DateTime? _lastFirestoreWriteTime;
+
+  /// Current tracking mode (to avoid redundant setting updates)
+  bool _isHighFrequencyMode = false;
+
   void onItemTapped(int index) {
     selectedIndex.value = index;
     AppLogger.info("Bottom navigation item tapped: $index",
@@ -186,6 +192,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           isActiveValue.value = event.size;
           AppLogger.info("Active rides count updated: ${isActiveValue.value}",
               tag: "HomeController");
+
+          // Adaptive Location Tracking:
+          // If there are active rides, switch to high frequency mode.
+          // Otherwise, use idle mode (battery saving).
+          _updateLocationSettings(isActive: isActiveValue.value > 0);
         }, onError: (error) {
           AppLogger.error("Error fetching active rides: $error",
               tag: "HomeController", error: error);
@@ -233,12 +244,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
 
     try {
-      location.changeSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter:
-              double.parse(Constant.driverLocationUpdate.toString()),
-          interval: 2000);
-      AppLogger.info("Location settings changed.", tag: "HomeController");
+      // Start with idle settings by default, active listener will upgrade if needed
+      _updateLocationSettings(
+          isActive: isActiveValue.value > 0, forceUpdate: true);
+
+      AppLogger.info("Location settings initialized.", tag: "HomeController");
     } catch (e) {
       AppLogger.warning("Failed to change location settings: $e",
           tag: "HomeController");
@@ -280,43 +290,17 @@ class HomeController extends GetxController with WidgetsBindingObserver {
               longitude: locationData.longitude,
             ),
           );
+          // Update listener location when driver moves significantly
+          CityRidesListenerService().updateLocation(
+            LocationLatLng(
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+            ),
+          );
         }
 
-        FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
-            .then((value) {
-          if (value != null) {
-            DriverUserModel driverUserModel = value;
-            if (driverUserModel.isOnline == true) {
-              driverUserModel.location = LocationLatLng(
-                  latitude: locationData.latitude,
-                  longitude: locationData.longitude);
-              GeoFirePoint position = Geoflutterfire().point(
-                  latitude: locationData.latitude!,
-                  longitude: locationData.longitude!);
-
-              driverUserModel.position = Positions(
-                  geoPoint: position.geoPoint, geohash: position.hash);
-              driverUserModel.rotation = locationData.heading;
-              FireStoreUtils.updateDriverUser(driverUserModel);
-              AppLogger.debug(
-                  "Driver location and rotation updated in Firestore.",
-                  tag: "HomeController");
-            } else {
-              AppLogger.info(
-                  "Driver is offline, not updating location in Firestore.",
-                  tag: "HomeController");
-            }
-          } else {
-            AppLogger.warning(
-                "Driver profile not found when trying to update location.",
-                tag: "HomeController");
-          }
-        }).catchError((error) {
-          AppLogger.error(
-              "Error getting driver profile for location update: $error",
-              tag: "HomeController",
-              error: error);
-        });
+        // Throttle Firestore updates
+        _updateDriverLocationInFirestore(locationData);
       } else {
         AppLogger.warning(
             "Received null latitude or longitude from location update.",
@@ -374,6 +358,95 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     return earthRadiusMeters * c;
+  }
+
+  /// Updates location tracking settings based on whether there is an active ride.
+  Future<void> _updateLocationSettings(
+      {required bool isActive, bool forceUpdate = false}) async {
+    if (_isHighFrequencyMode == isActive && !forceUpdate) {
+      return; // No change needed
+    }
+
+    _isHighFrequencyMode = isActive;
+
+    try {
+      if (isActive) {
+        AppLogger.info("Switching to ACTIVE location tracking (High Frequency)",
+            tag: "HomeController");
+        await location.changeSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: Constant.locationActiveDistanceFilter,
+          interval: Constant.locationActiveInterval,
+        );
+      } else {
+        AppLogger.info("Switching to IDLE location tracking (Power Saving)",
+            tag: "HomeController");
+        await location.changeSettings(
+          accuracy:
+              LocationAccuracy.high, // Keep high for accurate pickup detection
+          distanceFilter: Constant.locationIdleDistanceFilter,
+          interval: Constant.locationIdleInterval,
+        );
+      }
+    } catch (e) {
+      AppLogger.error("Failed to update location settings: $e",
+          tag: "HomeController", error: e);
+    }
+  }
+
+  /// Updates driver location in Firestore with throttling to save costs/data.
+  void _updateDriverLocationInFirestore(LocationData locationData) {
+    // Check throttling
+    final now = DateTime.now();
+    if (_lastFirestoreWriteTime != null) {
+      final difference =
+          now.difference(_lastFirestoreWriteTime!).inMilliseconds;
+      if (difference < Constant.firestoreWriteThrottleMs) {
+        // AppLogger.debug("Skipping Firestore update (Throttled)", tag: "HomeController");
+        return;
+      }
+    }
+
+    FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
+        .then((value) {
+      if (value != null) {
+        DriverUserModel driverUserModel = value;
+        if (driverUserModel.isOnline == true) {
+          driverUserModel.location = LocationLatLng(
+              latitude: locationData.latitude,
+              longitude: locationData.longitude);
+          GeoFirePoint position = Geoflutterfire().point(
+              latitude: locationData.latitude!,
+              longitude: locationData.longitude!);
+
+          driverUserModel.position =
+              Positions(geoPoint: position.geoPoint, geohash: position.hash);
+          driverUserModel.rotation = locationData.heading;
+
+          FireStoreUtils.updateDriverUser(driverUserModel);
+
+          // Update the last write time
+          _lastFirestoreWriteTime = DateTime.now();
+
+          AppLogger.debug(
+              "Driver location and rotation updated in Firestore (Throttled).",
+              tag: "HomeController");
+        } else {
+          AppLogger.info(
+              "Driver is offline, not updating location in Firestore.",
+              tag: "HomeController");
+        }
+      } else {
+        AppLogger.warning(
+            "Driver profile not found when trying to update location.",
+            tag: "HomeController");
+      }
+    }).catchError((error) {
+      AppLogger.error(
+          "Error getting driver profile for location update: $error",
+          tag: "HomeController",
+          error: error);
+    });
   }
 
   @override

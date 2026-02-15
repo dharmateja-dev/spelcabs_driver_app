@@ -95,6 +95,20 @@ class Constant {
 
   static String mapType = "google";
   static String selectedMapType = 'google';
+
+  // Adaptive Location Tracking Constants
+  // Idle: Online but no active ride
+  static const int locationIdleInterval = 15000; // 15 seconds
+  static const double locationIdleDistanceFilter = 50.0; // 50 meters
+
+  // Active: Ride in progress
+  static const int locationActiveInterval = 5000; // 5 seconds
+  static const double locationActiveDistanceFilter = 20.0; // 20 meters
+
+  // Throttling
+  static const int firestoreWriteThrottleMs = 30000; // 30 seconds
+
+  // Legacy constant (kept for backward compatibility if needed, but we will move away from it)
   static String driverLocationUpdate = "10";
 
   static CurrencyModel? currencyModel;
