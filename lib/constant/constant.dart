@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:driver/constant/env.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/model/admin_commission.dart';
@@ -79,7 +81,7 @@ class Constant {
   static const String appleLoginType = "apple";
   static LocationLatLng? currentLocation;
 
-  static String mapAPIKey = "AIzaSyBpz1URvQg9UwJUJ2iuuvU2TtPQOFVeEng";
+  static String mapAPIKey = Env.mapAPIKey;
   static String senderId = 'bidbolt-5d325';
   static String jsonNotificationFileURL =
       'https://firebasestorage.googleapis.com/v0/b/bidbolt-5d325.firebasestorage.app/o/bidbolt-5d325-firebase-adminsdk-fbsvc-f30b7cc63d.json?alt=media&token=aed7260b-4e6a-467c-9e4e-81be5759188d';
