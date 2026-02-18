@@ -473,10 +473,10 @@ class OrderFreightScreen extends StatelessWidget {
                                                                   .fcmToken
                                                                   .toString(),
                                                               title:
-                                                                  'Cash Payment conformed'
+                                                                  'Cash Payment confirmed'
                                                                       .tr,
                                                               body:
-                                                                  'Driver has conformed your cash payment'
+                                                                  'Driver has confirmed your cash payment'
                                                                       .tr,
                                                               payload: {},
                                                               driverName: driver

@@ -196,16 +196,29 @@ class Constant {
   }
 
   static String localizationName(List<LanguageName>? name) {
-    if (name!
-        .firstWhere((element) => element.type == Constant.getLanguage().code)
-        .name!
-        .isNotEmpty) {
-      return name
-          .firstWhere((element) => element.type == Constant.getLanguage().code)
-          .name!;
-    } else {
-      return name.firstWhere((element) => element.type == "en").name.toString();
+    if (name == null || name.isEmpty) {
+      return "";
     }
+
+    try {
+      final currentLangCode = Constant.getLanguage().code;
+      final currentMatch = name.firstWhere(
+        (e) => e.type == currentLangCode && (e.name?.isNotEmpty ?? false),
+      );
+      return currentMatch.name!;
+    } catch (_) {
+      try {
+        final englishMatch = name.firstWhere(
+          (e) => e.type == "en" && (e.name?.isNotEmpty ?? false),
+        );
+        return englishMatch.name!;
+      } catch (_) {
+        for (var item in name) {
+          if (item.name?.isNotEmpty ?? false) return item.name!;
+        }
+      }
+    }
+    return "";
   }
 
   static String localizationTitle(List<LanguageTitle>? name) {

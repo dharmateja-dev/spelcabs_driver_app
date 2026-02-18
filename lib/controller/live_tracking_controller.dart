@@ -548,8 +548,13 @@ class LiveTrackingController extends GetxController {
   }
 
   Future<void> checkCameraLocation(
-      CameraUpdate cameraUpdate, GoogleMapController mapController) async {
-    AppLogger.debug("checkCameraLocation called.",
+      CameraUpdate cameraUpdate, GoogleMapController mapController, {int retries = 0}) async {
+    if (retries > 5) {
+      AppLogger.warning("checkCameraLocation: max retries reached, aborting.",
+          tag: "LiveTrackingController");
+      return; // Safety limit to prevent infinite recursion
+    }
+    AppLogger.debug("checkCameraLocation called (retry $retries).",
         tag: "LiveTrackingController");
     mapController.animateCamera(cameraUpdate);
     LatLngBounds l1 = await mapController.getVisibleRegion();
@@ -560,7 +565,8 @@ class LiveTrackingController extends GetxController {
     if (l1.southwest.latitude == -90 || l2.southwest.latitude == -90) {
       AppLogger.warning("Camera location not updated correctly, retrying.",
           tag: "LiveTrackingController");
-      return checkCameraLocation(cameraUpdate, mapController);
+      await Future.delayed(const Duration(milliseconds: 200));
+      return checkCameraLocation(cameraUpdate, mapController, retries: retries + 1);
     }
   }
 

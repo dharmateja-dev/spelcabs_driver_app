@@ -23,6 +23,7 @@ class OrderMapController extends GetxController {
       TextEditingController().obs;
 
   RxBool isLoading = true.obs;
+  RxBool isAcceptingRide = false.obs;
 
   // variables for fare breakdown
   RxDouble baseFare = 0.0.obs;

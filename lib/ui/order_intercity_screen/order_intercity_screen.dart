@@ -532,9 +532,9 @@ class OrderIntercityScreen extends StatelessWidget {
                                                                           .fcmToken
                                                                           .toString(),
                                                                       title:
-                                                                          'Cash Payment conformed'
+                                                                          'Cash Payment confirmed'
                                                                               .tr,
-                                                                      body: 'Driver has conformed your cash payment'
+                                                                      body: 'Driver has confirmed your cash payment'
                                                                           .tr,
                                                                       payload: {},
                                                                       driverName:
@@ -567,7 +567,7 @@ class OrderIntercityScreen extends StatelessWidget {
                                                                       .closeLoader();
                                                                   ShowToastDialog
                                                                       .showToast(
-                                                                          "Payment Conform successfully"
+                                                                          "Payment Confirmed successfully"
                                                                               .tr);
                                                                 }
                                                               });

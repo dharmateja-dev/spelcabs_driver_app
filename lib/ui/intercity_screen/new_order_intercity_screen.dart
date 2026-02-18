@@ -757,75 +757,119 @@ class NewOrderInterCityScreen extends StatelessWidget {
                           title:
                               "Accept fare on ${Constant.amountShow(amount: controller.newAmount.value)}"
                                   .tr,
-                          onPress: () async {
-                            bool hasActive =
-                                await FireStoreUtils.hasActiveRide();
-                            if (hasActive) {
-                              ShowToastDialog.showToast(
-                                  "You already have an active ride. Please complete it before bidding on a new one."
-                                      .tr);
-                              return;
-                            }
-                            if (double.parse(controller
-                                    .driverModel.value.walletAmount
-                                    .toString()) >=
-                                double.parse(
-                                    Constant.minimumDepositToRideAccept)) {
-                              ShowToastDialog.showLoader("Please wait".tr);
-                              List<dynamic> newAcceptedDriverId = [];
-                              if (orderModel.acceptedDriverId != null) {
-                                newAcceptedDriverId =
-                                    orderModel.acceptedDriverId!;
-                              } else {
-                                newAcceptedDriverId = [];
-                              }
-                              newAcceptedDriverId
-                                  .add(FireStoreUtils.getCurrentUid());
-                              orderModel.acceptedDriverId = newAcceptedDriverId;
-                              await FireStoreUtils.setInterCityOrder(
-                                  orderModel);
+                          onPress: controller.isAcceptingRide.value
+                              ? null
+                              : () async {
+                                  // Prevent multiple clicks
+                                  if (controller.isAcceptingRide.value) return;
 
-                              DriverIdAcceptReject driverIdAcceptReject =
-                                  DriverIdAcceptReject(
-                                      driverId: FireStoreUtils.getCurrentUid(),
-                                      acceptedRejectTime: Timestamp.now(),
-                                      offerAmount: controller.newAmount.value,
-                                      suggestedDate: orderModel.whenDates,
-                                      suggestedTime: DateFormat("HH:mm")
-                                          .format(controller.suggestedTime!));
-                              await FireStoreUtils.getCustomer(
-                                      orderModel.userId.toString())
-                                  .then((value) async {
-                                if (value != null) {
-                                  await SendNotification.sendOneNotification(
-                                      token: value.fcmToken.toString(),
-                                      title: 'New Bids'.tr,
-                                      body:
-                                          '${controller.driverModel.value.fullName}  requested your ride.'
-                                              .tr,
-                                      payload: {},
-                                      driverName: controller
-                                          .driverModel.value.fullName);
-                                }
-                              });
+                                  try {
+                                    controller.isAcceptingRide.value = true;
+                                    bool hasActive =
+                                        await FireStoreUtils.hasActiveRide();
+                                    if (hasActive) {
+                                      ShowToastDialog.showToast(
+                                          "You already have an active ride. Please complete it before bidding on a new one."
+                                              .tr);
+                                      controller.isAcceptingRide.value = false;
+                                      return;
+                                    }
 
-                              await FireStoreUtils.acceptInterCityRide(
-                                      orderModel, driverIdAcceptReject)
-                                  .then((value) {
-                                ShowToastDialog.closeLoader();
-                                ShowToastDialog.showToast("Ride Accepted".tr);
-                                Get.back();
-                                if (value != null && value == true) {
-                                  controller
-                                      .homeController.selectedIndex.value = 1;
-                                }
-                              });
-                            } else {
-                              ShowToastDialog.showToast(
-                                  "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept)} wallet amount to Accept Order and place a bid"
-                                      .tr);
-                            }
-                          },
+                                    // Validate amount is not less than 90% of recommended
+                                    double recommendedAmount = double.tryParse(
+                                            orderModel.offerRate.toString()) ??
+                                        0.0;
+                                    double enteredAmount = double.tryParse(
+                                            controller.newAmount.value) ??
+                                        0.0;
+                                    if (enteredAmount <
+                                        recommendedAmount * 0.9) {
+                                      ShowToastDialog.showToast(
+                                          "Your offer cannot be less than 90% of the recommended price."
+                                              .tr);
+                                      controller.isAcceptingRide.value = false;
+                                      return;
+                                    }
+                                    if (double.parse(controller
+                                            .driverModel.value.walletAmount
+                                            .toString()) >=
+                                        double.parse(Constant
+                                            .minimumDepositToRideAccept)) {
+                                      ShowToastDialog.showLoader(
+                                          "Please wait".tr);
+                                      List<dynamic> newAcceptedDriverId = [];
+                                      if (orderModel.acceptedDriverId != null) {
+                                        newAcceptedDriverId =
+                                            orderModel.acceptedDriverId!;
+                                      } else {
+                                        newAcceptedDriverId = [];
+                                      }
+                                      newAcceptedDriverId
+                                          .add(FireStoreUtils.getCurrentUid());
+                                      orderModel.acceptedDriverId =
+                                          newAcceptedDriverId;
+                                      await FireStoreUtils.setInterCityOrder(
+                                          orderModel);
+
+                                      DriverIdAcceptReject
+                                          driverIdAcceptReject =
+                                          DriverIdAcceptReject(
+                                              driverId: FireStoreUtils
+                                                  .getCurrentUid(),
+                                              acceptedRejectTime:
+                                                  Timestamp.now(),
+                                              offerAmount:
+                                                  controller.newAmount.value,
+                                              suggestedDate:
+                                                  orderModel.whenDates,
+                                              suggestedTime: DateFormat("HH:mm")
+                                                  .format(controller
+                                                      .suggestedTime!));
+                                      await FireStoreUtils.getCustomer(
+                                              orderModel.userId.toString())
+                                          .then((value) async {
+                                        if (value != null) {
+                                          await SendNotification
+                                              .sendOneNotification(
+                                                  token:
+                                                      value.fcmToken.toString(),
+                                                  title: 'New Driver Bid'.tr,
+                                                  body:
+                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
+                                                          .tr,
+                                                  payload: {},
+                                                  driverName: controller
+                                                      .driverModel
+                                                      .value
+                                                      .fullName);
+                                        }
+                                      });
+
+                                      await FireStoreUtils.acceptInterCityRide(
+                                              orderModel, driverIdAcceptReject)
+                                          .then((value) {
+                                        ShowToastDialog.closeLoader();
+                                        ShowToastDialog.showToast(
+                                            "Ride Accepted".tr);
+                                        Get.back();
+                                        if (value != null && value == true) {
+                                          controller.homeController
+                                              .selectedIndex.value = 1;
+                                        }
+                                      });
+                                    } else {
+                                      ShowToastDialog.showToast(
+                                          "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept)} wallet amount to Accept Order and place a bid"
+                                              .tr);
+                                    }
+                                  } catch (e) {
+                                    print(
+                                        "Error in accepting intercity fare: $e");
+                                    ShowToastDialog.closeLoader();
+                                  } finally {
+                                    controller.isAcceptingRide.value = false;
+                                  }
+                                },
                         ),
                         const SizedBox(
                           height: 5,

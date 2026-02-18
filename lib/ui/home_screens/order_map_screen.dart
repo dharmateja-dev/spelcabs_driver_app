@@ -340,145 +340,214 @@ class OrderMapScreen extends StatelessWidget {
                                               title:
                                                   "Accept fare on ${Constant.amountShow(amount: controller.newAmount.value)}"
                                                       .tr,
-                                              onPress: () async {
-                                                bool hasActive =
-                                                    await FireStoreUtils
-                                                        .hasActiveRide();
-                                                if (hasActive) {
-                                                  ShowToastDialog.showToast(
-                                                      "You already have an active ride. Please complete it before accepting a new one."
-                                                          .tr);
-                                                  return;
-                                                }
-                                                // Prevent accepting new city rides if there are completed rides with pending payment
-                                                ShowToastDialog.showLoader(
-                                                    "Please wait".tr);
-                                                try {
-                                                  final pendingPaymentsSnap =
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection(
-                                                              CollectionName
-                                                                  .orders)
-                                                          .where('driverId',
-                                                              isEqualTo:
-                                                                  FireStoreUtils
-                                                                      .getCurrentUid())
-                                                          .where('status',
-                                                              isEqualTo: Constant
-                                                                  .rideComplete)
-                                                          .where(
-                                                              'paymentStatus',
-                                                              isEqualTo: false)
-                                                          .get();
+                                              onPress: controller
+                                                      .isAcceptingRide.value
+                                                  ? null
+                                                  : () async {
+                                                      // Prevent multiple clicks
+                                                      if (controller
+                                                          .isAcceptingRide
+                                                          .value) return;
 
-                                                  if (pendingPaymentsSnap
-                                                      .docs.isNotEmpty) {
-                                                    ShowToastDialog
-                                                        .closeLoader();
-                                                    ShowToastDialog.showToast(
-                                                        "Please complete pending payments before accepting new rides"
-                                                            .tr);
-                                                    return;
-                                                  }
-                                                } catch (e) {
-                                                  // If the check fails for any reason, allow the normal path but log the error
-                                                  AppLogger.error(
-                                                      "Error checking pending payments: $e",
-                                                      tag: "OrderMapScreen");
-                                                }
-
-                                                // Existing wallet minimum check
-                                                if (double.parse(controller
-                                                        .driverModel
-                                                        .value
-                                                        .walletAmount
-                                                        .toString()) >=
-                                                    double.parse(Constant
-                                                        .minimumAmountToWithdrawal)) {
-                                                  List<dynamic>
-                                                      newAcceptedDriverId = [];
-                                                  if (controller
-                                                          .orderModel
-                                                          .value
-                                                          .acceptedDriverId !=
-                                                      null) {
-                                                    newAcceptedDriverId =
+                                                      try {
                                                         controller
-                                                            .orderModel
-                                                            .value
-                                                            .acceptedDriverId!;
-                                                  } else {
-                                                    newAcceptedDriverId = [];
-                                                  }
-                                                  newAcceptedDriverId.add(
-                                                      FireStoreUtils
-                                                          .getCurrentUid());
-                                                  controller.orderModel.value
-                                                          .acceptedDriverId =
-                                                      newAcceptedDriverId;
-                                                  await FireStoreUtils.setOrder(
-                                                      controller
-                                                          .orderModel.value);
+                                                            .isAcceptingRide
+                                                            .value = true;
+                                                        bool hasActive =
+                                                            await FireStoreUtils
+                                                                .hasActiveRide();
+                                                        if (hasActive) {
+                                                          ShowToastDialog.showToast(
+                                                              "You already have an active ride. Please complete it before accepting a new one."
+                                                                  .tr);
+                                                          controller
+                                                              .isAcceptingRide
+                                                              .value = false;
+                                                          return;
+                                                        }
 
-                                                  await FireStoreUtils
-                                                          .getCustomer(
-                                                              controller
+                                                        // Validate amount is not less than 90% of recommended
+                                                        double
+                                                            recommendedAmount =
+                                                            double.tryParse(controller
+                                                                    .orderModel
+                                                                    .value
+                                                                    .offerRate
+                                                                    .toString()) ??
+                                                                0.0;
+                                                        double enteredAmount =
+                                                            double.tryParse(
+                                                                    controller
+                                                                        .newAmount
+                                                                        .value) ??
+                                                                0.0;
+                                                        if (enteredAmount <
+                                                            recommendedAmount *
+                                                                0.9) {
+                                                          ShowToastDialog.showToast(
+                                                              "Your offer cannot be less than 90% of the recommended price."
+                                                                  .tr);
+                                                          controller
+                                                              .isAcceptingRide
+                                                              .value = false;
+                                                          return;
+                                                        }
+                                                        // Prevent accepting new city rides if there are completed rides with pending payment
+                                                        ShowToastDialog
+                                                            .showLoader(
+                                                                "Please wait"
+                                                                    .tr);
+                                                        try {
+                                                          final pendingPaymentsSnap = await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  CollectionName
+                                                                      .orders)
+                                                              .where('driverId',
+                                                                  isEqualTo:
+                                                                      FireStoreUtils
+                                                                          .getCurrentUid())
+                                                              .where('status',
+                                                                  isEqualTo:
+                                                                      Constant
+                                                                          .rideComplete)
+                                                              .where(
+                                                                  'paymentStatus',
+                                                                  isEqualTo:
+                                                                      false)
+                                                              .get();
+
+                                                          if (pendingPaymentsSnap
+                                                              .docs
+                                                              .isNotEmpty) {
+                                                            ShowToastDialog
+                                                                .closeLoader();
+                                                            ShowToastDialog
+                                                                .showToast(
+                                                                    "Please complete pending payments before accepting new rides"
+                                                                        .tr);
+                                                            return;
+                                                          }
+                                                        } catch (e) {
+                                                          // If the check fails for any reason, allow the normal path but log the error
+                                                          AppLogger.error(
+                                                              "Error checking pending payments: $e",
+                                                              tag:
+                                                                  "OrderMapScreen");
+                                                        }
+
+                                                        // Existing wallet minimum check
+                                                        if (double.parse(controller
+                                                                .driverModel
+                                                                .value
+                                                                .walletAmount
+                                                                .toString()) >=
+                                                            double.parse(Constant
+                                                                .minimumAmountToWithdrawal)) {
+                                                          List<dynamic>
+                                                              newAcceptedDriverId =
+                                                              [];
+                                                          if (controller
                                                                   .orderModel
                                                                   .value
-                                                                  .userId
-                                                                  .toString())
-                                                      .then((value) async {
-                                                    if (value != null) {
-                                                      await SendNotification
-                                                          .sendOneNotification(
-                                                              token:
-                                                                  value.fcmToken
-                                                                      .toString(),
-                                                              title:
-                                                                  'New Driver Bid'
-                                                                      .tr,
-                                                              body:
-                                                                  '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
-                                                                      .tr,
-                                                              payload: {},
-                                                              driverName:
+                                                                  .acceptedDriverId !=
+                                                              null) {
+                                                            newAcceptedDriverId =
+                                                                controller
+                                                                    .orderModel
+                                                                    .value
+                                                                    .acceptedDriverId!;
+                                                          } else {
+                                                            newAcceptedDriverId =
+                                                                [];
+                                                          }
+                                                          newAcceptedDriverId
+                                                              .add(FireStoreUtils
+                                                                  .getCurrentUid());
+                                                          controller
+                                                                  .orderModel
+                                                                  .value
+                                                                  .acceptedDriverId =
+                                                              newAcceptedDriverId;
+                                                          await FireStoreUtils
+                                                              .setOrder(
                                                                   controller
+                                                                      .orderModel
+                                                                      .value);
+
+                                                          await FireStoreUtils
+                                                                  .getCustomer(controller
+                                                                      .orderModel
+                                                                      .value
+                                                                      .userId
+                                                                      .toString())
+                                                              .then(
+                                                                  (value) async {
+                                                            if (value != null) {
+                                                              await SendNotification.sendOneNotification(
+                                                                  token: value
+                                                                      .fcmToken
+                                                                      .toString(),
+                                                                  title:
+                                                                      'New Driver Bid'
+                                                                          .tr,
+                                                                  body:
+                                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
+                                                                          .tr,
+                                                                  payload: {},
+                                                                  driverName: controller
                                                                       .driverModel
                                                                       .value
                                                                       .fullName);
-                                                    }
-                                                  });
+                                                            }
+                                                          });
 
-                                                  DriverIdAcceptReject
-                                                      driverIdAcceptReject =
-                                                      DriverIdAcceptReject(
-                                                          driverId: FireStoreUtils
-                                                              .getCurrentUid(),
-                                                          acceptedRejectTime:
-                                                              Timestamp.now(),
-                                                          offerAmount:
-                                                              controller
-                                                                  .newAmount
-                                                                  .value);
-                                                  FireStoreUtils.acceptRide(
-                                                          controller
-                                                              .orderModel.value,
-                                                          driverIdAcceptReject)
-                                                      .then((value) {
-                                                    ShowToastDialog
-                                                        .closeLoader();
-                                                    ShowToastDialog.showToast(
-                                                        "Ride Accepted".tr);
-                                                    Get.back(result: true);
-                                                  });
-                                                } else {
-                                                  ShowToastDialog.closeLoader();
-                                                  ShowToastDialog.showToast(
-                                                      "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
-                                                          .tr);
-                                                }
-                                              },
+                                                          DriverIdAcceptReject
+                                                              driverIdAcceptReject =
+                                                              DriverIdAcceptReject(
+                                                                  driverId:
+                                                                      FireStoreUtils
+                                                                          .getCurrentUid(),
+                                                                  acceptedRejectTime:
+                                                                      Timestamp
+                                                                          .now(),
+                                                                  offerAmount:
+                                                                      controller
+                                                                          .newAmount
+                                                                          .value);
+                                                          FireStoreUtils.acceptRide(
+                                                                  controller
+                                                                      .orderModel
+                                                                      .value,
+                                                                  driverIdAcceptReject)
+                                                              .then((value) {
+                                                            ShowToastDialog
+                                                                .closeLoader();
+                                                            ShowToastDialog
+                                                                .showToast(
+                                                                    "Ride Accepted"
+                                                                        .tr);
+                                                            Get.back(
+                                                                result: true);
+                                                          });
+                                                        } else {
+                                                          ShowToastDialog
+                                                              .closeLoader();
+                                                          ShowToastDialog.showToast(
+                                                              "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
+                                                                  .tr);
+                                                        }
+                                                      } catch (e) {
+                                                        print(
+                                                            "Error in accepting order map fare: $e");
+                                                        ShowToastDialog
+                                                            .closeLoader();
+                                                      } finally {
+                                                        controller
+                                                            .isAcceptingRide
+                                                            .value = false;
+                                                      }
+                                                    },
                                             ),
                                           ],
                                         ),

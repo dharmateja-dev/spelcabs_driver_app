@@ -12,6 +12,7 @@ import 'package:driver/ui/home_screens/order_map_screen.dart';
 import 'package:driver/ui/order_intercity_screen/complete_intecity_order_screen.dart';
 import 'package:driver/ui/order_screen/complete_order_screen.dart';
 import 'package:driver/utils/fire_store_utils.dart';
+import 'package:driver/controller/home_controller.dart';
 import 'package:driver/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -149,6 +150,15 @@ class NotificationService {
         // Handle immediate dialog for new orders
         if (message.data['type'] == 'city_order') {
           _showNewRideDialog(message.data['orderId']);
+        } else if (message.data['type'] == 'ride_confirmed') {
+          // Ride confirmed by customer — navigate to active rides tab
+          log("Ride confirmed notification received for order: ${message.data['orderId']}");
+          try {
+            final homeController = Get.find<HomeController>();
+            homeController.selectedIndex.value = 2; // Active rides tab
+          } catch (e) {
+            log("HomeController not found, cannot switch tab: $e");
+          }
         } else if (message.data['type'] == 'order_cancelled' ||
             message.data['type'] == 'booking_cancelled') {
           // Only close the dialog if it matches the cancelled ride
@@ -202,6 +212,15 @@ class NotificationService {
             orderId: message.data['orderId'],
             token: customer.fcmToken,
           ));
+        } else if (message.data['type'] == "ride_confirmed") {
+          // Ride confirmed by customer — navigate to active rides tab
+          log("Ride confirmed notification tapped, navigating to active rides.");
+          try {
+            final homeController = Get.find<HomeController>();
+            homeController.selectedIndex.value = 2; // Active rides tab
+          } catch (e) {
+            log("HomeController not found: $e");
+          }
         }
       }
     });
@@ -213,7 +232,7 @@ class NotificationService {
 
   static Future<String> getToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
-    return token!;
+    return token ?? "";
   }
 
   void display(RemoteMessage message) async {

@@ -208,6 +208,7 @@ class FreightController extends GetxController {
 
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;
   RxBool isLoading = true.obs;
+  RxBool isAcceptingRide = false.obs;
 
   Future<void> getDriver() async {
     updateCurrentLocation();

@@ -39,6 +39,7 @@ class IntercityController extends GetxController {
   RxList<InterCityOrderModel> intercityServiceOrder =
       <InterCityOrderModel>[].obs;
   RxBool isLoading = false.obs;
+  RxBool isAcceptingRide = false.obs;
   RxString newAmount = "0.0".obs;
   Rx<TextEditingController> enterOfferRateController =
       TextEditingController().obs;

@@ -15,7 +15,7 @@ class ButtonThem {
     double txtSize = 14,
     double btnWidthRatio = 0.9,
     double btnRadius = 10,
-    required Function() onPress,
+    required VoidCallback? onPress,
     bool isVisible = true,
     Color? btnColor,
     Color? txtColor,
