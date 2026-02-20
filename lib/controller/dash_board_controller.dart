@@ -96,6 +96,11 @@ class DashBoardController extends GetxController {
 
   @override
   void onInit() {
+    if (Get.arguments != null &&
+        Get.arguments is Map &&
+        Get.arguments['initialIndex'] != null) {
+      selectedDrawerIndex.value = Get.arguments['initialIndex'];
+    }
     getLocation();
     super.onInit();
   }

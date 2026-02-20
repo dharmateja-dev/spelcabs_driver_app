@@ -128,13 +128,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
             tag: "HomeController");
         // Get a fresh location update
         try {
-          final locationData = await location.getLocation();
+          final locationData =
+              await location.getLocation().timeout(const Duration(seconds: 10));
           if (locationData.latitude != null && locationData.longitude != null) {
             _updateSearchLocationIfNeeded(
                 locationData.latitude!, locationData.longitude!);
           }
         } catch (e) {
-          AppLogger.warning("Could not refresh location on resume: $e",
+          AppLogger.warning(
+              "Could not refresh location on resume (Timeout/Error): $e",
               tag: "HomeController");
         }
       } else if (!serviceEnabled) {

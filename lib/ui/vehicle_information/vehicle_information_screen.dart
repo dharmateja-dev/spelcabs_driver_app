@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/vehicle_information_controller.dart';
+import 'package:driver/ui/dashboard_screen.dart';
 import 'package:driver/controller/home_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/driver_rules_model.dart';
@@ -915,6 +916,11 @@ class VehicleInformationScreen extends StatelessWidget {
                                                   tag:
                                                       "VehicleInformationScreen");
                                             }
+
+                                            // Redirect to City Rides screen (index 0)
+                                            Get.offAll(
+                                                () => const DashBoardScreen(),
+                                                arguments: {'initialIndex': 0});
                                           }
                                         });
                                       },

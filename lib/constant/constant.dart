@@ -85,7 +85,7 @@ class Constant {
   static String senderId = 'bidbolt-5d325';
   static String jsonNotificationFileURL =
       'https://firebasestorage.googleapis.com/v0/b/bidbolt-5d325.firebasestorage.app/o/bidbolt-5d325-firebase-adminsdk-fbsvc-f30b7cc63d.json?alt=media&token=aed7260b-4e6a-467c-9e4e-81be5759188d';
-  static String radius = "10";
+  static String radius = "20";
   static String distanceType = "";
   static String minimumAmountToWithdrawal = "0.0";
   static String minimumDepositToRideAccept = "0.0";

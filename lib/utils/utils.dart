@@ -43,11 +43,22 @@ class Utils {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
 
-    Position? position = await Geolocator.getCurrentPosition();
+    Position? position;
+    try {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          timeLimit: const Duration(seconds: 20));
+    } catch (e) {
+      position = await Geolocator.getLastKnownPosition();
+    }
 
-    Constant.currentLocation = LocationLatLng(
-        latitude: position.latitude, longitude: position.longitude);
-    return await Geolocator.getCurrentPosition();
+    if (position != null) {
+      Constant.currentLocation = LocationLatLng(
+          latitude: position.latitude, longitude: position.longitude);
+      return position;
+    } else {
+      return Future.error('Could not determine location.');
+    }
   }
 
   static Future<Position> getCurrentLocation() async {
@@ -72,7 +83,17 @@ class Utils {
     }
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
+    try {
+      return await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          timeLimit: const Duration(seconds: 20));
+    } catch (e) {
+      Position? position = await Geolocator.getLastKnownPosition();
+      if (position != null) {
+        return position;
+      }
+      return Future.error('Could not determine location.');
+    }
   }
 
   static Future<void> redirectMap(

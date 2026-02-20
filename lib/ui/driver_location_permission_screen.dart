@@ -245,15 +245,22 @@ class _DriverLocationPermissionScreenState
 
   Future<void> _getCurrentLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
-      );
-      print('✅ Driver Location: ${position.latitude}, ${position.longitude}');
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 20),
+        );
+      } catch (e) {
+        position = await Geolocator.getLastKnownPosition();
+      }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble('driver_last_latitude', position.latitude);
-      await prefs.setDouble('driver_last_longitude', position.longitude);
+      if (position != null) {
+        print('✅ Driver Location: ${position.latitude}, ${position.longitude}');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setDouble('driver_last_latitude', position.latitude);
+        await prefs.setDouble('driver_last_longitude', position.longitude);
+      }
     } catch (e) {
       print('❌ Error getting location: $e');
     }
