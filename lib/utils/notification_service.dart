@@ -24,8 +24,15 @@ import 'package:get/get.dart';
 Future<void> firebaseMessageBackgroundHandle(RemoteMessage message) async {
   log("BackGround Message :: ${message.messageId}");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  RemoteNotification? notification = message.notification;
-  if (notification == null && message.data.isNotEmpty) {
+
+  // OS automatically displays notifications for messages with a 'notification' block when in background.
+  // We only show manual local notification for data-only messages to avoid duplicates in the notification shade.
+  if (message.notification != null) {
+    return;
+  }
+
+  RemoteNotification? notification;
+  if (message.data.isNotEmpty) {
     // Determine title and body from data if notification payload is missing
     String title = "New Notification";
     String body = "You have a new update";
@@ -87,16 +94,28 @@ Future<void> firebaseMessageBackgroundHandle(RemoteMessage message) async {
 }
 
 class NotificationService {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  // Singleton pattern to ensure only one instance handles notifications and listeners
+  static final NotificationService _instance = NotificationService._internal();
+  factory NotificationService() => _instance;
+  NotificationService._internal();
+
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  bool _isInitialized = false;
 
   // Track the currently open ride dialog to prevent closing unrelated dialogs
   String? _currentRideDialogId;
 
   Future<void> initInfo() async {
+    if (_isInitialized) {
+      log("[NotificationService] initInfo: Already initialized. Skipping repeat setup.");
+      return;
+    }
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert:
+          false, // Avoid double notifications on iOS while app is in foreground. Manual display() handles this.
       badge: true,
       sound: true,
     );
@@ -227,7 +246,8 @@ class NotificationService {
 
     await FirebaseMessaging.instance.subscribeToTopic("goRide_driver");
     await FirebaseMessaging.instance.subscribeToTopic("global");
-    log("Subscribed to topics: goRide_driver, global");
+    _isInitialized = true;
+    log("Subscribed to topics: goRide_driver, global and marked as initialized.");
   }
 
   static Future<String> getToken() async {
