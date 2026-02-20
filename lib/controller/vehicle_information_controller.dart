@@ -215,30 +215,24 @@ class VehicleInformationController extends GetxController {
         zoneNameController.value.text = zoneString.value;
       }
 
-      // Restore Vehicle Selection using activeServices map or fallback to serviceId
-      if (driverModel.value.activeServices != null ||
+      // Restore Vehicle Selection using vehicleTypeId (most specific) or fallback to serviceId
+      if (driverModel.value.vehicleInformation != null ||
           driverModel.value.serviceId != null) {
-        String? targetId = driverModel.value.serviceId;
+        String? vTypeId = driverModel.value.vehicleInformation?.vehicleTypeId;
+        String? sId = driverModel.value.serviceId;
 
-        // Fallback to activeServices if serviceId is null
-        if (targetId == null && driverModel.value.activeServices != null) {
-          for (var entry in driverModel.value.activeServices!.entries) {
-            if (entry.value == true) {
-              targetId = entry.key;
-              break;
-            }
+        for (var uv in unifiedVehicleList) {
+          // Rule: If it's a freight vehicle, vehicleTypeId matches freightServiceId
+          if (vTypeId != null && uv.freightServiceId == vTypeId) {
+            selectedUnifiedVehicle.value = uv;
+            selectedServiceId.value = vTypeId;
+            break;
           }
-        }
-
-        if (targetId != null) {
-          for (var uv in unifiedVehicleList) {
-            if (uv.passengerServiceId == targetId ||
-                uv.freightServiceId == targetId) {
-              selectedUnifiedVehicle.value = uv;
-              // Set service ID for UI consistency if needed
-              selectedServiceId.value = targetId;
-              break;
-            }
+          // Rule: If it's a passenger service, serviceId matches passengerServiceId
+          if (sId != null && uv.passengerServiceId == sId) {
+            selectedUnifiedVehicle.value = uv;
+            selectedServiceId.value = sId;
+            break;
           }
         }
       }

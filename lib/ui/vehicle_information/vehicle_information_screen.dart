@@ -677,7 +677,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                     children: controller.driverRulesList
                                         .map((item) => CheckboxListTile(
                                               activeColor: themeChange.getThem()
-                                                  ? AppColors.darkModePrimary
+                                                  ? Colors.white
                                                   : AppColors.primary,
                                               checkColor: themeChange.getThem()
                                                   ? Colors.black
@@ -847,10 +847,10 @@ class VehicleInformationScreen extends StatelessWidget {
                                               selected.passengerServiceId;
                                         } else if (selected.freightServiceId !=
                                             null) {
-                                          // FIX: Save the specific freight vehicle ID as serviceId so admin panel can identify it
+                                          // Use the global freight service ID so admin panel and order filtering recognize the category
                                           controller
                                                   .driverModel.value.serviceId =
-                                              selected.freightServiceId;
+                                              Constant.freightServiceId;
                                         }
 
                                         controller.driverModel.value.zoneIds =
@@ -943,17 +943,25 @@ class VehicleInformationScreen extends StatelessWidget {
 
   void zoneDialog(
       BuildContext context, VehicleInformationController controller) {
+    final themeChange = Provider.of<DarkThemeProvider>(context);
     Widget cancelButton = TextButton(
       child: Text(
         "Cancel".tr,
-        style: const TextStyle(color: Colors.white70),
+        style: TextStyle(
+          color: themeChange.getThem() ? Colors.white : AppColors.primary,
+        ),
       ),
       onPressed: () {
         Get.back();
       },
     );
     Widget continueButton = TextButton(
-      child: Text("Continue".tr),
+      child: Text(
+        "Continue".tr,
+        style: TextStyle(
+          color: themeChange.getThem() ? Colors.white : AppColors.primary,
+        ),
+      ),
       onPressed: () {
         if (controller.selectedZone.isEmpty) {
           ShowToastDialog.showToast("Please select zone".tr);
@@ -1004,7 +1012,12 @@ class VehicleInformationScreen extends StatelessWidget {
                                       }
                                     }
                                   : null,
-                              activeColor: AppColors.primary,
+                              activeColor: themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary,
+                              checkColor: themeChange.getThem()
+                                  ? Colors.black
+                                  : Colors.white,
                               title: Text(Constant.localizationName(
                                   controller.zoneList[index].name)),
                             ),

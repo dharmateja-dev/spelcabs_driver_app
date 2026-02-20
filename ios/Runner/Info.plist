@@ -60,6 +60,35 @@
 
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires photo library access to upload profile pictures and vehicle registration documents.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone access for better video capture when recording vehicle-related videos.</string>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>https</string>
+      <string>http</string>
+      <string>tel</string>
+      <string>mailto</string>
+      <string>googlechromes</string>
+      <string>comgooglemaps</string>
+      <string>citymapper</string>
+      <string>uber</string>
+      <string>lyft</string>
+      <string>transit</string>
+      <string>waze</string>
+      <string>yandexnavi</string>
+      <string>moovit</string>
+      <string>yandextaxi</string>
+      <string>yandexmaps</string>
+      <string>kakaomap</string>
+      <string>szn-mapy</string>
+      <string>mapsme</string>
+      <string>osmandmaps</string>
+      <string>gett</string>
+      <string>nmap</string>
+      <string>dgis</string>
+      <string>lftgpas</string>
+    </array>
 
 	<key>UIBackgroundModes</key>
 	<array>

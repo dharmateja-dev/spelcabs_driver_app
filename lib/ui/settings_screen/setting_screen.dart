@@ -251,7 +251,16 @@ class SettingScreen extends StatelessWidget {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
+                                            bool hasActive =
+                                                await FireStoreUtils
+                                                    .hasActiveRide();
+                                            if (hasActive) {
+                                              ShowToastDialog.showToast(
+                                                  "You cannot delete your account while you have an active ride."
+                                                      .tr);
+                                              return;
+                                            }
                                             showAlertDialog(context);
                                           },
                                           child: Row(

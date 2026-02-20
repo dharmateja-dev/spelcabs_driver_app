@@ -366,9 +366,9 @@ class Constant {
         return Theme(
           data: themeChange.getThem()
               ? ThemeData.dark().copyWith(
-                  primaryColor: AppColors.darkModePrimary,
+                  primaryColor: Colors.white,
                   colorScheme: const ColorScheme.dark(
-                    primary: AppColors.darkModePrimary,
+                    primary: Colors.white,
                     onPrimary: Colors.black,
                     onSurface: Colors.white,
                   ),
@@ -404,9 +404,9 @@ class Constant {
         return Theme(
           data: themeChange.getThem()
               ? ThemeData.dark().copyWith(
-                  primaryColor: AppColors.darkModePrimary,
+                  primaryColor: Colors.white,
                   colorScheme: const ColorScheme.dark(
-                    primary: AppColors.darkModePrimary,
+                    primary: Colors.white,
                     onPrimary: Colors.black,
                     onSurface: Colors.white,
                   ),
