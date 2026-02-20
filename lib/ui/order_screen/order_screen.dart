@@ -474,7 +474,14 @@ class OrderScreen extends StatelessWidget {
                                                                 body:
                                                                     'Driver has confirmed your cash payment'
                                                                         .tr,
-                                                                payload: {},
+                                                                payload: {
+                                                                  'type':
+                                                                      'cash_payment_confirmed',
+                                                                  'orderId':
+                                                                      orderModel
+                                                                          .id
+                                                                          .toString(),
+                                                                },
                                                                 driverName: driver
                                                                     ?.fullName);
                                                       }

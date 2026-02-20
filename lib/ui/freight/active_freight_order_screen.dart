@@ -603,7 +603,10 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                         body:
                             'The ride has officially started. Please follow the designated route to the destination.'
                                 .tr,
-                        payload: {});
+                        payload: {
+                          'type': 'ride_started',
+                          'orderId': orderModel.id.toString(),
+                        });
                   }
                 });
 

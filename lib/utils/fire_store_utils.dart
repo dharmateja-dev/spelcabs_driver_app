@@ -1374,12 +1374,18 @@ class FireStoreUtils {
           "Final list: ${ordersList.length} orders after zone/service filtering",
           tag: "FireStoreUtils");
 
-      // Sort by creation time (Newest First)
+      // Sort by Amount (Highest First)
       ordersList.sort((a, b) {
-        final aTime = a.createdDate; // Corrected from createdAt
-        final bTime = b.createdDate; // Corrected from createdAt
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
+        // Try to parse offerStatus/finalRate first, if not then offerRate
+        double aPrice = 0.0;
+        double bPrice = 0.0;
+
+        try {
+          aPrice = double.tryParse(a.finalRate ?? a.offerRate ?? "0") ?? 0.0;
+          bPrice = double.tryParse(b.finalRate ?? b.offerRate ?? "0") ?? 0.0;
+        } catch (_) {}
+
+        return bPrice.compareTo(aPrice); // Descending order
       });
 
       return ordersList;
@@ -1486,12 +1492,18 @@ class FireStoreUtils {
           "Nearest freight orders updated: ${ordersList.length} new orders.",
           tag: "FireStoreUtils");
 
-      // Sort by creation time (Newest First)
+      // Sort by Amount (Highest First)
       ordersList.sort((a, b) {
-        final aTime = a.createdDate;
-        final bTime = b.createdDate;
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
+        // Try to parse offerStatus/finalRate first, if not then offerRate
+        double aPrice = 0.0;
+        double bPrice = 0.0;
+
+        try {
+          aPrice = double.tryParse(a.finalRate ?? a.offerRate ?? "0") ?? 0.0;
+          bPrice = double.tryParse(b.finalRate ?? b.offerRate ?? "0") ?? 0.0;
+        } catch (_) {}
+
+        return bPrice.compareTo(aPrice); // Descending order
       });
 
       getNearestFreightOrderRequestController!.sink.add(ordersList);
@@ -1901,17 +1913,21 @@ class FireStoreUtils {
         tag: "FireStoreUtils");
     bool isAdded = false;
     try {
-      final docRef = fireStore.collection(CollectionName.driverUsers).doc(FireStoreUtils.getCurrentUid());
+      final docRef = fireStore
+          .collection(CollectionName.driverUsers)
+          .doc(FireStoreUtils.getCurrentUid());
       await fireStore.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(docRef);
         if (!snapshot.exists) throw Exception("Driver document does not exist");
         final data = snapshot.data() as Map<String, dynamic>;
-        double currentAmount = double.tryParse(data['walletAmount']?.toString() ?? '0') ?? 0.0;
+        double currentAmount =
+            double.tryParse(data['walletAmount']?.toString() ?? '0') ?? 0.0;
         double newAmount = currentAmount + double.parse(amount);
         transaction.update(docRef, {'walletAmount': newAmount.toString()});
       });
       isAdded = true;
-      AppLogger.info("Driver wallet atomically updated by $amount for current UID.",
+      AppLogger.info(
+          "Driver wallet atomically updated by $amount for current UID.",
           tag: "FireStoreUtils");
     } catch (error, s) {
       AppLogger.error("Error updating driver wallet: $error",
@@ -2256,14 +2272,20 @@ class FireStoreUtils {
           if (userDocument.data() != null && userDocument.exists) {
             try {
               // Use Firestore transaction to prevent race conditions
-              final refDocRef = fireStore.collection(CollectionName.users).doc(referralModel!.referralBy);
+              final refDocRef = fireStore
+                  .collection(CollectionName.users)
+                  .doc(referralModel!.referralBy);
               await fireStore.runTransaction((transaction) async {
                 DocumentSnapshot snapshot = await transaction.get(refDocRef);
                 if (!snapshot.exists) return;
                 final data = snapshot.data() as Map<String, dynamic>;
-                double currentAmount = double.tryParse(data['walletAmount']?.toString() ?? '0') ?? 0.0;
-                double newAmount = currentAmount + double.parse(Constant.referralAmount.toString());
-                transaction.update(refDocRef, {'walletAmount': newAmount.toString()});
+                double currentAmount =
+                    double.tryParse(data['walletAmount']?.toString() ?? '0') ??
+                        0.0;
+                double newAmount = currentAmount +
+                    double.parse(Constant.referralAmount.toString());
+                transaction
+                    .update(refDocRef, {'walletAmount': newAmount.toString()});
               });
 
               WalletTransactionModel transactionModel = WalletTransactionModel(
@@ -2279,7 +2301,7 @@ class FireStoreUtils {
 
               await FireStoreUtils.setWalletTransaction(transactionModel);
               AppLogger.info(
-                  "Intercity referral amount updated for user: ${user.id}",
+                  "Intercity referral amount updated for user: ${referralModel!.referralBy}",
                   tag: "FireStoreUtils");
             } catch (error, s) {
               AppLogger.error(
@@ -2374,14 +2396,20 @@ class FireStoreUtils {
           if (userDocument.data() != null && userDocument.exists) {
             try {
               // Use Firestore transaction to prevent race conditions
-              final refDocRef = fireStore.collection(CollectionName.users).doc(referralModel!.referralBy);
+              final refDocRef = fireStore
+                  .collection(CollectionName.users)
+                  .doc(referralModel!.referralBy);
               await fireStore.runTransaction((transaction) async {
                 DocumentSnapshot snapshot = await transaction.get(refDocRef);
                 if (!snapshot.exists) return;
                 final data = snapshot.data() as Map<String, dynamic>;
-                double currentAmount = double.tryParse(data['walletAmount']?.toString() ?? '0') ?? 0.0;
-                double newAmount = currentAmount + double.parse(Constant.referralAmount.toString());
-                transaction.update(refDocRef, {'walletAmount': newAmount.toString()});
+                double currentAmount =
+                    double.tryParse(data['walletAmount']?.toString() ?? '0') ??
+                        0.0;
+                double newAmount = currentAmount +
+                    double.parse(Constant.referralAmount.toString());
+                transaction
+                    .update(refDocRef, {'walletAmount': newAmount.toString()});
               });
 
               WalletTransactionModel transactionModel = WalletTransactionModel(
@@ -2396,7 +2424,8 @@ class FireStoreUtils {
                   note: "Referral Amount");
 
               await FireStoreUtils.setWalletTransaction(transactionModel);
-              AppLogger.info("Referral amount updated for user: ${user.id}",
+              AppLogger.info(
+                  "Referral amount updated for user: ${referralModel!.referralBy}",
                   tag: "FireStoreUtils");
             } catch (error, s) {
               AppLogger.error("Error updating referral amount: $error",

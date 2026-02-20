@@ -65,284 +65,275 @@ class ActiveOrderScreen extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
-                              decoration: BoxDecoration(
-                                color: themeChange.getThem()
-                                    ? AppColors.darkContainerBackground
-                                    : AppColors.containerBackground,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10)),
-                                border: Border.all(
-                                    color: themeChange.getThem()
-                                        ? AppColors.darkContainerBorder
-                                        : AppColors.containerBorder,
-                                    width: 0.5),
-                                boxShadow: themeChange.getThem()
-                                    ? null
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          blurRadius: 8,
-                                          offset: const Offset(0,
-                                              2), // changes position of shadow
-                                        ),
-                                      ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                child: Column(
-                                  children: [
-                                    UserView(
-                                      userId: orderModel.userId,
-                                      amount: orderModel.finalRate,
-                                      distance: orderModel.distance,
-                                      distanceType: orderModel.distanceType,
-                                    ),
-                                    const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 5),
-                                      child: Divider(),
-                                    ),
-                                    LocationView(
-                                      sourceLocation: orderModel
-                                          .sourceLocationName
-                                          .toString(),
-                                      destinationLocation: orderModel
-                                          .destinationLocationName
-                                          .toString(),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ButtonThem.buildBorderButton(
-                                              context,
-                                              title: "Get Directions".tr,
-                                              btnHeight: 40, onPress: () {
-                                            if (Constant.mapType ==
-                                                "inappmap") {
-                                              if (orderModel.status ==
-                                                      Constant.rideActive ||
-                                                  orderModel.status ==
-                                                      Constant.rideInProgress) {
-                                                Get.to(
-                                                    const LiveTrackingScreen(),
-                                                    arguments: {
-                                                      "orderModel": orderModel,
-                                                      "type": "orderModel",
-                                                    });
-                                              }
-                                            } else {
-                                              if (orderModel.status ==
-                                                  Constant.rideInProgress) {
-                                                Utils.redirectMap(
-                                                    latitude: orderModel
-                                                        .destinationLocationLAtLng!
-                                                        .latitude!,
-                                                    longLatitude: orderModel
-                                                        .destinationLocationLAtLng!
-                                                        .longitude!,
-                                                    name: orderModel
-                                                        .destinationLocationName
-                                                        .toString());
-                                              } else {
-                                                Utils.redirectMap(
-                                                    latitude: orderModel
-                                                        .sourceLocationLAtLng!
-                                                        .latitude!,
-                                                    longLatitude: orderModel
-                                                        .sourceLocationLAtLng!
-                                                        .longitude!,
-                                                    name: orderModel
-                                                        .sourceLocationName
-                                                        .toString());
-                                              }
+                            decoration: BoxDecoration(
+                              color: themeChange.getThem()
+                                  ? AppColors.darkContainerBackground
+                                  : AppColors.containerBackground,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10)),
+                              border: Border.all(
+                                  color: themeChange.getThem()
+                                      ? AppColors.darkContainerBorder
+                                      : AppColors.containerBorder,
+                                  width: 0.5),
+                              boxShadow: themeChange.getThem()
+                                  ? null
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        blurRadius: 8,
+                                        offset: const Offset(
+                                            0, 2), // changes position of shadow
+                                      ),
+                                    ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 10),
+                              child: Column(
+                                children: [
+                                  UserView(
+                                    userId: orderModel.userId,
+                                    amount: orderModel.finalRate,
+                                    distance: orderModel.distance,
+                                    distanceType: orderModel.distanceType,
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 5),
+                                    child: Divider(),
+                                  ),
+                                  LocationView(
+                                    sourceLocation: orderModel
+                                        .sourceLocationName
+                                        .toString(),
+                                    destinationLocation: orderModel
+                                        .destinationLocationName
+                                        .toString(),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ButtonThem.buildBorderButton(
+                                            context,
+                                            title: "Get Directions".tr,
+                                            btnHeight: 40, onPress: () {
+                                          if (Constant.mapType == "inappmap") {
+                                            if (orderModel.status ==
+                                                    Constant.rideActive ||
+                                                orderModel.status ==
+                                                    Constant.rideInProgress) {
+                                              Get.to(const LiveTrackingScreen(),
+                                                  arguments: {
+                                                    "orderModel": orderModel,
+                                                    "type": "orderModel",
+                                                  });
                                             }
-                                          }),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: orderModel.status ==
-                                                  Constant.rideInProgress
-                                              ? ButtonThem.buildBorderButton(
-                                                  context,
-                                                  title: "Complete Ride".tr,
-                                                  btnHeight: 44,
-                                                  iconVisibility: false,
-                                                  onPress: () async {
-                                                    orderModel.status =
-                                                        Constant.rideComplete;
+                                          } else {
+                                            if (orderModel.status ==
+                                                Constant.rideInProgress) {
+                                              Utils.redirectMap(
+                                                  latitude: orderModel
+                                                      .destinationLocationLAtLng!
+                                                      .latitude!,
+                                                  longLatitude: orderModel
+                                                      .destinationLocationLAtLng!
+                                                      .longitude!,
+                                                  name: orderModel
+                                                      .destinationLocationName
+                                                      .toString());
+                                            } else {
+                                              Utils.redirectMap(
+                                                  latitude: orderModel
+                                                      .sourceLocationLAtLng!
+                                                      .latitude!,
+                                                  longLatitude: orderModel
+                                                      .sourceLocationLAtLng!
+                                                      .longitude!,
+                                                  name: orderModel
+                                                      .sourceLocationName
+                                                      .toString());
+                                            }
+                                          }
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: orderModel.status ==
+                                                Constant.rideInProgress
+                                            ? ButtonThem.buildBorderButton(
+                                                context,
+                                                title: "Complete Ride".tr,
+                                                btnHeight: 44,
+                                                iconVisibility: false,
+                                                onPress: () async {
+                                                  orderModel.status =
+                                                      Constant.rideComplete;
 
-                                                    await FireStoreUtils
-                                                            .getCustomer(
-                                                                orderModel
-                                                                    .userId
-                                                                    .toString())
-                                                        .then((value) async {
-                                                      if (value != null) {
-                                                        if (value.fcmToken !=
-                                                            null) {
-                                                          Map<String, dynamic>
-                                                              playLoad =
-                                                              <String, dynamic>{
-                                                            "type":
-                                                                "city_order_complete",
-                                                            "orderId":
-                                                                orderModel.id
-                                                          };
-                                                          DriverUserModel?
-                                                              driver =
-                                                              await FireStoreUtils
-                                                                  .getDriverProfile(
-                                                                      orderModel
-                                                                          .driverId
-                                                                          .toString());
+                                                  await FireStoreUtils
+                                                          .getCustomer(
+                                                              orderModel.userId
+                                                                  .toString())
+                                                      .then((value) async {
+                                                    if (value != null) {
+                                                      if (value.fcmToken !=
+                                                          null) {
+                                                        Map<String, dynamic>
+                                                            playLoad =
+                                                            <String, dynamic>{
+                                                          "type":
+                                                              "city_order_complete",
+                                                          "orderId":
+                                                              orderModel.id
+                                                        };
+                                                        DriverUserModel?
+                                                            driver =
+                                                            await FireStoreUtils
+                                                                .getDriverProfile(
+                                                                    orderModel
+                                                                        .driverId
+                                                                        .toString());
 
-                                                          await SendNotification
-                                                              .sendOneNotification(
-                                                                  token: value
-                                                                      .fcmToken
-                                                                      .toString(),
-                                                                  title:
-                                                                      'Ride complete!'
-                                                                          .tr,
-                                                                  body:
-                                                                      'Please complete your payment.'
-                                                                          .tr,
-                                                                  payload:
-                                                                      playLoad,
-                                                                  driverName: driver
-                                                                      ?.fullName);
-                                                        }
+                                                        await SendNotification
+                                                            .sendOneNotification(
+                                                                token: value
+                                                                    .fcmToken
+                                                                    .toString(),
+                                                                title:
+                                                                    'Ride complete!'
+                                                                        .tr,
+                                                                body:
+                                                                    'Please complete your payment.'
+                                                                        .tr,
+                                                                payload:
+                                                                    playLoad,
+                                                                driverName: driver
+                                                                    ?.fullName);
                                                       }
-                                                    });
+                                                    }
+                                                  });
 
-                                                    await FireStoreUtils
-                                                            .setOrder(
-                                                                orderModel)
-                                                        .then((value) {
-                                                      if (value == true) {
-                                                        ShowToastDialog.showToast(
-                                                            "Ride Complete successfully"
-                                                                .tr);
-                                                        controller
-                                                            .homeController
-                                                            .selectedIndex
-                                                            .value = 3;
-                                                      }
-                                                    });
-                                                  },
-                                                )
-                                              : ButtonThem.buildBorderButton(
-                                                  context,
-                                                  title: "Pickup Customer".tr,
-                                                  btnHeight: 44,
-                                                  iconVisibility: false,
-                                                  onPress: () async {
-                                                    showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            otpDialog(
-                                                                context,
-                                                                controller,
-                                                                orderModel));
-                                                  },
-                                                ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Row(
-                                          children: [
-                                            InkWell(
-                                              onTap: () async {
-                                                UserModel? customer =
-                                                    await FireStoreUtils
-                                                        .getCustomer(orderModel
-                                                            .userId
-                                                            .toString());
-                                                DriverUserModel? driver =
-                                                    await FireStoreUtils
-                                                        .getDriverProfile(
-                                                            orderModel.driverId
-                                                                .toString());
+                                                  await FireStoreUtils.setOrder(
+                                                          orderModel)
+                                                      .then((value) {
+                                                    if (value == true) {
+                                                      ShowToastDialog.showToast(
+                                                          "Ride Complete successfully"
+                                                              .tr);
+                                                      controller
+                                                          .homeController
+                                                          .selectedIndex
+                                                          .value = 3;
+                                                    }
+                                                  });
+                                                },
+                                              )
+                                            : ButtonThem.buildBorderButton(
+                                                context,
+                                                title: "Pickup Customer".tr,
+                                                btnHeight: 44,
+                                                iconVisibility: false,
+                                                onPress: () async {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          otpDialog(
+                                                              context,
+                                                              controller,
+                                                              orderModel));
+                                                },
+                                              ),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: () async {
+                                              UserModel? customer =
+                                                  await FireStoreUtils
+                                                      .getCustomer(orderModel
+                                                          .userId
+                                                          .toString());
+                                              DriverUserModel? driver =
+                                                  await FireStoreUtils
+                                                      .getDriverProfile(
+                                                          orderModel.driverId
+                                                              .toString());
 
-                                                Get.to(ChatScreens(
-                                                  driverId: driver!.id,
-                                                  customerId: customer!.id,
-                                                  customerName:
-                                                      customer.fullName,
-                                                  customerProfileImage:
-                                                      customer.profilePic,
-                                                  driverName: driver.fullName,
-                                                  driverProfileImage:
-                                                      driver.profilePic,
-                                                  orderId: orderModel.id,
-                                                  token: customer.fcmToken,
-                                                ));
-                                              },
-                                              child: Container(
-                                                height: 44,
-                                                width: 44,
-                                                decoration: BoxDecoration(
-                                                    color: themeChange.getThem()
-                                                        ? AppColors
-                                                            .darkModePrimary
-                                                        : AppColors.primary,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5)),
-                                                child: const Icon(Icons.chat,
-                                                    color: Colors.white),
-                                              ),
+                                              Get.to(ChatScreens(
+                                                driverId: driver!.id,
+                                                customerId: customer!.id,
+                                                customerName: customer.fullName,
+                                                customerProfileImage:
+                                                    customer.profilePic,
+                                                driverName: driver.fullName,
+                                                driverProfileImage:
+                                                    driver.profilePic,
+                                                orderId: orderModel.id,
+                                                token: customer.fcmToken,
+                                              ));
+                                            },
+                                            child: Container(
+                                              height: 44,
+                                              width: 44,
+                                              decoration: BoxDecoration(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkModePrimary
+                                                      : AppColors.primary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(5)),
+                                              child: const Icon(Icons.chat,
+                                                  color: Colors.white),
                                             ),
-                                            const SizedBox(
-                                              width: 10,
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          InkWell(
+                                            onTap: () async {
+                                              UserModel? customer =
+                                                  await FireStoreUtils
+                                                      .getCustomer(orderModel
+                                                          .userId
+                                                          .toString());
+                                              Constant.makePhoneCall(
+                                                  "${customer!.countryCode}${customer.phoneNumber}");
+                                            },
+                                            child: Container(
+                                              height: 44,
+                                              width: 44,
+                                              decoration: BoxDecoration(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkModePrimary
+                                                      : AppColors.primary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(5)),
+                                              child: const Icon(Icons.call,
+                                                  color: Colors.white),
                                             ),
-                                            InkWell(
-                                              onTap: () async {
-                                                UserModel? customer =
-                                                    await FireStoreUtils
-                                                        .getCustomer(orderModel
-                                                            .userId
-                                                            .toString());
-                                                Constant.makePhoneCall(
-                                                    "${customer!.countryCode}${customer.phoneNumber}");
-                                              },
-                                              child: Container(
-                                                height: 44,
-                                                width: 44,
-                                                decoration: BoxDecoration(
-                                                    color: themeChange.getThem()
-                                                        ? AppColors
-                                                            .darkModePrimary
-                                                        : AppColors.primary,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5)),
-                                                child: const Icon(Icons.call,
-                                                    color: Colors.white),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
                             ),
-                          );
-                    
+                          ),
+                        );
                       });
             },
           );
@@ -425,7 +416,10 @@ class ActiveOrderScreen extends StatelessWidget {
                         body:
                             'The ride has officially started. Please follow the designated route to the destination.'
                                 .tr,
-                        payload: {});
+                        payload: {
+                          'type': 'ride_started',
+                          'orderId': orderModel.id.toString(),
+                        });
                   }
                 });
 

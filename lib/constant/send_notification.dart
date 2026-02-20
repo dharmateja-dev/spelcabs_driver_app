@@ -35,9 +35,17 @@ class SendNotification {
       required Map<String, dynamic> payload,
       String? driverName}) async {
     try {
+      if (token.isEmpty) {
+        debugPrint(
+            "[SendNotification] WARNING: FCM token is empty! Notification will not be sent.");
+        debugPrint("[SendNotification] Title: $title, Body: $body");
+        return false;
+      }
+
       final String accessToken = await getAccessToken();
-      debugPrint("accessToken=======>");
-      debugPrint(accessToken);
+      debugPrint(
+          "[SendNotification] Sending notification to token: ${token.substring(0, 20)}...");
+      debugPrint("[SendNotification] Title: $title");
 
       final Map<String, dynamic> finalPayload = {};
       finalPayload.addAll(payload);
@@ -63,18 +71,22 @@ class SendNotification {
         ),
       );
 
-      debugPrint("Notification=======>");
-      debugPrint(response.statusCode.toString());
-      debugPrint(response.body);
-      return true;
+      if (response.statusCode == 200) {
+        debugPrint(
+            "[SendNotification] SUCCESS: Notification sent (${response.statusCode})");
+      } else {
+        debugPrint("[SendNotification] FAILED: Status ${response.statusCode}");
+        debugPrint("[SendNotification] Response: ${response.body}");
+      }
+      return response.statusCode == 200;
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("[SendNotification] ERROR: $e");
       return false;
     }
   }
 
-  static Future<void> sendMultiPleNotification(List<String> tokens, String title,
-      String body, Map<String, dynamic>? payload) async {
+  static Future<void> sendMultiPleNotification(List<String> tokens,
+      String title, String body, Map<String, dynamic>? payload) async {
     final String accessToken = await getAccessToken();
     debugPrint("accessToken=======>");
     debugPrint(accessToken);

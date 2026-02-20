@@ -527,19 +527,23 @@ class OrderIntercityScreen extends StatelessWidget {
                                                                       await FireStoreUtils.getDriverProfile(orderModel
                                                                           .driverId
                                                                           .toString());
-                                                                  await SendNotification.sendOneNotification(
-                                                                      token: value
-                                                                          .fcmToken
-                                                                          .toString(),
-                                                                      title:
-                                                                          'Cash Payment confirmed'
+                                                                  await SendNotification
+                                                                      .sendOneNotification(
+                                                                          token: value
+                                                                              .fcmToken
+                                                                              .toString(),
+                                                                          title: 'Cash Payment confirmed'
                                                                               .tr,
-                                                                      body: 'Driver has confirmed your cash payment'
-                                                                          .tr,
-                                                                      payload: {},
-                                                                      driverName:
-                                                                          driver
-                                                                              ?.fullName);
+                                                                          body: 'Driver has confirmed your cash payment'
+                                                                              .tr,
+                                                                          payload: {
+                                                                            'type':
+                                                                                'cash_payment_confirmed',
+                                                                            'orderId':
+                                                                                orderModel.id.toString(),
+                                                                          },
+                                                                          driverName:
+                                                                              driver?.fullName);
                                                                 }
                                                               });
 

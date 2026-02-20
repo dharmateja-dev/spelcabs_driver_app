@@ -353,10 +353,19 @@ class OrderMapScreen extends StatelessWidget {
                                                         controller
                                                             .isAcceptingRide
                                                             .value = true;
+
+                                                        // Show loader immediately to eliminate perceived lag
+                                                        ShowToastDialog
+                                                            .showLoader(
+                                                                "Please wait"
+                                                                    .tr);
+
                                                         bool hasActive =
                                                             await FireStoreUtils
                                                                 .hasActiveRide();
                                                         if (hasActive) {
+                                                          ShowToastDialog
+                                                              .closeLoader();
                                                           ShowToastDialog.showToast(
                                                               "You already have an active ride. Please complete it before accepting a new one."
                                                                   .tr);
@@ -384,6 +393,8 @@ class OrderMapScreen extends StatelessWidget {
                                                         if (enteredAmount <
                                                             recommendedAmount *
                                                                 0.9) {
+                                                          ShowToastDialog
+                                                              .closeLoader();
                                                           ShowToastDialog.showToast(
                                                               "Your offer cannot be less than 90% of the recommended price."
                                                                   .tr);
@@ -393,10 +404,6 @@ class OrderMapScreen extends StatelessWidget {
                                                           return;
                                                         }
                                                         // Prevent accepting new city rides if there are completed rides with pending payment
-                                                        ShowToastDialog
-                                                            .showLoader(
-                                                                "Please wait"
-                                                                    .tr);
                                                         try {
                                                           final pendingPaymentsSnap = await FirebaseFirestore
                                                               .instance
@@ -484,21 +491,29 @@ class OrderMapScreen extends StatelessWidget {
                                                               .then(
                                                                   (value) async {
                                                             if (value != null) {
-                                                              await SendNotification.sendOneNotification(
-                                                                  token: value
-                                                                      .fcmToken
-                                                                      .toString(),
-                                                                  title:
-                                                                      'New Driver Bid'
+                                                              await SendNotification
+                                                                  .sendOneNotification(
+                                                                      token: value
+                                                                          .fcmToken
+                                                                          .toString(),
+                                                                      title:
+                                                                          'New Driver Bid'
+                                                                              .tr,
+                                                                      body: '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
                                                                           .tr,
-                                                                  body:
-                                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
-                                                                          .tr,
-                                                                  payload: {},
-                                                                  driverName: controller
-                                                                      .driverModel
-                                                                      .value
-                                                                      .fullName);
+                                                                      payload: {
+                                                                        'type':
+                                                                            'driver_bid',
+                                                                        'orderId': controller
+                                                                            .orderModel
+                                                                            .value
+                                                                            .id
+                                                                            .toString(),
+                                                                      },
+                                                                      driverName: controller
+                                                                          .driverModel
+                                                                          .value
+                                                                          .fullName);
                                                             }
                                                           });
 
