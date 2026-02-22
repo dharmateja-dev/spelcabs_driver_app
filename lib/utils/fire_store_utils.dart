@@ -1663,6 +1663,24 @@ class FireStoreUtils {
     return isAdded;
   }
 
+  static Future<bool> addDriverToOrder(String orderId, String driverId) async {
+    AppLogger.debug(
+        "addDriverToOrder called for order ID: $orderId, driver ID: $driverId",
+        tag: "FireStoreUtils");
+    try {
+      await fireStore.collection(CollectionName.orders).doc(orderId).update({
+        'acceptedDriverId': FieldValue.arrayUnion([driverId])
+      });
+      AppLogger.info("Driver $driverId added to order $orderId successfully.",
+          tag: "FireStoreUtils");
+      return true;
+    } catch (error, s) {
+      AppLogger.error("Failed to add driver to order $orderId: $error",
+          tag: "FireStoreUtils", error: error, stackTrace: s);
+      return false;
+    }
+  }
+
   static Future<bool?> bankDetailsIsAvailable() async {
     AppLogger.debug(
         "bankDetailsIsAvailable called for current UID: ${getCurrentUid()}",
@@ -1831,6 +1849,32 @@ class FireStoreUtils {
       isAdded = false;
     });
     return isAdded;
+  }
+
+  static Future<bool> addDriverToInterCityOrder(
+      String orderId, String driverId) async {
+    AppLogger.debug(
+        "addDriverToInterCityOrder called for order ID: $orderId, driver ID: $driverId",
+        tag: "FireStoreUtils");
+    try {
+      await fireStore
+          .collection(CollectionName.ordersIntercity)
+          .doc(orderId)
+          .update({
+        'acceptedDriverId': FieldValue.arrayUnion([driverId])
+      });
+      AppLogger.info(
+          "Driver $driverId added to Intercity order $orderId successfully.",
+          tag: "FireStoreUtils");
+      return true;
+    } catch (error, s) {
+      AppLogger.error(
+          "Failed to add driver to intercity order $orderId: $error",
+          tag: "FireStoreUtils",
+          error: error,
+          stackTrace: s);
+      return false;
+    }
   }
 
   static Future<bool?> acceptInterCityRide(InterCityOrderModel orderModel,

@@ -451,37 +451,6 @@ class OrderMapScreen extends StatelessWidget {
                                                                 .toString()) >=
                                                             double.parse(Constant
                                                                 .minimumAmountToWithdrawal)) {
-                                                          List<dynamic>
-                                                              newAcceptedDriverId =
-                                                              [];
-                                                          if (controller
-                                                                  .orderModel
-                                                                  .value
-                                                                  .acceptedDriverId !=
-                                                              null) {
-                                                            newAcceptedDriverId =
-                                                                controller
-                                                                    .orderModel
-                                                                    .value
-                                                                    .acceptedDriverId!;
-                                                          } else {
-                                                            newAcceptedDriverId =
-                                                                [];
-                                                          }
-                                                          newAcceptedDriverId
-                                                              .add(FireStoreUtils
-                                                                  .getCurrentUid());
-                                                          controller
-                                                                  .orderModel
-                                                                  .value
-                                                                  .acceptedDriverId =
-                                                              newAcceptedDriverId;
-                                                          await FireStoreUtils
-                                                              .setOrder(
-                                                                  controller
-                                                                      .orderModel
-                                                                      .value);
-
                                                           await FireStoreUtils
                                                                   .getCustomer(controller
                                                                       .orderModel
@@ -535,7 +504,17 @@ class OrderMapScreen extends StatelessWidget {
                                                                       .orderModel
                                                                       .value,
                                                                   driverIdAcceptReject)
-                                                              .then((value) {
+                                                              .then(
+                                                                  (value) async {
+                                                            await FireStoreUtils
+                                                                .addDriverToOrder(
+                                                                    controller
+                                                                        .orderModel
+                                                                        .value
+                                                                        .id
+                                                                        .toString(),
+                                                                    FireStoreUtils
+                                                                        .getCurrentUid());
                                                             ShowToastDialog
                                                                 .closeLoader();
                                                             ShowToastDialog

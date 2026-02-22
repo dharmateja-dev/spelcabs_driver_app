@@ -797,19 +797,6 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                             .minimumDepositToRideAccept)) {
                                       ShowToastDialog.showLoader(
                                           "Please wait".tr);
-                                      List<dynamic> newAcceptedDriverId = [];
-                                      if (orderModel.acceptedDriverId != null) {
-                                        newAcceptedDriverId =
-                                            orderModel.acceptedDriverId!;
-                                      } else {
-                                        newAcceptedDriverId = [];
-                                      }
-                                      newAcceptedDriverId
-                                          .add(FireStoreUtils.getCurrentUid());
-                                      orderModel.acceptedDriverId =
-                                          newAcceptedDriverId;
-                                      await FireStoreUtils.setInterCityOrder(
-                                          orderModel);
 
                                       DriverIdAcceptReject
                                           driverIdAcceptReject =
@@ -847,7 +834,11 @@ class NewOrderInterCityScreen extends StatelessWidget {
 
                                       await FireStoreUtils.acceptInterCityRide(
                                               orderModel, driverIdAcceptReject)
-                                          .then((value) {
+                                          .then((value) async {
+                                        await FireStoreUtils
+                                            .addDriverToInterCityOrder(
+                                                orderModel.id.toString(),
+                                                FireStoreUtils.getCurrentUid());
                                         ShowToastDialog.closeLoader();
                                         ShowToastDialog.showToast(
                                             "Ride Accepted".tr);
