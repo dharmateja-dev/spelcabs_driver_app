@@ -41,6 +41,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:driver/services/city_rides_listener_service.dart';
+import 'package:driver/services/driver_assignment_validator.dart';
 
 class FireStoreUtils {
   static FirebaseFirestore fireStore = FirebaseFirestore.instance;
@@ -1245,15 +1246,28 @@ class FireStoreUtils {
     }
 
     if (driverUserModel.zoneIds == null || driverUserModel.zoneIds!.isEmpty) {
-      AppLogger.debug("No zones assigned to driver", tag: "FireStoreUtils");
-      return Stream.value(<OrderModel>[]);
+      AppLogger.debug(
+          "Driver has no assigned zones in profile, but will still see nearby city rides if physically inside the zone polygon.",
+          tag: "FireStoreUtils");
+      // Don't return empty stream anymore - allow location-first dispatching.
     }
 
     // Calculate radius in km
     double radiusKm = Constant.getParsedRadius();
 
-    AppLogger.info("Using GeoFlutterFire geo-query with radius: ${radiusKm}km",
-        tag: "FireStoreUtils");
+    // If driver has assigned zones, we use a large radius (100km) to ensure they see all rides
+    // within their city zones, as per client request for city-wide visibility.
+    if (driverUserModel.zoneIds != null &&
+        driverUserModel.zoneIds!.isNotEmpty) {
+      radiusKm = 100.0;
+      AppLogger.info(
+          "Driver has assigned zones, using large radius (100km) for city-wide visibility",
+          tag: "FireStoreUtils");
+    } else {
+      AppLogger.info(
+          "Using GeoFlutterFire geo-query with radius: ${radiusKm}km",
+          tag: "FireStoreUtils");
+    }
 
     // Create the geo-query center point
     final geo = Geoflutterfire();
@@ -1277,7 +1291,10 @@ class FireStoreUtils {
       field: 'position',
       strictMode: true, // Only return documents within exact radius
     )
-        .map((List<DocumentSnapshot<Map<String, dynamic>>> snapshots) {
+        .asyncMap(
+            (List<DocumentSnapshot<Map<String, dynamic>>> snapshots) async {
+      final availableZones =
+          await DriverAssignmentValidator.getAvailableZones();
       AppLogger.info(
           "GeoFlutterFire returned ${snapshots.length} nearby orders (within ${radiusKm}km)",
           tag: "FireStoreUtils");
@@ -1460,11 +1477,25 @@ class FireStoreUtils {
         .where('status', isEqualTo: Constant.ridePlaced);
     GeoFirePoint center = Geoflutterfire()
         .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
+    double radiusKm = Constant.getParsedRadius();
+
+    // Check if the current driver has assigned zones - if so, use city-wide visibility
+    // to ensure they see all freight rides within their city zones.
+    DriverUserModel? currentDriver = await getCurrentDriverUser();
+    if (currentDriver != null &&
+        currentDriver.zoneIds != null &&
+        currentDriver.zoneIds!.isNotEmpty) {
+      radiusKm = 100.0;
+      AppLogger.info(
+          "Driver has assigned zones, using large radius (100km) for freight city-wide visibility",
+          tag: "FireStoreUtils");
+    }
+
     Stream<List<DocumentSnapshot>> stream = Geoflutterfire()
         .collection(collectionRef: query)
         .within(
             center: center,
-            radius: Constant.getParsedRadius(),
+            radius: radiusKm,
             field: 'position',
             strictMode: true);
 
@@ -1569,11 +1600,25 @@ class FireStoreUtils {
     GeoFirePoint center = Geoflutterfire()
         .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
 
+    double radiusKm = Constant.getParsedRadius();
+
+    // Check if the current driver has assigned zones - if so, use city-wide visibility
+    // to ensure they see all intercity rides within their city zones.
+    DriverUserModel? currentDriver = await getCurrentDriverUser();
+    if (currentDriver != null &&
+        currentDriver.zoneIds != null &&
+        currentDriver.zoneIds!.isNotEmpty) {
+      radiusKm = 100.0;
+      AppLogger.info(
+          "Driver has assigned zones, using large radius (100km) for intercity city-wide visibility",
+          tag: "FireStoreUtils");
+    }
+
     Stream<List<DocumentSnapshot>> stream = Geoflutterfire()
         .collection(collectionRef: query)
         .within(
             center: center,
-            radius: Constant.getParsedRadius(),
+            radius: radiusKm,
             field: 'position',
             strictMode: true);
 

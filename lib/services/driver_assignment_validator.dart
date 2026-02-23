@@ -128,17 +128,28 @@ class DriverAssignmentValidator {
       ridePickupLocation.longitude!,
     );
 
+    // Relaxed proximity check:
+    // If the driver is NOT in the ride's city zone, they MUST be within the proximity radius.
+    // IF THEY ARE in the same city zone (zoneMatch is true), we allow them to receive the ride
+    // regardless of distance (radius bypass), as per client requirement for city visibility.
     if (distanceKm > radiusKm) {
-      AppLogger.debug(
-        "Driver ${driver.id} is ${distanceKm.toStringAsFixed(2)}km away (max: ${radiusKm}km) - NOT eligible",
-        tag: tag,
-      );
-      return DriverAssignmentResult(
-        isEligible: false,
-        reason: DriverIneligibilityReason.outsideRadius,
-        message:
-            "Driver is ${distanceKm.toStringAsFixed(1)}km away from pickup (max: ${radiusKm.toStringAsFixed(1)}km)",
-      );
+      if (zoneMatch) {
+        AppLogger.info(
+          "Driver ${driver.id} is outside radius (${distanceKm.toStringAsFixed(2)}km) but matches zone $rideZoneId - ALLOWING ride",
+          tag: tag,
+        );
+      } else {
+        AppLogger.debug(
+          "Driver ${driver.id} is ${distanceKm.toStringAsFixed(2)}km away (max: ${radiusKm}km) - NOT eligible",
+          tag: tag,
+        );
+        return DriverAssignmentResult(
+          isEligible: false,
+          reason: DriverIneligibilityReason.outsideRadius,
+          message:
+              "Driver is ${distanceKm.toStringAsFixed(1)}km away from pickup (max: ${radiusKm.toStringAsFixed(1)}km)",
+        );
+      }
     }
 
     // All checks passed - driver is eligible
