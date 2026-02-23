@@ -135,10 +135,26 @@ class CityRidesListenerService {
 
   /// Update the search location (call when driver moves significantly)
   void updateLocation(LocationLatLng newLocation) {
-    if (_currentLocation == null ||
-        _calculateDistance(_currentLocation!, newLocation) > 500) {
+    if (_currentLocation == null) {
       _currentLocation = newLocation;
-      AppLogger.debug('Location updated for city rides listener', tag: _tag);
+      return;
+    }
+
+    // Dynamic Search Location Threshold (matches HomeController)
+    // At least 500m to avoid too frequent stream rebuilds.
+    final double radiusValueKm = Constant.getParsedRadius();
+    final double dynamicThreshold =
+        (radiusValueKm * 1000.0) * 0.05; // 5% of radius in meters
+
+    final double effectiveThreshold =
+        dynamicThreshold < 500 ? 500 : dynamicThreshold;
+
+    if (_calculateDistance(_currentLocation!, newLocation) >
+        effectiveThreshold) {
+      _currentLocation = newLocation;
+      AppLogger.debug(
+          'Location updated for city rides listener (threshold: ${effectiveThreshold.toStringAsFixed(0)}m)',
+          tag: _tag);
 
       // Restart stream with new location if currently listening
       if (_isListening && _currentDriver != null) {

@@ -342,7 +342,7 @@ class ActiveOrderScreen extends StatelessWidget {
 
   Dialog otpDialog(BuildContext context, ActiveOrderController controller,
       OrderModel orderModel) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
 
     return Dialog(
       shape: RoundedRectangleBorder(

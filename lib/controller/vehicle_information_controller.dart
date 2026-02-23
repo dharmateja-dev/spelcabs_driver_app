@@ -146,7 +146,7 @@ class VehicleInformationController extends GetxController {
 
     // Fetch Services (Passenger)
     await FireStoreUtils.getService().then((value) {
-      serviceList.value = value;
+      serviceList.assignAll(value);
     });
 
     // Fetch Freight
@@ -155,7 +155,7 @@ class VehicleInformationController extends GetxController {
     // Fetch Zones
     await FireStoreUtils.getZone().then((value) {
       if (value != null) {
-        zoneList.value = value;
+        zoneList.assignAll(value);
       }
     });
 
@@ -198,7 +198,7 @@ class VehicleInformationController extends GetxController {
         selectedColor.value =
             driverModel.value.vehicleInformation!.vehicleColor.toString();
         seatsController.value.text =
-            driverModel.value.vehicleInformation!.seats ?? "2";
+            driverModel.value.vehicleInformation!.seats ?? "";
       }
 
       // Restore Zone Selection
@@ -240,7 +240,7 @@ class VehicleInformationController extends GetxController {
 
     // Fetch Vehicle Types (for subtypes if used)
     await FireStoreUtils.getVehicleType().then((value) {
-      vehicleList = value!;
+      vehicleList.assignAll(value!);
       if (driverModel.value.vehicleInformation != null) {
         for (var element in vehicleList) {
           if (element.id ==
@@ -273,6 +273,23 @@ class VehicleInformationController extends GetxController {
 
   void selectVehicle(UnifiedVehicleModel vehicle) {
     selectedUnifiedVehicle.value = vehicle;
+
+    // Clear seats if switching between types, to avoid leftover defaults
+    final name = vehicle.name.toLowerCase().trim();
+    if (name.contains('bike') ||
+        name.contains('scooter') ||
+        name.contains('moto') ||
+        name.contains('cycle')) {
+      // Keep it empty or 1, but it will be hidden anyway
+      seatsController.value.text = "1";
+    } else {
+      // If it's a fresh registration and it was auto-set to 1, clear it
+      if (seatsController.value.text == "1" &&
+          driverModel.value.vehicleInformation == null) {
+        seatsController.value.text = "";
+      }
+    }
+
     if (vehicle.passengerServiceId != null) {
       selectedServiceId.value = vehicle.passengerServiceId;
       _listenToDriverRules(CollectionName.service, vehicle.passengerServiceId!);

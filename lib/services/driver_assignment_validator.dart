@@ -119,8 +119,7 @@ class DriverAssignmentValidator {
     }
 
     // TC01: Check if driver is within proximity radius of the pickup location
-    final double radiusKm =
-        customRadiusKm ?? (double.tryParse(Constant.radius) ?? defaultRadiusKm);
+    final double radiusKm = customRadiusKm ?? Constant.getParsedRadius();
 
     final double distanceKm = _calculateHaversineDistance(
       driver.location!.latitude!,

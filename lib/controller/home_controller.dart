@@ -41,7 +41,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   Rx<LocationLatLng?> searchLocation = Rx<LocationLatLng?>(null);
 
   /// Minimum distance (in meters) the driver must move before we update the search location.
-  static const double _searchLocationThresholdMeters = 500.0;
 
   /// Stream subscriptions to be cancelled in onClose
   StreamSubscription? _driverSubscription;
@@ -334,11 +333,18 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final distanceMeters = _calculateHaversineDistanceMeters(
         current.latitude!, current.longitude!, newLat, newLng);
 
-    if (distanceMeters >= _searchLocationThresholdMeters) {
+    // Refine Search Location Threshold: Dynamic based on current search radius
+    // Default to at least 500m to avoid too frequent stream rebuilds.
+    // Otherwise, use 1/20th (5%) of the radius for larger areas.
+    final double radiusValueKm = Constant.getParsedRadius();
+    final double dynamicThreshold =
+        math.max(500.0, (radiusValueKm * 1000.0) * 0.05);
+
+    if (distanceMeters >= dynamicThreshold) {
       searchLocation.value =
           LocationLatLng(latitude: newLat, longitude: newLng);
       AppLogger.info(
-          "Search location updated (moved ${distanceMeters.toStringAsFixed(0)}m): ($newLat, $newLng)",
+          "Search location updated (moved ${distanceMeters.toStringAsFixed(0)}m, threshold ${dynamicThreshold.toStringAsFixed(0)}m): ($newLat, $newLng)",
           tag: "HomeController");
     }
   }
@@ -403,8 +409,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     if (_lastFirestoreWriteTime != null) {
       final difference =
           now.difference(_lastFirestoreWriteTime!).inMilliseconds;
-      if (difference < Constant.firestoreWriteThrottleMs) {
-        // AppLogger.debug("Skipping Firestore update (Throttled)", tag: "HomeController");
+
+      // Dynamic Throttling: Use high-frequency updates (5s) during active rides,
+      // and power-saving updates (30s) when idle.
+      final int currentThrottle = _isHighFrequencyMode
+          ? Constant.firestoreWriteActiveThrottleMs
+          : Constant.firestoreWriteThrottleMs;
+
+      if (difference < currentThrottle) {
+        // AppLogger.debug("Skipping Firestore update (Throttled: ${currentThrottle}ms)", tag: "HomeController");
         return;
       }
     }

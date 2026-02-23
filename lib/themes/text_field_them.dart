@@ -25,7 +25,7 @@ class TextFieldThem {
     List<TextInputFormatter>? inputFormatters,
     Widget? prefixIcon,
   }) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
     final bool hasError = errorText != null && errorText.isNotEmpty;
 
     // Determine border color based on error state
@@ -131,7 +131,7 @@ class TextFieldThem {
     bool enable = true,
     int? maxLength,
   }) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
     final bool hasError = errorText != null && errorText.isNotEmpty;
 
     // Determine border color based on error state
@@ -234,7 +234,7 @@ class TextFieldThem {
     bool enable = true,
     int maxLine = 1,
   }) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
 
     return TextFormField(
         controller: controller,
@@ -303,7 +303,7 @@ class TextFieldThem {
       TextInputType keyBoardType = TextInputType.text,
       bool enable = true,
       ValueChanged<String>? onChanged}) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
 
     return TextFormField(
         controller: controller,
@@ -372,7 +372,7 @@ class TextFieldThem {
     TextInputType keyBoardType = TextInputType.text,
     bool enable = true,
   }) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
 
     return TextFormField(
         controller: controller,

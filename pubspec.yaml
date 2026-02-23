@@ -92,6 +92,7 @@ dependencies:
 
   http: any
   dio: any
+  logger: ^2.5.0
   rxdart: any
 dependency_overrides:
 

@@ -848,6 +848,7 @@ class FireStoreUtils {
         .then((value) {
       for (var element in value.docs) {
         ServiceModel documentModel = ServiceModel.fromJson(element.data());
+        documentModel.id = element.id;
         serviceList.add(documentModel);
       }
       AppLogger.info("Retrieved ${serviceList.length} services.",
@@ -1007,6 +1008,7 @@ class FireStoreUtils {
       for (var element in value.docs) {
         VehicleTypeModel vehicleModel =
             VehicleTypeModel.fromJson(element.data());
+        vehicleModel.id = element.id;
         vehicleList.add(vehicleModel);
       }
       AppLogger.info("Retrieved ${vehicleList.length} vehicle types.",
@@ -1029,6 +1031,7 @@ class FireStoreUtils {
         for (var element in value.docs) {
           FreightVehicle documentModel =
               FreightVehicle.fromJson(element.data());
+          documentModel.id = element.id;
           freightVehicle.add(documentModel);
         }
       });
@@ -1247,17 +1250,7 @@ class FireStoreUtils {
     }
 
     // Calculate radius in km
-    double radiusKm;
-    final parsedRadius = double.tryParse(Constant.radius) ?? 0.0;
-
-    if (parsedRadius > 100.0) {
-      // Assume it's in meters, convert to km
-      radiusKm = parsedRadius / 1000.0;
-    } else if (parsedRadius > 0) {
-      radiusKm = parsedRadius;
-    } else {
-      radiusKm = 4.0; // Default 4km
-    }
+    double radiusKm = Constant.getParsedRadius();
 
     AppLogger.info("Using GeoFlutterFire geo-query with radius: ${radiusKm}km",
         tag: "FireStoreUtils");
@@ -1471,9 +1464,7 @@ class FireStoreUtils {
         .collection(collectionRef: query)
         .within(
             center: center,
-            radius: (double.tryParse(Constant.radius) ?? 10.0) < 50.0
-                ? 50.0
-                : (double.tryParse(Constant.radius) ?? 10.0),
+            radius: Constant.getParsedRadius(),
             field: 'position',
             strictMode: true);
 
@@ -1578,12 +1569,11 @@ class FireStoreUtils {
     GeoFirePoint center = Geoflutterfire()
         .point(latitude: latitude ?? 0.0, longitude: longLatitude ?? 0.0);
 
-    Stream<List<DocumentSnapshot>> stream =
-        Geoflutterfire().collection(collectionRef: query).within(
+    Stream<List<DocumentSnapshot>> stream = Geoflutterfire()
+        .collection(collectionRef: query)
+        .within(
             center: center,
-            radius: (double.tryParse(Constant.radius) ?? 10.0) < 50.0
-                ? 50.0 // Minimum 50km radius for intercity usually
-                : (double.tryParse(Constant.radius) ?? 10.0),
+            radius: Constant.getParsedRadius(),
             field: 'position',
             strictMode: true);
 
@@ -2515,6 +2505,8 @@ class FireStoreUtils {
         .then((value) {
       for (var element in value.docs) {
         ZoneModel ariPortModel = ZoneModel.fromJson(element.data());
+        ariPortModel.id =
+            element.id; // Essential: Ensure ID is set from document ID
         airPortList.add(ariPortModel);
       }
       AppLogger.info("Retrieved ${airPortList.length} zones.",

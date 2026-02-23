@@ -552,7 +552,7 @@ class ActiveIntercityOrderScreen extends StatelessWidget {
       BuildContext context,
       ActiveInterCityOrderController controller,
       InterCityOrderModel orderModel) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
 
     return Dialog(
       shape: RoundedRectangleBorder(

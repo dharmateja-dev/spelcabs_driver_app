@@ -495,84 +495,146 @@ class VehicleInformationScreen extends StatelessWidget {
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                DropdownButtonFormField<String>(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: themeChange.getThem()
-                                          ? AppColors.darkTextField
-                                          : AppColors.textField,
-                                      contentPadding: const EdgeInsets.only(
-                                          left: 10, right: 10),
-                                      disabledBorder: OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        borderSide: BorderSide(
-                                            color: themeChange.getThem()
-                                                ? AppColors.darkTextFieldBorder
-                                                : AppColors.textFieldBorder,
-                                            width: 1),
+                                Obx(() {
+                                  bool isBike = false;
+                                  final selected =
+                                      controller.selectedUnifiedVehicle.value;
+                                  if (selected != null) {
+                                    final name =
+                                        selected.name.toLowerCase().trim();
+                                    // Robust check for bike-like services
+                                    if (name.contains('bike') ||
+                                        name.contains('scooter') ||
+                                        name.contains('moto') ||
+                                        name.contains('cycle') ||
+                                        name.contains('two wheeler')) {
+                                      isBike = true;
+                                    }
+
+                                    // Check raw names for more accuracy if name check fails
+                                    if (!isBike && selected.rawNames != null) {
+                                      for (var rn in selected.rawNames!) {
+                                        final rName =
+                                            (rn.name ?? '').toLowerCase();
+                                        if (rName.contains('bike') ||
+                                            rName.contains('scooter') ||
+                                            rName.contains('moto') ||
+                                            rName.contains('cycle')) {
+                                          isBike = true;
+                                          break;
+                                        }
+                                      }
+                                    }
+                                  }
+
+                                  if (isBike) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Column(
+                                    children: [
+                                      DropdownButtonFormField<String>(
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            fillColor: themeChange.getThem()
+                                                ? AppColors.darkTextField
+                                                : AppColors.textField,
+                                            contentPadding:
+                                                const EdgeInsets.only(
+                                                    left: 10, right: 10),
+                                            disabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(4)),
+                                              borderSide: BorderSide(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkTextFieldBorder
+                                                      : AppColors
+                                                          .textFieldBorder,
+                                                  width: 1),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(4)),
+                                              borderSide: BorderSide(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkTextFieldBorder
+                                                      : AppColors
+                                                          .textFieldBorder,
+                                                  width: 1),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(4)),
+                                              borderSide: BorderSide(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkTextFieldBorder
+                                                      : AppColors
+                                                          .textFieldBorder,
+                                                  width: 1),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(4)),
+                                              borderSide: BorderSide(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkTextFieldBorder
+                                                      : AppColors
+                                                          .textFieldBorder,
+                                                  width: 1),
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(4)),
+                                              borderSide: BorderSide(
+                                                  color: themeChange.getThem()
+                                                      ? AppColors
+                                                          .darkTextFieldBorder
+                                                      : AppColors
+                                                          .textFieldBorder,
+                                                  width: 1),
+                                            ),
+                                          ),
+                                          validator: (value) => value == null
+                                              ? 'field required'.tr
+                                              : null,
+                                          initialValue: controller
+                                                  .seatsController
+                                                  .value
+                                                  .text
+                                                  .isEmpty
+                                              ? null
+                                              : controller
+                                                  .seatsController.value.text,
+                                          onChanged:
+                                              !controller.isVehicleInfoSubmitted
+                                                  ? (value) {
+                                                      controller.seatsController
+                                                          .value.text = value!;
+                                                    }
+                                                  : null,
+                                          hint: Text("How Many Seats".tr),
+                                          items:
+                                              controller.sheetList.map((item) {
+                                            return DropdownMenuItem(
+                                              value: item,
+                                              child: Text(item.toString()),
+                                            );
+                                          }).toList()),
+                                      const SizedBox(
+                                        height: 10,
                                       ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        borderSide: BorderSide(
-                                            color: themeChange.getThem()
-                                                ? AppColors.darkTextFieldBorder
-                                                : AppColors.textFieldBorder,
-                                            width: 1),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        borderSide: BorderSide(
-                                            color: themeChange.getThem()
-                                                ? AppColors.darkTextFieldBorder
-                                                : AppColors.textFieldBorder,
-                                            width: 1),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        borderSide: BorderSide(
-                                            color: themeChange.getThem()
-                                                ? AppColors.darkTextFieldBorder
-                                                : AppColors.textFieldBorder,
-                                            width: 1),
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(4)),
-                                        borderSide: BorderSide(
-                                            color: themeChange.getThem()
-                                                ? AppColors.darkTextFieldBorder
-                                                : AppColors.textFieldBorder,
-                                            width: 1),
-                                      ),
-                                    ),
-                                    validator: (value) => value == null
-                                        ? 'field required'.tr
-                                        : null,
-                                    initialValue: controller
-                                            .seatsController.value.text.isEmpty
-                                        ? null
-                                        : controller.seatsController.value.text,
-                                    onChanged:
-                                        !controller.isVehicleInfoSubmitted
-                                            ? (value) {
-                                                controller.seatsController.value
-                                                    .text = value!;
-                                              }
-                                            : null,
-                                    hint: Text("How Many Seats".tr),
-                                    items: controller.sheetList.map((item) {
-                                      return DropdownMenuItem(
-                                        value: item,
-                                        child: Text(item.toString()),
-                                      );
-                                    }).toList()),
-                                const SizedBox(
-                                  height: 10,
-                                ),
+                                    ],
+                                  );
+                                }),
                                 InkWell(
                                   onTap: !controller.isVehicleInfoSubmitted
                                       ? () {
@@ -806,12 +868,34 @@ class VehicleInformationScreen extends StatelessWidget {
                                           return;
                                         }
 
-                                        if (controller.seatsController.value
-                                            .text.isEmpty) {
-                                          ShowToastDialog.closeLoader();
-                                          ShowToastDialog.showToast(
-                                              "Please enter seats".tr);
-                                          return;
+                                        // Validate seats (hidden for bikes)
+                                        bool isBike = false;
+                                        if (selected.passengerServiceId !=
+                                            null) {
+                                          final name = selected.name
+                                              .toLowerCase()
+                                              .trim();
+                                          if (name.contains('bike') ||
+                                              name.contains('scooter') ||
+                                              name.contains('moto') ||
+                                              name.contains('cycle') ||
+                                              name.contains('two wheeler')) {
+                                            isBike = true;
+                                          }
+                                        }
+
+                                        if (isBike) {
+                                          // Force 1 seat for bikes internally for backend requirements
+                                          controller
+                                              .seatsController.value.text = "1";
+                                        } else {
+                                          if (controller.seatsController.value
+                                              .text.isEmpty) {
+                                            ShowToastDialog.closeLoader();
+                                            ShowToastDialog.showToast(
+                                                "Please enter seats".tr);
+                                            return;
+                                          }
                                         }
 
                                         if (controller.selectedZone.isEmpty) {
@@ -949,7 +1033,7 @@ class VehicleInformationScreen extends StatelessWidget {
 
   void zoneDialog(
       BuildContext context, VehicleInformationController controller) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context, listen: false);
     Widget cancelButton = TextButton(
       child: Text(
         "Cancel".tr,
