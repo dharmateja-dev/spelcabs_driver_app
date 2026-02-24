@@ -184,9 +184,9 @@ class NotificationService {
           // Handle ride cancellation and bid rejection
           final cancelledOrderId = message.data['orderId'];
           final notificationType = message.data['type'];
-          
+
           log("Received $notificationType notification for order: $cancelledOrderId");
-          
+
           // Only close the dialog if it matches the cancelled ride
           if (cancelledOrderId != null &&
               _currentRideDialogId == cancelledOrderId &&
@@ -195,7 +195,7 @@ class NotificationService {
             Get.back();
             _currentRideDialogId = null;
           }
-          
+
           // The stream listeners in AcceptedOrders and other screens will automatically
           // update when Firestore removes this driver from acceptedDriverId array
         }
