@@ -1001,10 +1001,19 @@ class VehicleInformationScreen extends StatelessWidget {
                                                       "VehicleInformationScreen");
                                             }
 
-                                            // Redirect to City Rides screen (index 0)
+                                            // Determine correct tab: index 2 for Freight, index 0 for City/Outstation
+                                            int initialIndex = 0;
+                                            if (selected.freightServiceId !=
+                                                null) {
+                                              initialIndex = 2;
+                                            }
+
+                                            // Redirect to correct screen
                                             Get.offAll(
                                                 () => const DashBoardScreen(),
-                                                arguments: {'initialIndex': 0});
+                                                arguments: {
+                                                  'initialIndex': initialIndex
+                                                });
                                           }
                                         });
                                       },

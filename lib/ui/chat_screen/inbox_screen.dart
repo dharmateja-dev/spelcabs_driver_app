@@ -99,7 +99,7 @@ class InboxScreen extends StatelessWidget {
                                 child: CachedNetworkImage(
                                     width: 40,
                                     height: 40,
-                                    imageUrl: inboxModel.driverProfileImage
+                                    imageUrl: inboxModel.customerProfileImage
                                         .toString(),
                                     imageBuilder: (context, imageProvider) =>
                                         Container(

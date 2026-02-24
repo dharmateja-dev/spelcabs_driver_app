@@ -460,7 +460,7 @@ class _ChatScreensState extends State<ChatScreens> {
   Future<void> _sendMessage(String message, Url? url, String videoThumbnail,
       String messageType) async {
     InboxModel inboxModel = InboxModel(
-        lastSenderId: widget.customerId,
+        lastSenderId: FireStoreUtils.getCurrentUid(),
         customerId: widget.customerId,
         customerName: widget.customerName,
         driverId: widget.driverId,
@@ -477,7 +477,7 @@ class _ChatScreensState extends State<ChatScreens> {
         id: const Uuid().v4(),
         message: message,
         senderId: FireStoreUtils.getCurrentUid(),
-        receiverId: widget.driverId,
+        receiverId: widget.customerId,
         createdAt: Timestamp.now(),
         url: url,
         orderId: widget.orderId,

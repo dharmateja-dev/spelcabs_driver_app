@@ -187,7 +187,10 @@ class VehicleInformationController extends GetxController {
     // Fetch Driver Profile
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
-      driverModel.value = value!;
+      if (value != null) {
+        driverModel.value = value;
+      }
+
       if (driverModel.value.vehicleInformation != null) {
         vehicleNumberController.value.text =
             driverModel.value.vehicleInformation!.vehicleNumber.toString();
