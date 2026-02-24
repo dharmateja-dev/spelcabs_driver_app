@@ -186,6 +186,7 @@ class VehicleInformation {
   Timestamp? registrationDate;
   String? vehicleColor;
   String? vehicleNumber;
+  String? freightVehicleId;
   String? seats;
   List<DriverRulesModel>? driverRules;
 
@@ -195,6 +196,7 @@ class VehicleInformation {
       this.registrationDate,
       this.vehicleColor,
       this.vehicleNumber,
+      this.freightVehicleId,
       this.seats,
       this.driverRules});
 
@@ -218,6 +220,7 @@ class VehicleInformation {
     }
     vehicleColor = json['vehicleColor'];
     vehicleNumber = json['vehicleNumber'];
+    freightVehicleId = json['freight_vehicle_id'];
     seats = json['seats'];
     if (json['driverRules'] != null) {
       driverRules = <DriverRulesModel>[];
@@ -236,6 +239,7 @@ class VehicleInformation {
     data['registrationDate'] = registrationDate?.millisecondsSinceEpoch;
     data['vehicleColor'] = vehicleColor;
     data['vehicleNumber'] = vehicleNumber;
+    data['freight_vehicle_id'] = freightVehicleId;
     data['seats'] = seats;
     if (driverRules != null) {
       data['driverRules'] = driverRules!.map((v) => v.toJson()).toList();

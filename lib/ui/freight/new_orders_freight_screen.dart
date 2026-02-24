@@ -739,7 +739,10 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                   body:
                                                       '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
                                                           .tr,
-                                                  payload: {},
+                                                  payload: {
+                                                    'type': 'driver_bid',
+                                                    'orderId': orderModel.id.toString(),
+                                                  },
                                                   driverName: controller
                                                       .driverModel
                                                       .value

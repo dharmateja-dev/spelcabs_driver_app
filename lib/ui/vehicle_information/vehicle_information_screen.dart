@@ -950,6 +950,8 @@ class VehicleInformationScreen extends StatelessWidget {
                                                 .vehicleNumberController
                                                 .value
                                                 .text,
+                                            freightVehicleId:
+                                                selected.freightServiceId,
                                             vehicleType: isCarLike
                                                 ? controller
                                                     .selectedVehicle.value.name
@@ -962,8 +964,7 @@ class VehicleInformationScreen extends StatelessWidget {
                                                         .passengerServiceId),
                                             seats: controller
                                                 .seatsController.value.text,
-                                            driverRules:
-                                                List<DriverRulesModel>.from(controller.selectedDriverRulesList.toList()));
+                                            driverRules: List<DriverRulesModel>.from(controller.selectedDriverRulesList.toList()));
 
                                         await FireStoreUtils.updateDriverUser(
                                                 controller.driverModel.value)
