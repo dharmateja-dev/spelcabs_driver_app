@@ -147,7 +147,6 @@ class NotificationService {
       log("Local notifications initialized.");
       setupInteractedMessage();
     }
-    FirebaseMessaging.onBackgroundMessage(firebaseMessageBackgroundHandle);
   }
 
   void setupInteractedMessage() async {
@@ -179,18 +178,26 @@ class NotificationService {
             log("HomeController not found, cannot switch tab: $e");
           }
         } else if (message.data['type'] == 'order_cancelled' ||
-            message.data['type'] == 'booking_cancelled') {
-          // Only close the dialog if it matches the cancelled ride
+            message.data['type'] == 'booking_cancelled' ||
+            message.data['type'] == 'ride_cancelled_by_customer' ||
+            message.data['type'] == 'bid_rejected') {
+          // Handle ride cancellation and bid rejection
           final cancelledOrderId = message.data['orderId'];
+          final notificationType = message.data['type'];
+          
+          log("Received $notificationType notification for order: $cancelledOrderId");
+          
+          // Only close the dialog if it matches the cancelled ride
           if (cancelledOrderId != null &&
               _currentRideDialogId == cancelledOrderId &&
               Get.isDialogOpen == true) {
-            log("Closing ride dialog for cancelled order: $cancelledOrderId");
+            log("Closing ride dialog for order: $cancelledOrderId");
             Get.back();
             _currentRideDialogId = null;
-          } else {
-            log("Cancellation received but no matching dialog open. Cancelled: $cancelledOrderId, Current: $_currentRideDialogId");
           }
+          
+          // The stream listeners in AcceptedOrders and other screens will automatically
+          // update when Firestore removes this driver from acceptedDriverId array
         }
       }
     });
@@ -237,6 +244,18 @@ class NotificationService {
           try {
             final homeController = Get.find<HomeController>();
             homeController.selectedIndex.value = 2; // Active rides tab
+          } catch (e) {
+            log("HomeController not found: $e");
+          }
+        } else if (message.data['type'] == "ride_cancelled_by_customer" ||
+            message.data['type'] == "bid_rejected" ||
+            message.data['type'] == "order_cancelled") {
+          // Ride was cancelled or bid was rejected
+          // Navigate to active orders or accepted orders to see updated list
+          log("Ride/Bid notification tapped, navigating to accepted orders.");
+          try {
+            final homeController = Get.find<HomeController>();
+            homeController.selectedIndex.value = 1; // Accepted Orders tab
           } catch (e) {
             log("HomeController not found: $e");
           }

@@ -22,22 +22,11 @@ class Utils {
     }
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      // Permissions are denied - don't request again
+      // Permission should be requested only once during app startup
+      // in DriverLocationPermissionScreen
+      return Future.error('Location permissions are denied. Please enable location access in app settings.');
     }
 
     // When we reach here, permissions are granted and we can
@@ -72,14 +61,14 @@ class Utils {
       // accessing the position and request users of the
       // App to enable the location services.
       await Geolocator.openLocationSettings();
+      return Future.error('Location services are disabled.');
     }
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        return Future.error('Location Not Available');
-      }
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      // Permissions are denied - don't request again
+      // Permission should be requested only once during app startup
+      return Future.error('Location Not Available');
     }
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.

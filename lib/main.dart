@@ -4,7 +4,9 @@ import 'package:driver/controller/global_setting_conroller.dart';
 import 'package:driver/firebase_options.dart';
 import 'package:driver/ui/splash_screen.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
+import 'package:driver/utils/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -27,6 +29,9 @@ void main() async {
   );
 
   await Preferences.initPref();
+
+  // Set up background message handler BEFORE runApp (critical!)
+  FirebaseMessaging.onBackgroundMessage(firebaseMessageBackgroundHandle);
 
   // Initialize date formatting safely
   try {

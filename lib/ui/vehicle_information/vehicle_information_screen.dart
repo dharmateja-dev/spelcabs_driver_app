@@ -1002,11 +1002,13 @@ class VehicleInformationScreen extends StatelessWidget {
                                                       "VehicleInformationScreen");
                                             }
 
-                                            // Determine correct tab: index 2 for Freight, index 0 for City/Outstation
-                                            int initialIndex = 0;
+                                            // Determine correct tab based on vehicle type:
+                                            // If freight vehicle selected -> Freight tab (index 2)
+                                            // If service/passenger vehicle selected -> City tab (index 0)
+                                            int initialIndex = 0; // Default: City
                                             if (selected.freightServiceId !=
                                                 null) {
-                                              initialIndex = 2;
+                                              initialIndex = 2; // Freight
                                             }
 
                                             // Redirect to correct screen
