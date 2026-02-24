@@ -125,7 +125,7 @@ class OrderIntercityScreen extends StatelessWidget {
                                                       : [
                                                           BoxShadow(
                                                             color: Colors.grey
-                                                                .withOpacity(
+                                                                .withValues(alpha :
                                                                     0.5),
                                                             blurRadius: 8,
                                                             offset: const Offset(

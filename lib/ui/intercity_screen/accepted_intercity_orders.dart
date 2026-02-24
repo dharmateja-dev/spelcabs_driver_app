@@ -95,7 +95,7 @@ class AcceptedIntercityOrders extends StatelessWidget {
                                         : [
                                             BoxShadow(
                                               color:
-                                                  Colors.grey.withOpacity(0.5),
+                                                  Colors.grey.withValues(alpha :0.5),
                                               blurRadius: 8,
                                               offset: const Offset(0,
                                                   2), // changes position of shadow
@@ -150,7 +150,7 @@ class AcceptedIntercityOrders extends StatelessWidget {
                                                   Container(
                                                     decoration: BoxDecoration(
                                                         color: Colors.grey
-                                                            .withOpacity(0.30),
+                                                            .withValues(alpha :0.30),
                                                         borderRadius:
                                                             const BorderRadius
                                                                 .all(
@@ -172,7 +172,7 @@ class AcceptedIntercityOrders extends StatelessWidget {
                                                   Container(
                                                     decoration: BoxDecoration(
                                                         color: AppColors.primary
-                                                            .withOpacity(0.30),
+                                                            .withValues(alpha :0.30),
                                                         borderRadius:
                                                             const BorderRadius
                                                                 .all(

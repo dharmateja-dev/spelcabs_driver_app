@@ -293,7 +293,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                         : [
                                                             BoxShadow(
                                                               color: Colors.grey
-                                                                  .withOpacity(
+                                                                  .withValues(alpha :
                                                                       0.5),
                                                               blurRadius: 8,
                                                               offset: const Offset(
@@ -365,7 +365,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                                     decoration: BoxDecoration(
                                                                         color: Colors
                                                                             .grey
-                                                                            .withOpacity(
+                                                                            .withValues(alpha :
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(
@@ -390,7 +390,7 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                                     decoration: BoxDecoration(
                                                                         color: AppColors
                                                                             .primary
-                                                                            .withOpacity(
+                                                                            .withValues(alpha :
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(

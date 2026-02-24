@@ -206,7 +206,7 @@
 //                     child: Container(
 //                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
 //                       decoration: BoxDecoration(
-//                         color: AppColors.primary.withOpacity(0.1),
+//                         color: AppColors.primary.withValues(alpha :0.1),
 //                         borderRadius: BorderRadius.circular(4),
 //                       ),
 //                       child: Text("Retry",
@@ -686,7 +686,7 @@ class _UserViewState extends State<UserView> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha :0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text("Retry",

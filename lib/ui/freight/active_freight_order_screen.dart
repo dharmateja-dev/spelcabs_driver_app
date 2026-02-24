@@ -107,7 +107,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                       ? null
                                       : [
                                           BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
+                                            color: Colors.grey.withValues(alpha :0.5),
                                             blurRadius: 8,
                                             offset: const Offset(0,
                                                 2), // changes position of shadow
@@ -155,7 +155,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                                 Container(
                                                   decoration: BoxDecoration(
                                                       color: Colors.grey
-                                                          .withOpacity(0.30),
+                                                          .withValues(alpha :0.30),
                                                       borderRadius:
                                                           const BorderRadius
                                                               .all(
@@ -177,7 +177,7 @@ class ActiveFreightOrderScreen extends StatelessWidget {
                                                 Container(
                                                   decoration: BoxDecoration(
                                                       color: AppColors.primary
-                                                          .withOpacity(0.30),
+                                                          .withValues(alpha :0.30),
                                                       borderRadius:
                                                           const BorderRadius
                                                               .all(

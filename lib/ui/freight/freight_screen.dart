@@ -80,7 +80,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withOpacity(0.5)
+                                  ? Colors.white.withValues(alpha :0.5)
                                   : Colors.grey)),
                     ),
                     label: 'New'.tr,
@@ -95,7 +95,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withOpacity(0.5)
+                                  ? Colors.white.withValues(alpha :0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Accepted'.tr,
@@ -110,7 +110,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withOpacity(0.5)
+                                  ? Colors.white.withValues(alpha :0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Active'.tr,
@@ -125,7 +125,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withOpacity(0.5)
+                                  ? Colors.white.withValues(alpha :0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Completed'.tr,
@@ -139,7 +139,7 @@ class FreightScreen extends StatelessWidget {
                 selectedItemColor:
                     themeChange.getThem() ? Colors.white : AppColors.primary,
                 unselectedItemColor: themeChange.getThem()
-                    ? Colors.white.withOpacity(0.5)
+                    ? Colors.white.withValues(alpha :0.5)
                     : Colors.grey,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,

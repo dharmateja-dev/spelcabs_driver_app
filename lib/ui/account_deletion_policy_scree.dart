@@ -73,12 +73,12 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.red.withOpacity(0.15)
+                    ? Colors.red.withValues(alpha :0.15)
                     : Colors.red[50], // Darker background for dark mode
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                     color: isDark
-                        ? Colors.red.withOpacity(0.5)
+                        ? Colors.red.withValues(alpha :0.5)
                         : Colors.red[200]!),
               ),
               child: Row(
@@ -146,7 +146,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
         boxShadow: [
           if (!isDark) // Use shadow only in light mode mostly, or subtle in dark
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha :0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -161,7 +161,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha :0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -205,7 +205,7 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.15),
+                      color: iconColor.withValues(alpha :0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -239,12 +239,12 @@ class AccountDeletionPolicyScreen extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.amber.withOpacity(0.1)
+                  ? Colors.amber.withValues(alpha :0.1)
                   : Colors.amber[50], // Dark mode amber
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                   color: isDark
-                      ? Colors.amber.withOpacity(0.5)
+                      ? Colors.amber.withValues(alpha :0.5)
                       : Colors.amber[200]!),
             ),
             child: Row(

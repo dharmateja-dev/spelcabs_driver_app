@@ -371,7 +371,7 @@ class _DriverLocationPermissionScreenState
     const Color primaryColor = Color(0xff193751);
     final Color iconColor = isDark ? Colors.white : primaryColor;
     final Color iconBgColor =
-        isDark ? Colors.white.withOpacity(0.1) : primaryColor.withOpacity(0.1);
+        isDark ? Colors.white.withValues(alpha :0.1) : primaryColor.withValues(alpha :0.1);
     final Color cardBgColor = isDark ? Colors.grey[900]! : Colors.grey[50]!;
     final Color cardBorderColor =
         isDark ? Colors.grey[800]! : Colors.grey[200]!;
@@ -538,7 +538,7 @@ class _DriverLocationPermissionScreenState
                           border: Border.all(
                               color: isDark
                                   ? Colors.grey[800]!
-                                  : primaryColor.withOpacity(0.3)),
+                                  : primaryColor.withValues(alpha :0.3)),
                         ),
                         child: Column(
                           children: [

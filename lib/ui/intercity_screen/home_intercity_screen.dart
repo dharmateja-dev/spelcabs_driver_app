@@ -75,7 +75,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                         ? Colors.white
                                         : AppColors.primary)
                                     : (themeChange.getThem()
-                                        ? Colors.white.withOpacity(0.5)
+                                        ? Colors.white.withValues(alpha :0.5)
                                         : Colors.grey)),
                           ),
                           label: 'New'.tr,
@@ -90,7 +90,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                         ? Colors.white
                                         : AppColors.primary)
                                     : (themeChange.getThem()
-                                        ? Colors.white.withOpacity(0.5)
+                                        ? Colors.white.withValues(alpha :0.5)
                                         : Colors.grey)),
                           ),
                           label: 'Accepted'.tr,
@@ -105,7 +105,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                         ? Colors.white
                                         : AppColors.primary)
                                     : (themeChange.getThem()
-                                        ? Colors.white.withOpacity(0.5)
+                                        ? Colors.white.withValues(alpha :0.5)
                                         : Colors.grey)),
                           ),
                           label: 'Active'.tr,
@@ -120,7 +120,7 @@ class HomeIntercityScreen extends StatelessWidget {
                                         ? Colors.white
                                         : AppColors.primary)
                                     : (themeChange.getThem()
-                                        ? Colors.white.withOpacity(0.5)
+                                        ? Colors.white.withValues(alpha :0.5)
                                         : Colors.grey)),
                           ),
                           label: 'Completed'.tr,
@@ -135,7 +135,7 @@ class HomeIntercityScreen extends StatelessWidget {
                           ? Colors.white
                           : AppColors.primary,
                       unselectedItemColor: themeChange.getThem()
-                          ? Colors.white.withOpacity(0.5)
+                          ? Colors.white.withValues(alpha :0.5)
                           : Colors.grey,
                       selectedFontSize: 12,
                       unselectedFontSize: 12,

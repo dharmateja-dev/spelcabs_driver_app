@@ -67,7 +67,7 @@ class CompleteOrderScreen extends StatelessWidget {
                                                 ? null
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.black.withOpacity(0.10),
+                                                      color: Colors.black.withValues(alpha :0.10),
                                                       blurRadius: 5,
                                                       offset: const Offset(0, 4), // changes position of shadow
                                                     ),
@@ -147,7 +147,7 @@ class CompleteOrderScreen extends StatelessWidget {
                                                 ? null
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.grey.withOpacity(0.5),
+                                                      color: Colors.grey.withValues(alpha :0.5),
                                                       blurRadius: 8,
                                                       offset: const Offset(0, 2), // changes position of shadow
                                                     ),
@@ -187,7 +187,7 @@ class CompleteOrderScreen extends StatelessWidget {
                                                 ? null
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.grey.withOpacity(0.5),
+                                                      color: Colors.grey.withValues(alpha :0.5),
                                                       blurRadius: 8,
                                                       offset: const Offset(0, 2), // changes position of shadow
                                                     ),
@@ -311,7 +311,7 @@ class CompleteOrderScreen extends StatelessWidget {
                                                 ? null
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.black.withOpacity(0.10),
+                                                      color: Colors.black.withValues(alpha :0.10),
                                                       blurRadius: 5,
                                                       offset: const Offset(0, 4), // changes position of shadow
                                                     ),

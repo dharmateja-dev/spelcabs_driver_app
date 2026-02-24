@@ -489,8 +489,8 @@ class SubscriptionPlanCard extends StatelessWidget {
     // Using AppColors.primary to ensure consistency with the app's blue theme
     const activeBorderColor = AppColors.primary;
     final activeBackgroundColor = isDark
-        ? AppColors.primary.withOpacity(0.1)
-        : AppColors.primary.withOpacity(0.05);
+        ? AppColors.primary.withValues(alpha :0.1)
+        : AppColors.primary.withValues(alpha :0.05);
 
     return InkWell(
       onTap: onSelect,
@@ -517,7 +517,7 @@ class SubscriptionPlanCard extends StatelessWidget {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: activeBorderColor.withOpacity(0.2),
+                    color: activeBorderColor.withValues(alpha :0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )

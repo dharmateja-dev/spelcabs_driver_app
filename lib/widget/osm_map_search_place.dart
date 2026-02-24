@@ -107,7 +107,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
+                          color: Colors.grey.withValues(alpha :0.3),
                           spreadRadius: 2,
                           blurRadius: 5,
                           offset: const Offset(0, 3),
@@ -177,7 +177,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
+                                color: Colors.grey.withValues(alpha :0.3),
                                 spreadRadius: 2,
                                 blurRadius: 5,
                                 offset: const Offset(0, 3),
@@ -227,7 +227,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                 // Loading indicator
                 Obx(() => controller.isLoading.value
                     ? Container(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha :0.3),
                         child: const Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -260,7 +260,7 @@ class OsmSearchPlacesApi extends StatelessWidget {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.grey.withOpacity(0.3),
+                                      color: Colors.grey.withValues(alpha :0.3),
                                       spreadRadius: 2,
                                       blurRadius: 10,
                                       offset: const Offset(0, -3),
