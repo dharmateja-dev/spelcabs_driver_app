@@ -61,113 +61,93 @@ class HomeScreen extends StatelessWidget {
                                   topRight: Radius.circular(25))),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: controller.driverModel.value.serviceId ==
-                                    null
-                                ? Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "City Service is not allowed for this vehicle"
-                                            .tr,
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500),
-                                      )
-                                    ],
-                                  )
-                                : controller.widgetOptions
-                                    .elementAt(controller.selectedIndex.value),
+                            child: controller.widgetOptions
+                                .elementAt(controller.selectedIndex.value),
                           ),
                         ),
                       ),
                     ],
                   ),
-            bottomNavigationBar: controller.driverModel.value.serviceId == null
-                ? null
-                : BottomNavigationBar(
-                    items: <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(
-                          icon: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Image.asset("assets/icons/ic_new.png",
-                                width: 18,
-                                color: controller.selectedIndex.value == 0
-                                    ? (themeChange.getThem()
-                                        ? Colors.white
-                                        : AppColors.primary)
-                                    : (themeChange.getThem()
-                                        ? Colors.white.withValues(alpha: 0.5)
-                                        : Colors.grey)),
-                          ),
-                          label: 'New'.tr,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Image.asset("assets/icons/ic_accepted.png",
-                                width: 18,
-                                color: controller.selectedIndex.value == 1
-                                    ? (themeChange.getThem()
-                                        ? Colors.white
-                                        : AppColors.primary)
-                                    : (themeChange.getThem()
-                                        ? Colors.white.withValues(alpha: 0.5)
-                                        : Colors.grey)),
-                          ),
-                          label: 'Accepted'.tr,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: badges.Badge(
-                            badgeContent:
-                                Text(controller.isActiveValue.value.toString()),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Image.asset("assets/icons/ic_active.png",
-                                  width: 18,
-                                  color: controller.selectedIndex.value == 2
-                                      ? (themeChange.getThem()
-                                          ? Colors.white
-                                          : AppColors.primary)
-                                      : (themeChange.getThem()
-                                          ? Colors.white.withValues(alpha: 0.5)
-                                          : Colors.grey)),
-                            ),
-                          ),
-                          label: 'Active'.tr,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Image.asset("assets/icons/ic_completed.png",
-                                width: 18,
-                                color: controller.selectedIndex.value == 3
-                                    ? (themeChange.getThem()
-                                        ? Colors.white
-                                        : AppColors.primary)
-                                    : (themeChange.getThem()
-                                        ? Colors.white.withValues(alpha: 0.5)
-                                        : Colors.grey)),
-                          ),
-                          label: 'Completed'.tr,
-                        ),
-                      ],
-                    backgroundColor: themeChange.getThem()
-                        ? AppColors.darkModePrimary
-                        : Colors.white,
-                    type: BottomNavigationBarType.fixed,
-                    currentIndex: controller.selectedIndex.value,
-                    selectedItemColor: themeChange.getThem()
-                        ? Colors.white
-                        : AppColors.primary,
-                    unselectedItemColor: themeChange.getThem()
-                        ? Colors.white.withValues(alpha: 0.5)
-                        : Colors.grey,
-                    selectedFontSize: 12,
-                    unselectedFontSize: 12,
-                    onTap: controller.onItemTapped),
+            bottomNavigationBar: BottomNavigationBar(
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Image.asset("assets/icons/ic_new.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 0
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withValues(alpha: 0.5)
+                                  : Colors.grey)),
+                    ),
+                    label: 'New'.tr,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Image.asset("assets/icons/ic_accepted.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 1
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withValues(alpha: 0.5)
+                                  : Colors.grey)),
+                    ),
+                    label: 'Accepted'.tr,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: badges.Badge(
+                      badgeContent:
+                          Text(controller.isActiveValue.value.toString()),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Image.asset("assets/icons/ic_active.png",
+                            width: 18,
+                            color: controller.selectedIndex.value == 2
+                                ? (themeChange.getThem()
+                                    ? Colors.white
+                                    : AppColors.primary)
+                                : (themeChange.getThem()
+                                    ? Colors.white.withValues(alpha: 0.5)
+                                    : Colors.grey)),
+                      ),
+                    ),
+                    label: 'Active'.tr,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Image.asset("assets/icons/ic_completed.png",
+                          width: 18,
+                          color: controller.selectedIndex.value == 3
+                              ? (themeChange.getThem()
+                                  ? Colors.white
+                                  : AppColors.primary)
+                              : (themeChange.getThem()
+                                  ? Colors.white.withValues(alpha: 0.5)
+                                  : Colors.grey)),
+                    ),
+                    label: 'Completed'.tr,
+                  ),
+                ],
+                backgroundColor: themeChange.getThem()
+                    ? AppColors.darkModePrimary
+                    : Colors.white,
+                type: BottomNavigationBarType.fixed,
+                currentIndex: controller.selectedIndex.value,
+                selectedItemColor:
+                    themeChange.getThem() ? Colors.white : AppColors.primary,
+                unselectedItemColor: themeChange.getThem()
+                    ? Colors.white.withValues(alpha: 0.5)
+                    : Colors.grey,
+                selectedFontSize: 12,
+                unselectedFontSize: 12,
+                onTap: controller.onItemTapped),
           );
         });
   }

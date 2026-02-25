@@ -27,8 +27,7 @@ class HomeIntercityScreen extends StatelessWidget {
                 body: Center(child: Constant.loader(context)));
           }
 
-          if (controller.selectedService.value.intercityType != true ||
-              controller.driverModel.value.serviceId == null) {
+          if (controller.selectedService.value.intercityType != true) {
             return Scaffold(
               backgroundColor: AppColors.primary,
               body: Column(

@@ -79,10 +79,7 @@ class DashBoardScreen extends StatelessWidget {
                                     _showAlertDialog(context, "document");
                                   } else if (driverModel.vehicleInformation ==
                                           null ||
-                                      (driverModel.serviceId == null &&
-                                          driverModel.vehicleInformation!
-                                                  .freightVehicleId ==
-                                              null)) {
+                                      driverModel.serviceId == null) {
                                     ShowToastDialog.closeLoader();
                                     _showAlertDialog(
                                         context, "vehicleInformation");
