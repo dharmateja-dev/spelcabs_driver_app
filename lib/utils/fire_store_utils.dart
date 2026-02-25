@@ -1293,8 +1293,7 @@ class FireStoreUtils {
     )
         .asyncMap(
             (List<DocumentSnapshot<Map<String, dynamic>>> snapshots) async {
-      final availableZones =
-          await DriverAssignmentValidator.getAvailableZones();
+        await DriverAssignmentValidator.getAvailableZones();
       AppLogger.info(
           "GeoFlutterFire returned ${snapshots.length} nearby orders (within ${radiusKm}km)",
           tag: "FireStoreUtils");
