@@ -293,8 +293,9 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                         : [
                                                             BoxShadow(
                                                               color: Colors.grey
-                                                                  .withValues(alpha :
-                                                                      0.5),
+                                                                  .withValues(
+                                                                      alpha:
+                                                                          0.5),
                                                               blurRadius: 8,
                                                               offset: const Offset(
                                                                   0,
@@ -363,9 +364,8 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                                 children: [
                                                                   Container(
                                                                     decoration: BoxDecoration(
-                                                                        color: Colors
-                                                                            .grey
-                                                                            .withValues(alpha :
+                                                                        color: Colors.grey.withValues(
+                                                                            alpha:
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(
@@ -388,9 +388,8 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                                   ),
                                                                   Container(
                                                                     decoration: BoxDecoration(
-                                                                        color: AppColors
-                                                                            .primary
-                                                                            .withValues(alpha :
+                                                                        color: AppColors.primary.withValues(
+                                                                            alpha:
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(
@@ -822,11 +821,13 @@ class NewOrderInterCityScreen extends StatelessWidget {
                                                       value.fcmToken.toString(),
                                                   title: 'New Driver Bid'.tr,
                                                   body:
-                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey'.tr,
+                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey'
+                                                          .tr,
                                                   payload: {
-                                                    'type': 'driver_bid',
-                                                    'orderId': orderModel.id.toString(),
-                                                  });
+                                                'type': 'driver_bid',
+                                                'orderId':
+                                                    orderModel.id.toString(),
+                                              });
                                         }
                                       });
 

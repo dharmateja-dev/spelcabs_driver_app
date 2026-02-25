@@ -140,7 +140,7 @@ class OrderMapScreen extends StatelessWidget {
                                             : [
                                                 BoxShadow(
                                                   color: Colors.grey
-                                                      .withValues(alpha :0.5),
+                                                      .withValues(alpha: 0.5),
                                                   blurRadius: 8,
                                                   offset: const Offset(0,
                                                       2), // changes position of shadow
@@ -515,27 +515,56 @@ class OrderMapScreen extends StatelessWidget {
                                                                         .toString(),
                                                                     FireStoreUtils
                                                                         .getCurrentUid());
-                                                            
+
                                                             // Send notification to customer when driver places a bid
-                                                            if (controller.orderModel.value.userId != null && 
-                                                                controller.orderModel.value.userId!.isNotEmpty) {
-                                                              final userModel = await FireStoreUtils.getCustomer(
-                                                                  controller.orderModel.value.userId!);
-                                                              if (userModel != null && 
-                                                                  userModel.fcmToken != null && 
-                                                                  userModel.fcmToken!.isNotEmpty) {
-                                                                await SendNotification.sendOneNotification(
-                                                                  token: userModel.fcmToken.toString(),
-                                                                  title: 'New Driver Bid'.tr,
-                                                                  body: '${controller.driverModel.value.fullName} has offered \$${controller.newAmount.value} for your journey'.tr,
+                                                            if (controller
+                                                                        .orderModel
+                                                                        .value
+                                                                        .userId !=
+                                                                    null &&
+                                                                controller
+                                                                    .orderModel
+                                                                    .value
+                                                                    .userId!
+                                                                    .isNotEmpty) {
+                                                              final userModel =
+                                                                  await FireStoreUtils.getCustomer(
+                                                                      controller
+                                                                          .orderModel
+                                                                          .value
+                                                                          .userId!);
+                                                              if (userModel !=
+                                                                      null &&
+                                                                  userModel
+                                                                          .fcmToken !=
+                                                                      null &&
+                                                                  userModel
+                                                                      .fcmToken!
+                                                                      .isNotEmpty) {
+                                                                await SendNotification
+                                                                    .sendOneNotification(
+                                                                  token: userModel
+                                                                      .fcmToken
+                                                                      .toString(),
+                                                                  title:
+                                                                      'New Driver Bid'
+                                                                          .tr,
+                                                                  body:
+                                                                      '${controller.driverModel.value.fullName} has offered \$${controller.newAmount.value} for your journey'
+                                                                          .tr,
                                                                   payload: {
-                                                                    'type': 'driver_bid',
-                                                                    'orderId': controller.orderModel.value.id,
+                                                                    'type':
+                                                                        'driver_bid',
+                                                                    'orderId':
+                                                                        controller
+                                                                            .orderModel
+                                                                            .value
+                                                                            .id,
                                                                   },
                                                                 );
                                                               }
                                                             }
-                                                            
+
                                                             ShowToastDialog
                                                                 .closeLoader();
                                                             ShowToastDialog
