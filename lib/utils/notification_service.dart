@@ -146,6 +146,37 @@ class NotificationService {
       });
       log("Local notifications initialized.");
       setupInteractedMessage();
+
+      // Ensure FCM token is stored for the current driver and keep it updated
+      try {
+        String? token = await FirebaseMessaging.instance.getToken();
+        if (token != null && token.isNotEmpty) {
+          DriverUserModel? user = await FireStoreUtils.getCurrentDriverUser();
+          if (user != null) {
+            user.fcmToken = token;
+            await FireStoreUtils.updateDriverUser(user);
+            log('[NotificationService] Driver FCM token saved to Firestore.');
+          }
+        }
+      } catch (e) {
+        log('[NotificationService] Error saving initial FCM token: $e');
+      }
+
+      // Listen for token refresh and update Firestore
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+        try {
+          if (newToken.isNotEmpty) {
+            DriverUserModel? user = await FireStoreUtils.getCurrentDriverUser();
+            if (user != null) {
+              user.fcmToken = newToken;
+              await FireStoreUtils.updateDriverUser(user);
+              log('[NotificationService] Driver FCM token refreshed and saved.');
+            }
+          }
+        } catch (e) {
+          log('[NotificationService] Error updating refreshed FCM token: $e');
+        }
+      });
     }
   }
 
