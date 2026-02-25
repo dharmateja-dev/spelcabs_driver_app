@@ -758,7 +758,7 @@ class WalletController extends GetxController {
         Get.to(() => XenditScreen(
                   initialURl: model.invoiceUrl ?? '',
                   transId: model.id ?? '',
-                  apiKey: paymentModel.value.xendit!.apiKey!.toString() ?? "",
+                  apiKey: paymentModel.value.xendit?.apiKey?.toString() ?? "",
                 ))!
             .then((value) {
           if (value == true) {

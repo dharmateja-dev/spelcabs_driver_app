@@ -14,7 +14,7 @@ class LocationPermissionHelper {
   /// Check and request location permission with educational UI
   /// Returns true if permission is granted (either when in use or always)
   static Future<bool> checkAndRequestLocationPermission({
-    bool showEducationalDialog = true,
+    bool showEducationalDialog = false,
   }) async {
     try {
       // First check if location services are enabled
@@ -32,13 +32,7 @@ class LocationPermissionHelper {
         // Permission already granted
         return true;
       } else if (status.isDenied) {
-        // Show educational dialog if requested
-        if (showEducationalDialog) {
-          final shouldRequest = await _showPermissionEducationDialog();
-          if (!shouldRequest) {
-            return false;
-          }
-        }
+        // Educational dialog removed per request
 
         // Request permission
         final result = await Permission.location.request();
@@ -88,12 +82,13 @@ class LocationPermissionHelper {
           if (backgroundStatus.isGranted) {
             return true;
           } else if (backgroundStatus.isDenied) {
-            // Show educational dialog for background permission
+            /*
             final shouldRequest =
                 await _showBackgroundPermissionEducationDialog();
             if (!shouldRequest) {
               return false;
             }
+            */
 
             final result = await Permission.locationAlways.request();
             AppLogger.info("Background location permission result: $result",
@@ -111,12 +106,13 @@ class LocationPermissionHelper {
         if (alwaysStatus.isGranted) {
           return true;
         } else if (alwaysStatus.isDenied) {
-          // Show educational dialog for background permission
+          /*
           final shouldRequest =
               await _showBackgroundPermissionEducationDialog();
           if (!shouldRequest) {
             return false;
           }
+          */
 
           final result = await Permission.locationAlways.request();
           AppLogger.info("iOS Always location permission result: $result",
@@ -154,192 +150,7 @@ class LocationPermissionHelper {
 
   // ========== Private Helper Methods ==========
 
-  /// Show educational dialog explaining why location permission is needed
-  static Future<bool> _showPermissionEducationDialog() async {
-    final completer = Completer<bool>();
-
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: Get.theme.dialogBackgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.location_on, color: Colors.blue[400], size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Location Access Required',
-                style: TextStyle(
-                  color: Get.theme.textTheme.titleLarge?.color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'We need your location to:',
-              style: TextStyle(
-                color: Get.theme.textTheme.bodyLarge?.color,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildBulletPoint('Show nearby ride requests'),
-            _buildBulletPoint('Track your position during rides'),
-            _buildBulletPoint('Provide accurate ETAs to customers'),
-            _buildBulletPoint('Update your availability in real-time'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              completer.complete(false);
-            },
-            child: Text(
-              'Not Now',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              completer.complete(true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[400],
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-
-    return completer.future;
-  }
-
-  /// Show educational dialog for background location permission
-  static Future<bool> _showBackgroundPermissionEducationDialog() async {
-    final completer = Completer<bool>();
-
-    final String platformSpecificMessage = Platform.isIOS
-        ? 'In the next dialog, please select "Always Allow" to enable background location tracking.'
-        : 'Please allow background location access to track your position during rides.';
-
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: Get.theme.dialogBackgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.my_location, color: Colors.blue[400], size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Background Location',
-                style: TextStyle(
-                  color: Get.theme.textTheme.titleLarge?.color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'To track your rides even when the app is in the background, we need continuous location access.',
-              style: TextStyle(
-                color: Get.theme.textTheme.bodyLarge?.color,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
-              ),
-              child: Text(
-                platformSpecificMessage,
-                style: TextStyle(
-                  color: Colors.blue[900],
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'This ensures customers can see your real-time location during active rides.',
-              style: TextStyle(
-                color: Get.theme.textTheme.bodyMedium?.color,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              completer.complete(false);
-            },
-            child: Text(
-              'Not Now',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              completer.complete(true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[400],
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-
-    return completer.future;
-  }
+  // Removed educational dialogs as per request
 
   /// Show dialog when permission is permanently denied
   static Future<void> _showPermissionPermanentlyDeniedDialog() async {
@@ -458,37 +269,6 @@ class LocationPermissionHelper {
             child: const Text(
               'Open Settings',
               style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build a bullet point widget for permission education
-  static Widget _buildBulletPoint(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 6),
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: Colors.blue[400],
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Get.theme.textTheme.bodyMedium?.color,
-                fontSize: 14,
-              ),
             ),
           ),
         ],

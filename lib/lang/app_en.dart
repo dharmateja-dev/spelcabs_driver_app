@@ -101,8 +101,8 @@ const Map<String, String> enUS = {
   "Enter Fare rate": "Enter Fare rate",
   "Accept fare on": "Accept fare on",
   'New Driver Bid': 'New Driver Bid',
-  'Driver has offered for your journey.🚗':
-      'Driver has offered for your journey.🚗',
+  'Driver has offered for your journey.':
+      'Driver has offered for your journey.',
   "Ride Accepted": "Ride Accepted",
   "You have to minimum wallet amount to Accept Order and place a bid":
       "You have to minimum wallet amount to Accept Order and place a bid",

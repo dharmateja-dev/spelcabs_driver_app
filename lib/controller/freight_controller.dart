@@ -6,6 +6,7 @@ import 'package:driver/constant/constant.dart';
 import 'package:driver/controller/dash_board_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/intercity_order_model.dart';
+import 'package:driver/model/service_model.dart';
 import 'package:driver/model/order/location_lat_lng.dart';
 import 'package:driver/model/order/positions.dart';
 import 'package:driver/ui/freight/accepted_freight_orders.dart';
@@ -207,6 +208,7 @@ class FreightController extends GetxController {
   }
 
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;
+  Rx<ServiceModel> selectedService = ServiceModel().obs;
   RxBool isLoading = true.obs;
   RxBool isAcceptingRide = false.obs;
 
@@ -216,9 +218,19 @@ class FreightController extends GetxController {
         .collection(CollectionName.driverUsers)
         .doc(FireStoreUtils.getCurrentUid())
         .snapshots()
-        .listen((event) {
+        .listen((event) async {
       if (event.exists) {
         driverModel.value = DriverUserModel.fromJson(event.data()!);
+
+        if (driverModel.value.serviceId != null) {
+          await FireStoreUtils.getService().then((value) {
+            for (var element in value) {
+              if (element.id == driverModel.value.serviceId) {
+                selectedService.value = element;
+              }
+            }
+          });
+        }
       }
     });
   }

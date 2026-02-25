@@ -35,7 +35,6 @@ class HomeIntercityController extends GetxController {
     await FireStoreUtils.getDriverProfile(FireStoreUtils.getCurrentUid())
         .then((value) {
       driverModel.value = value!;
-      isLoading.value = false;
     });
 
     if (driverModel.value.serviceId != null) {
@@ -47,5 +46,6 @@ class HomeIntercityController extends GetxController {
         }
       });
     }
+    isLoading.value = false;
   }
 }

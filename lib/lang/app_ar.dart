@@ -99,7 +99,7 @@ const Map<String, String> arAR = {
   "Enter Fare rate": "أدخل معدل الأجرة",
   "Accept fare on": "قبول الأجرة على",
   'New Driver Bid': 'عرض جديد من السائق',
-  'Driver has offered for your journey.🚗': 'السائق قدم عرضًا لرحلتك.🚗',
+  'Driver has offered for your journey.': 'السائق قدم عرضًا لرحلتك.',
   "Ride Accepted": "تم قبول الرحلة",
   "You have to minimum wallet amount to Accept Order and place a bid":
       "يجب أن يكون لديك حد أدنى من الرصيد لقبول الطلب وتقديم عرض",

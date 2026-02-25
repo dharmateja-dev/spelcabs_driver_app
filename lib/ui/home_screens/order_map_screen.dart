@@ -451,41 +451,6 @@ class OrderMapScreen extends StatelessWidget {
                                                                 .toString()) >=
                                                             double.parse(Constant
                                                                 .minimumAmountToWithdrawal)) {
-                                                          await FireStoreUtils
-                                                                  .getCustomer(controller
-                                                                      .orderModel
-                                                                      .value
-                                                                      .userId
-                                                                      .toString())
-                                                              .then(
-                                                                  (value) async {
-                                                            if (value != null) {
-                                                              await SendNotification
-                                                                  .sendOneNotification(
-                                                                      token: value
-                                                                          .fcmToken
-                                                                          .toString(),
-                                                                      title:
-                                                                          'New Driver Bid'
-                                                                              .tr,
-                                                                      body: '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
-                                                                          .tr,
-                                                                      payload: {
-                                                                        'type':
-                                                                            'driver_bid',
-                                                                        'orderId': controller
-                                                                            .orderModel
-                                                                            .value
-                                                                            .id
-                                                                            .toString(),
-                                                                      },
-                                                                      driverName: controller
-                                                                          .driverModel
-                                                                          .value
-                                                                          .fullName);
-                                                            }
-                                                          });
-
                                                           DriverIdAcceptReject
                                                               driverIdAcceptReject =
                                                               DriverIdAcceptReject(
@@ -550,7 +515,7 @@ class OrderMapScreen extends StatelessWidget {
                                                                       'New Driver Bid'
                                                                           .tr,
                                                                   body:
-                                                                      '${controller.driverModel.value.fullName} has offered \$${controller.newAmount.value} for your journey'
+                                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey'
                                                                           .tr,
                                                                   payload: {
                                                                     'type':

@@ -77,6 +77,14 @@ class IntercityController extends GetxController {
       isLoading.value = true;
       intercityServiceOrder.clear();
 
+      if (homeController.selectedService.value.intercityType != true) {
+        AppLogger.info(
+            "Intercity not allowed for this vehicle, skipping getOrder.",
+            tag: "IntercityController");
+        isLoading.value = false;
+        return;
+      }
+
       // helpers
       String norm(String s) => s.trim().toLowerCase();
       bool eqOrContains(String? haystack, String needle) {

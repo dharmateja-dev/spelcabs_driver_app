@@ -25,49 +25,88 @@ class FreightScreen extends StatelessWidget {
             backgroundColor: AppColors.primary,
             body: controller.isLoading.value
                 ? Constant.loader(context)
-                : Column(
-                    children: [
-                      (double.tryParse(controller.driverModel.value.walletAmount
-                                      .toString()) ??
-                                  0.0) >=
-                              (double.tryParse(
-                                      Constant.minimumDepositToRideAccept) ??
-                                  0.0)
-                          ? SizedBox(
-                              height: Responsive.width(8, context),
+                : (controller.driverModel.value.serviceId != null &&
+                        controller.selectedService.value.intercityType != true)
+                    ? Column(
+                        children: [
+                          SizedBox(
+                            height: Responsive.width(8, context),
+                            width: Responsive.width(100, context),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: Responsive.height(100, context),
                               width: Responsive.width(100, context),
-                            )
-                          : SizedBox(
-                              height: Responsive.width(18, context),
-                              width: Responsive.width(100, context),
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25))),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
-                                child: Text(
-                                    "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
-                                        .tr,
-                                    style: GoogleFonts.poppins(
-                                        color: Colors.white)),
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Freight Service is not allowed for this vehicle"
+                                          .tr,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
-                      Expanded(
-                        child: Container(
-                          height: Responsive.height(100, context),
-                          width: Responsive.width(100, context),
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(25),
-                                  topRight: Radius.circular(25))),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: controller.widgetOptions
-                                .elementAt(controller.selectedIndex.value),
                           ),
-                        ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          (double.tryParse(controller
+                                          .driverModel.value.walletAmount
+                                          .toString()) ??
+                                      0.0) >=
+                                  (double.tryParse(Constant
+                                          .minimumDepositToRideAccept) ??
+                                      0.0)
+                              ? SizedBox(
+                                  height: Responsive.width(8, context),
+                                  width: Responsive.width(100, context),
+                                )
+                              : SizedBox(
+                                  height: Responsive.width(18, context),
+                                  width: Responsive.width(100, context),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    child: Text(
+                                        "You have to minimum ${Constant.amountShow(amount: Constant.minimumDepositToRideAccept.toString())} wallet amount to Accept Order and place a bid"
+                                            .tr,
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.white)),
+                                  ),
+                                ),
+                          Expanded(
+                            child: Container(
+                              height: Responsive.height(100, context),
+                              width: Responsive.width(100, context),
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25))),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: controller.widgetOptions
+                                    .elementAt(controller.selectedIndex.value),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
             bottomNavigationBar: BottomNavigationBar(
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
@@ -80,7 +119,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha :0.5)
+                                  ? Colors.white.withValues(alpha: 0.5)
                                   : Colors.grey)),
                     ),
                     label: 'New'.tr,
@@ -95,7 +134,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha :0.5)
+                                  ? Colors.white.withValues(alpha: 0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Accepted'.tr,
@@ -110,7 +149,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha :0.5)
+                                  ? Colors.white.withValues(alpha: 0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Active'.tr,
@@ -125,7 +164,7 @@ class FreightScreen extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.primary)
                               : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha :0.5)
+                                  ? Colors.white.withValues(alpha: 0.5)
                                   : Colors.grey)),
                     ),
                     label: 'Completed'.tr,
@@ -139,7 +178,7 @@ class FreightScreen extends StatelessWidget {
                 selectedItemColor:
                     themeChange.getThem() ? Colors.white : AppColors.primary,
                 unselectedItemColor: themeChange.getThem()
-                    ? Colors.white.withValues(alpha :0.5)
+                    ? Colors.white.withValues(alpha: 0.5)
                     : Colors.grey,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,

@@ -262,8 +262,9 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                         : [
                                                             BoxShadow(
                                                               color: Colors.grey
-                                                                  .withValues(alpha :
-                                                                      0.5),
+                                                                  .withValues(
+                                                                      alpha:
+                                                                          0.5),
                                                               blurRadius: 8,
                                                               offset:
                                                                   const Offset(
@@ -318,9 +319,8 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                                 children: [
                                                                   Container(
                                                                     decoration: BoxDecoration(
-                                                                        color: Colors
-                                                                            .grey
-                                                                            .withValues(alpha :
+                                                                        color: Colors.grey.withValues(
+                                                                            alpha:
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(
@@ -343,9 +343,8 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                                           10),
                                                                   Container(
                                                                     decoration: BoxDecoration(
-                                                                        color: AppColors
-                                                                            .primary
-                                                                            .withValues(alpha :
+                                                                        color: AppColors.primary.withValues(
+                                                                            alpha:
                                                                                 0.30),
                                                                         borderRadius: const BorderRadius
                                                                             .all(
@@ -737,11 +736,12 @@ class NewOrderFreightScreen extends StatelessWidget {
                                                       value.fcmToken.toString(),
                                                   title: 'New Driver Bid'.tr,
                                                   body:
-                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey.🚗'
+                                                      '${controller.driverModel.value.fullName} has offered ${Constant.amountShow(amount: controller.newAmount.value)} for your journey'
                                                           .tr,
                                                   payload: {
                                                     'type': 'driver_bid',
-                                                    'orderId': orderModel.id.toString(),
+                                                    'orderId': orderModel.id
+                                                        .toString(),
                                                   },
                                                   driverName: controller
                                                       .driverModel

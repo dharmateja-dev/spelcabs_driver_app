@@ -103,8 +103,8 @@ const Map<String, String> trFr = {
   "Enter Fare rate": "Enter Fare rate",
   "Accept fare on": "Accept fare on",
   'New Driver Bid': 'Offre de nouveau conducteur',
-  'Driver has offered for your journey.🚗':
-      'Un chauffeur vous a proposé pour votre trajet.🚗',
+  'Driver has offered for your journey.':
+      'Un chauffeur vous a proposé pour votre trajet.',
   "Ride Accepted": "Ride Accepted",
   "You have to minimum wallet amount to Accept Order and place a bid":
       "Vous devez atteindre le montant minimum du portefeuille pour accepter la commande et placer une enchère.",
