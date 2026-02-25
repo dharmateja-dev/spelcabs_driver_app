@@ -12,7 +12,9 @@ class SendNotification {
   static final _scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
 
   static Future getCharacters() {
-    return http.get(Uri.parse(Constant.jsonNotificationFileURL.toString())).catchError((e) async {
+    return http
+        .get(Uri.parse(Constant.jsonNotificationFileURL.toString()))
+        .catchError((e) async {
       try {
         await FirebaseFirestore.instance.collection('notification_debug').add({
           'createdAt': FieldValue.serverTimestamp(),
