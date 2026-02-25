@@ -25,8 +25,7 @@ class FreightScreen extends StatelessWidget {
             backgroundColor: AppColors.primary,
             body: controller.isLoading.value
                 ? Constant.loader(context)
-                : (controller.driverModel.value.serviceId != null &&
-                        controller.selectedService.value.intercityType != true)
+                : (controller.driverModel.value.serviceId != null)
                     ? Column(
                         children: [
                           SizedBox(
@@ -107,82 +106,85 @@ class FreightScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-            bottomNavigationBar: BottomNavigationBar(
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_new.png",
-                          width: 18,
-                          color: controller.selectedIndex.value == 0
-                              ? (themeChange.getThem()
-                                  ? Colors.white
-                                  : AppColors.primary)
-                              : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey)),
-                    ),
-                    label: 'New'.tr,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_accepted.png",
-                          width: 18,
-                          color: controller.selectedIndex.value == 1
-                              ? (themeChange.getThem()
-                                  ? Colors.white
-                                  : AppColors.primary)
-                              : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey)),
-                    ),
-                    label: 'Accepted'.tr,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_active.png",
-                          width: 18,
-                          color: controller.selectedIndex.value == 2
-                              ? (themeChange.getThem()
-                                  ? Colors.white
-                                  : AppColors.primary)
-                              : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey)),
-                    ),
-                    label: 'Active'.tr,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Image.asset("assets/icons/ic_completed.png",
-                          width: 18,
-                          color: controller.selectedIndex.value == 3
-                              ? (themeChange.getThem()
-                                  ? Colors.white
-                                  : AppColors.primary)
-                              : (themeChange.getThem()
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey)),
-                    ),
-                    label: 'Completed'.tr,
-                  ),
-                ],
-                backgroundColor: themeChange.getThem()
-                    ? AppColors.darkModePrimary
-                    : Colors.white,
-                type: BottomNavigationBarType.fixed,
-                currentIndex: controller.selectedIndex.value,
-                selectedItemColor:
-                    themeChange.getThem() ? Colors.white : AppColors.primary,
-                unselectedItemColor: themeChange.getThem()
-                    ? Colors.white.withValues(alpha: 0.5)
-                    : Colors.grey,
-                selectedFontSize: 12,
-                unselectedFontSize: 12,
-                onTap: controller.onItemTapped),
+            bottomNavigationBar: controller.driverModel.value.serviceId != null
+                ? null
+                : BottomNavigationBar(
+                    items: <BottomNavigationBarItem>[
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Image.asset("assets/icons/ic_new.png",
+                                width: 18,
+                                color: controller.selectedIndex.value == 0
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withValues(alpha: 0.5)
+                                        : Colors.grey)),
+                          ),
+                          label: 'New'.tr,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Image.asset("assets/icons/ic_accepted.png",
+                                width: 18,
+                                color: controller.selectedIndex.value == 1
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withValues(alpha: 0.5)
+                                        : Colors.grey)),
+                          ),
+                          label: 'Accepted'.tr,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Image.asset("assets/icons/ic_active.png",
+                                width: 18,
+                                color: controller.selectedIndex.value == 2
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withValues(alpha: 0.5)
+                                        : Colors.grey)),
+                          ),
+                          label: 'Active'.tr,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Image.asset("assets/icons/ic_completed.png",
+                                width: 18,
+                                color: controller.selectedIndex.value == 3
+                                    ? (themeChange.getThem()
+                                        ? Colors.white
+                                        : AppColors.primary)
+                                    : (themeChange.getThem()
+                                        ? Colors.white.withValues(alpha: 0.5)
+                                        : Colors.grey)),
+                          ),
+                          label: 'Completed'.tr,
+                        ),
+                      ],
+                    backgroundColor: themeChange.getThem()
+                        ? AppColors.darkModePrimary
+                        : Colors.white,
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: controller.selectedIndex.value,
+                    selectedItemColor: themeChange.getThem()
+                        ? Colors.white
+                        : AppColors.primary,
+                    unselectedItemColor: themeChange.getThem()
+                        ? Colors.white.withValues(alpha: 0.5)
+                        : Colors.grey,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    onTap: controller.onItemTapped),
           );
         });
   }

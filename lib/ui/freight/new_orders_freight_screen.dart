@@ -54,476 +54,501 @@ class NewOrderFreightScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 10),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          children: [
-                            InkWell(
-                                onTap: () async {
-                                  if (Constant.selectedMapType == 'osm') {
-                                    Get.to(const OsmSearchPlacesApi())
-                                        ?.then((value) {
-                                      if (value != null) {
-                                        SearchInfo place = value;
-                                        controller.sourceCityController.value
-                                            .text = place.address.toString();
-                                      }
-                                    });
-                                  } else {
-                                    Get.to(const GoogleMapSearchPlacesApi())!
-                                        .then((value) async {
-                                      if (value != null) {
-                                        PlaceDetailsModel placeDetailsModel =
-                                            value;
-                                        controller.sourceCityController.value
-                                                .text =
-                                            placeDetailsModel.result!.vicinity
-                                                .toString();
-                                      }
-                                    });
-                                  }
+                        child: Obx(() {
+                          if (controller.driverModel.value.isOnline == false) {
+                            return Center(
+                              child: Text(
+                                "You are Now offline so you can't get nearest order."
+                                    .tr,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: themeChange.getThem()
+                                        ? Colors.white
+                                        : Colors.black),
+                              ),
+                            );
+                          }
+                          return Column(
+                            children: [
+                              InkWell(
+                                  onTap: () async {
+                                    if (Constant.selectedMapType == 'osm') {
+                                      Get.to(const OsmSearchPlacesApi())
+                                          ?.then((value) {
+                                        if (value != null) {
+                                          SearchInfo place = value;
+                                          controller.sourceCityController.value
+                                              .text = place.address.toString();
+                                        }
+                                      });
+                                    } else {
+                                      Get.to(const GoogleMapSearchPlacesApi())!
+                                          .then((value) async {
+                                        if (value != null) {
+                                          PlaceDetailsModel placeDetailsModel =
+                                              value;
+                                          controller.sourceCityController.value
+                                                  .text =
+                                              placeDetailsModel.result!.vicinity
+                                                  .toString();
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: TextFieldThem.buildTextFiled(
+                                    context,
+                                    hintText: 'Pickup Location'.tr,
+                                    controller:
+                                        controller.sourceCityController.value,
+                                    enable: false,
+                                  )),
+                              const SizedBox(height: 10),
+                              InkWell(
+                                  onTap: () async {
+                                    if (Constant.selectedMapType == 'osm') {
+                                      Get.to(const OsmSearchPlacesApi())
+                                          ?.then((value) {
+                                        if (value != null) {
+                                          SearchInfo place = value;
+                                          controller
+                                              .destinationCityController
+                                              .value
+                                              .text = place.address.toString();
+                                        }
+                                      });
+                                    } else {
+                                      Get.to(const GoogleMapSearchPlacesApi())!
+                                          .then((value) async {
+                                        if (value != null) {
+                                          PlaceDetailsModel placeDetailsModel =
+                                              value;
+                                          controller.destinationCityController
+                                                  .value.text =
+                                              placeDetailsModel.result!.vicinity
+                                                  .toString();
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: TextFieldThem.buildTextFiled(
+                                    context,
+                                    hintText: 'Dropoff Location'.tr,
+                                    controller: controller
+                                        .destinationCityController.value,
+                                    enable: false,
+                                  )),
+                              const SizedBox(height: 10),
+                              InkWell(
+                                  onTap: () async {
+                                    BottomPicker.date(
+                                      onSubmit: (index) {
+                                        controller.dateAndTime = index;
+                                        DateFormat dateFormat =
+                                            DateFormat("EEE, dd MMMM");
+                                        String string =
+                                            dateFormat.format(index);
+                                        controller.whenController.value.text =
+                                            string;
+                                      },
+                                      minDateTime: DateTime.now(),
+                                      buttonAlignment: MainAxisAlignment.center,
+                                      displaySubmitButton: true,
+                                      buttonSingleColor: AppColors.primary,
+                                      pickerTitle: const Text(''),
+                                    ).show(context);
+                                  },
+                                  child: TextFieldThem
+                                      .buildTextFiledWithSuffixIcon(
+                                    context,
+                                    hintText: 'Select date'.tr,
+                                    controller: controller.whenController.value,
+                                    enable: false,
+                                    suffixIcon: const Icon(Icons.calendar_month,
+                                        color: Colors.grey),
+                                  )),
+                              const SizedBox(height: 10),
+                              ButtonThem.buildButton(
+                                context,
+                                title: "Search".tr,
+                                onPress: () {
+                                  controller.searchFreightOrders();
                                 },
-                                child: TextFieldThem.buildTextFiled(
-                                  context,
-                                  hintText: 'Pickup Location'.tr,
-                                  controller:
-                                      controller.sourceCityController.value,
-                                  enable: false,
-                                )),
-                            const SizedBox(height: 10),
-                            InkWell(
-                                onTap: () async {
-                                  if (Constant.selectedMapType == 'osm') {
-                                    Get.to(const OsmSearchPlacesApi())
-                                        ?.then((value) {
-                                      if (value != null) {
-                                        SearchInfo place = value;
-                                        controller
-                                            .destinationCityController
-                                            .value
-                                            .text = place.address.toString();
-                                      }
-                                    });
-                                  } else {
-                                    Get.to(const GoogleMapSearchPlacesApi())!
-                                        .then((value) async {
-                                      if (value != null) {
-                                        PlaceDetailsModel placeDetailsModel =
-                                            value;
-                                        controller.destinationCityController
-                                                .value.text =
-                                            placeDetailsModel.result!.vicinity
-                                                .toString();
-                                      }
-                                    });
-                                  }
-                                },
-                                child: TextFieldThem.buildTextFiled(
-                                  context,
-                                  hintText: 'Dropoff Location'.tr,
-                                  controller: controller
-                                      .destinationCityController.value,
-                                  enable: false,
-                                )),
-                            const SizedBox(height: 10),
-                            InkWell(
-                                onTap: () async {
-                                  BottomPicker.date(
-                                    onSubmit: (index) {
-                                      controller.dateAndTime = index;
-                                      DateFormat dateFormat =
-                                          DateFormat("EEE, dd MMMM");
-                                      String string = dateFormat.format(index);
-                                      controller.whenController.value.text =
-                                          string;
-                                    },
-                                    minDateTime: DateTime.now(),
-                                    buttonAlignment: MainAxisAlignment.center,
-                                    displaySubmitButton: true,
-                                    buttonSingleColor: AppColors.primary,
-                                    pickerTitle: const Text(''),
-                                  ).show(context);
-                                },
-                                child:
-                                    TextFieldThem.buildTextFiledWithSuffixIcon(
-                                  context,
-                                  hintText: 'Select date'.tr,
-                                  controller: controller.whenController.value,
-                                  enable: false,
-                                  suffixIcon: const Icon(Icons.calendar_month,
-                                      color: Colors.grey),
-                                )),
-                            const SizedBox(height: 10),
-                            ButtonThem.buildButton(
-                              context,
-                              title: "Search".tr,
-                              onPress: () {
-                                controller.searchFreightOrders();
-                              },
-                            ),
-                            Expanded(
-                              child: controller.isSearchLoading.value
-                                  ? Constant.loader(context)
-                                  : controller.freightServiceOrder.isEmpty
-                                      ? Center(
-                                          child: Text(
-                                              "No Freight Orders found".tr))
-                                      : ListView.builder(
-                                          itemCount: controller
-                                              .freightServiceOrder.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (context, index) {
-                                            InterCityOrderModel orderModel =
-                                                controller
-                                                    .freightServiceOrder[index];
-                                            String amount;
-                                            if (Constant.distanceType == "Km") {
-                                              amount = Constant.amountCalculate(
-                                                      orderModel.freightVehicle!
-                                                          .kmCharge
-                                                          .toString(),
-                                                      orderModel.distance
-                                                          .toString())
-                                                  .toStringAsFixed(Constant
-                                                      .currencyModel!
-                                                      .decimalDigits!);
-                                            } else {
-                                              amount = Constant.amountCalculate(
-                                                      orderModel.freightVehicle!
-                                                          .kmCharge
-                                                          .toString(),
-                                                      orderModel.distance
-                                                          .toString())
-                                                  .toStringAsFixed(Constant
-                                                      .currencyModel!
-                                                      .decimalDigits!);
-                                            }
-
-                                            return InkWell(
-                                              onTap: () {
-                                                if (orderModel
-                                                            .acceptedDriverId !=
-                                                        null &&
-                                                    orderModel.acceptedDriverId!
-                                                        .contains(FireStoreUtils
-                                                            .getCurrentUid())) {
-                                                  ShowToastDialog.showToast(
-                                                      "Ride already accepted"
-                                                          .tr);
-                                                } else {
-                                                  controller.newAmount.value =
-                                                      orderModel.offerRate
-                                                          .toString();
-                                                  DateTime start;
-                                                  try {
-                                                    start = Constant
-                                                        .parseTimeString(
-                                                            orderModel.whenTime
-                                                                .toString());
-                                                  } catch (e) {
-                                                    start = DateTime.now();
-                                                  }
-                                                  controller.suggestedTime =
-                                                      start;
+                              ),
+                              Expanded(
+                                child: controller.isSearchLoading.value
+                                    ? Constant.loader(context)
+                                    : controller.freightServiceOrder.isEmpty
+                                        ? Center(
+                                            child: Text(
+                                                "No Freight Orders found".tr))
+                                        : ListView.builder(
+                                            itemCount: controller
+                                                .freightServiceOrder.length,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              InterCityOrderModel orderModel =
                                                   controller
-                                                      .suggestedTimeController
-                                                      .value
-                                                      .text = DateFormat(
-                                                          'hh:mm a')
-                                                      .format(controller
-                                                          .suggestedTime!);
-                                                  offerAcceptDialog(context,
-                                                      controller, orderModel);
-                                                }
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: themeChange.getThem()
-                                                        ? AppColors
-                                                            .darkContainerBackground
-                                                        : AppColors
-                                                            .containerBackground,
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                            Radius.circular(
-                                                                10)),
-                                                    border: Border.all(
-                                                        color: themeChange
-                                                                .getThem()
-                                                            ? AppColors
-                                                                .darkContainerBorder
-                                                            : AppColors
-                                                                .containerBorder,
-                                                        width: 0.5),
-                                                    boxShadow: themeChange
-                                                            .getThem()
-                                                        ? null
-                                                        : [
-                                                            BoxShadow(
-                                                              color: Colors.grey
-                                                                  .withValues(
-                                                                      alpha:
-                                                                          0.5),
-                                                              blurRadius: 8,
-                                                              offset:
-                                                                  const Offset(
-                                                                      0, 2),
-                                                            ),
-                                                          ],
-                                                  ),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        vertical: 10,
-                                                        horizontal: 10),
-                                                    child: Column(
-                                                      children: [
-                                                        UserView(
-                                                          userId:
-                                                              orderModel.userId,
-                                                          amount: orderModel
-                                                              .offerRate,
-                                                          distance: orderModel
-                                                              .distance,
-                                                          distanceType:
+                                                          .freightServiceOrder[
+                                                      index];
+                                              String amount;
+                                              if (Constant.distanceType ==
+                                                  "Km") {
+                                                amount = Constant
+                                                        .amountCalculate(
+                                                            orderModel
+                                                                .freightVehicle!
+                                                                .kmCharge
+                                                                .toString(),
+                                                            orderModel.distance
+                                                                .toString())
+                                                    .toStringAsFixed(Constant
+                                                        .currencyModel!
+                                                        .decimalDigits!);
+                                              } else {
+                                                amount = Constant
+                                                        .amountCalculate(
+                                                            orderModel
+                                                                .freightVehicle!
+                                                                .kmCharge
+                                                                .toString(),
+                                                            orderModel.distance
+                                                                .toString())
+                                                    .toStringAsFixed(Constant
+                                                        .currencyModel!
+                                                        .decimalDigits!);
+                                              }
+
+                                              return InkWell(
+                                                onTap: () {
+                                                  if (orderModel
+                                                              .acceptedDriverId !=
+                                                          null &&
+                                                      orderModel
+                                                          .acceptedDriverId!
+                                                          .contains(FireStoreUtils
+                                                              .getCurrentUid())) {
+                                                    ShowToastDialog.showToast(
+                                                        "Ride already accepted"
+                                                            .tr);
+                                                  } else {
+                                                    controller.newAmount.value =
+                                                        orderModel.offerRate
+                                                            .toString();
+                                                    DateTime start;
+                                                    try {
+                                                      start = Constant
+                                                          .parseTimeString(
                                                               orderModel
-                                                                  .distanceType,
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 10),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Text(
-                                                              Constant.amountShow(
-                                                                  amount: orderModel
-                                                                      .offerRate
-                                                                      .toString()),
-                                                              style: GoogleFonts.poppins(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize: 18),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 10),
-                                                        Row(
-                                                          children: [
-                                                            Expanded(
-                                                              child: Row(
-                                                                children: [
-                                                                  Container(
-                                                                    decoration: BoxDecoration(
-                                                                        color: Colors.grey.withValues(
-                                                                            alpha:
-                                                                                0.30),
-                                                                        borderRadius: const BorderRadius
-                                                                            .all(
-                                                                            Radius.circular(5))),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              10,
-                                                                          vertical:
-                                                                              4),
-                                                                      child: Text(orderModel
-                                                                          .paymentType
-                                                                          .toString()),
-                                                                    ),
-                                                                  ),
-                                                                  const SizedBox(
-                                                                      width:
-                                                                          10),
-                                                                  Container(
-                                                                    decoration: BoxDecoration(
-                                                                        color: AppColors.primary.withValues(
-                                                                            alpha:
-                                                                                0.30),
-                                                                        borderRadius: const BorderRadius
-                                                                            .all(
-                                                                            Radius.circular(5))),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              10,
-                                                                          vertical:
-                                                                              4),
-                                                                      child: Text(Constant.localizationName(orderModel
-                                                                          .intercityService!
-                                                                          .name)),
-                                                                    ),
-                                                                  ),
-                                                                ],
+                                                                  .whenTime
+                                                                  .toString());
+                                                    } catch (e) {
+                                                      start = DateTime.now();
+                                                    }
+                                                    controller.suggestedTime =
+                                                        start;
+                                                    controller
+                                                        .suggestedTimeController
+                                                        .value
+                                                        .text = DateFormat(
+                                                            'hh:mm a')
+                                                        .format(controller
+                                                            .suggestedTime!);
+                                                    offerAcceptDialog(context,
+                                                        controller, orderModel);
+                                                  }
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      color: themeChange
+                                                              .getThem()
+                                                          ? AppColors
+                                                              .darkContainerBackground
+                                                          : AppColors
+                                                              .containerBackground,
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                              .all(
+                                                              Radius.circular(
+                                                                  10)),
+                                                      border: Border.all(
+                                                          color: themeChange
+                                                                  .getThem()
+                                                              ? AppColors
+                                                                  .darkContainerBorder
+                                                              : AppColors
+                                                                  .containerBorder,
+                                                          width: 0.5),
+                                                      boxShadow: themeChange
+                                                              .getThem()
+                                                          ? null
+                                                          : [
+                                                              BoxShadow(
+                                                                color: Colors
+                                                                    .grey
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.5),
+                                                                blurRadius: 8,
+                                                                offset:
+                                                                    const Offset(
+                                                                        0, 2),
                                                               ),
-                                                            ),
-                                                            InkWell(
-                                                                onTap: () {
-                                                                  Get.to(
-                                                                      const ParcelDetailsScreen(),
-                                                                      arguments: {
-                                                                        "orderModel":
-                                                                            orderModel,
-                                                                      });
-                                                                },
-                                                                child: Text(
-                                                                    "View details"
-                                                                        .tr,
-                                                                    style: GoogleFonts
-                                                                        .poppins()))
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 10),
-                                                        Row(children: [
-                                                          const Icon(
-                                                              Icons.fire_truck),
-                                                          const SizedBox(
-                                                              width: 10),
-                                                          Text(
-                                                            Constant.localizationName(
+                                                            ],
+                                                    ),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 10,
+                                                          horizontal: 10),
+                                                      child: Column(
+                                                        children: [
+                                                          UserView(
+                                                            userId: orderModel
+                                                                .userId,
+                                                            amount: orderModel
+                                                                .offerRate,
+                                                            distance: orderModel
+                                                                .distance,
+                                                            distanceType:
                                                                 orderModel
-                                                                    .freightVehicle!
-                                                                    .name),
-                                                            style: GoogleFonts
-                                                                .poppins(
-                                                                    fontSize:
-                                                                        16,
+                                                                    .distanceType,
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 10),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Text(
+                                                                Constant.amountShow(
+                                                                    amount: orderModel
+                                                                        .offerRate
+                                                                        .toString()),
+                                                                style: GoogleFonts.poppins(
                                                                     fontWeight:
                                                                         FontWeight
-                                                                            .w600),
-                                                          )
-                                                        ]),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  vertical: 14),
-                                                          child: Container(
-                                                            decoration: BoxDecoration(
-                                                                color: themeChange
-                                                                        .getThem()
-                                                                    ? AppColors
-                                                                        .darkGray
-                                                                    : AppColors
-                                                                        .gray,
-                                                                borderRadius:
-                                                                    const BorderRadius
-                                                                        .all(
-                                                                        Radius.circular(
-                                                                            10))),
-                                                            child: Padding(
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        18),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 10),
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Row(
+                                                                  children: [
+                                                                    Container(
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.grey.withValues(
+                                                                              alpha:
+                                                                                  0.30),
+                                                                          borderRadius: const BorderRadius
+                                                                              .all(
+                                                                              Radius.circular(5))),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                10,
+                                                                            vertical:
+                                                                                4),
+                                                                        child: Text(orderModel
+                                                                            .paymentType
+                                                                            .toString()),
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                        width:
+                                                                            10),
+                                                                    Container(
+                                                                      decoration: BoxDecoration(
+                                                                          color: AppColors.primary.withValues(
+                                                                              alpha:
+                                                                                  0.30),
+                                                                          borderRadius: const BorderRadius
+                                                                              .all(
+                                                                              Radius.circular(5))),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                10,
+                                                                            vertical:
+                                                                                4),
+                                                                        child: Text(Constant.localizationName(orderModel
+                                                                            .intercityService!
+                                                                            .name)),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              InkWell(
+                                                                  onTap: () {
+                                                                    Get.to(
+                                                                        const ParcelDetailsScreen(),
+                                                                        arguments: {
+                                                                          "orderModel":
+                                                                              orderModel,
+                                                                        });
+                                                                  },
+                                                                  child: Text(
+                                                                      "View details"
+                                                                          .tr,
+                                                                      style: GoogleFonts
+                                                                          .poppins()))
+                                                            ],
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 10),
+                                                          Row(children: [
+                                                            const Icon(Icons
+                                                                .fire_truck),
+                                                            const SizedBox(
+                                                                width: 10),
+                                                            Text(
+                                                              Constant.localizationName(
+                                                                  orderModel
+                                                                      .freightVehicle!
+                                                                      .name),
+                                                              style: GoogleFonts.poppins(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            )
+                                                          ]),
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        14),
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                  color: themeChange.getThem()
+                                                                      ? AppColors
+                                                                          .darkGray
+                                                                      : AppColors
+                                                                          .gray,
+                                                                  borderRadius:
+                                                                      const BorderRadius
+                                                                          .all(
+                                                                          Radius.circular(
+                                                                              10))),
+                                                              child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          10,
+                                                                      vertical:
+                                                                          12),
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      Text(
+                                                                          orderModel
+                                                                              .whenDates
+                                                                              .toString(),
+                                                                          style:
+                                                                              GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                                                                      const SizedBox(
+                                                                          width:
+                                                                              10),
+                                                                      Text(
+                                                                          orderModel
+                                                                              .whenTime
+                                                                              .toString(),
+                                                                          style:
+                                                                              GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                                                                    ],
+                                                                  )),
+                                                            ),
+                                                          ),
+                                                          LocationView(
+                                                            sourceLocation:
+                                                                orderModel
+                                                                    .sourceLocationName
+                                                                    .toString(),
+                                                            destinationLocation:
+                                                                orderModel
+                                                                    .destinationLocationName
+                                                                    .toString(),
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              const SizedBox(
+                                                                  height: 10),
+                                                              Padding(
                                                                 padding: const EdgeInsets
                                                                     .symmetric(
                                                                     horizontal:
                                                                         10,
                                                                     vertical:
-                                                                        12),
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    Text(
-                                                                        orderModel
-                                                                            .whenDates
-                                                                            .toString(),
-                                                                        style: GoogleFonts.poppins(
-                                                                            fontWeight:
-                                                                                FontWeight.w600)),
-                                                                    const SizedBox(
-                                                                        width:
-                                                                            10),
-                                                                    Text(
-                                                                        orderModel
-                                                                            .whenTime
-                                                                            .toString(),
-                                                                        style: GoogleFonts.poppins(
-                                                                            fontWeight:
-                                                                                FontWeight.w600)),
-                                                                  ],
-                                                                )),
-                                                          ),
-                                                        ),
-                                                        LocationView(
-                                                          sourceLocation: orderModel
-                                                              .sourceLocationName
-                                                              .toString(),
-                                                          destinationLocation:
-                                                              orderModel
-                                                                  .destinationLocationName
-                                                                  .toString(),
-                                                        ),
-                                                        Column(
-                                                          children: [
-                                                            const SizedBox(
-                                                                height: 10),
-                                                            Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          10,
-                                                                      vertical:
-                                                                          5),
-                                                              child: Container(
-                                                                width: Responsive
-                                                                    .width(100,
-                                                                        context),
-                                                                decoration: BoxDecoration(
-                                                                    color: themeChange.getThem()
-                                                                        ? AppColors
-                                                                            .darkGray
-                                                                        : AppColors
-                                                                            .gray,
-                                                                    borderRadius:
-                                                                        const BorderRadius
-                                                                            .all(
-                                                                            Radius.circular(10))),
-                                                                child: Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .symmetric(
-                                                                        horizontal:
-                                                                            10,
-                                                                        vertical:
-                                                                            10),
-                                                                    child:
-                                                                        Center(
-                                                                      child:
-                                                                          Text(
-                                                                        'Recommended Price is ${Constant.amountShow(amount: amount)}. Approx distance ${double.parse(orderModel.distance.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)} ${Constant.distanceType}'
-                                                                            .tr,
-                                                                        style: GoogleFonts.poppins(
-                                                                            fontWeight:
-                                                                                FontWeight.w500),
-                                                                      ),
-                                                                    )),
+                                                                        5),
+                                                                child:
+                                                                    Container(
+                                                                  width: Responsive
+                                                                      .width(
+                                                                          100,
+                                                                          context),
+                                                                  decoration: BoxDecoration(
+                                                                      color: themeChange.getThem()
+                                                                          ? AppColors
+                                                                              .darkGray
+                                                                          : AppColors
+                                                                              .gray,
+                                                                      borderRadius: const BorderRadius
+                                                                          .all(
+                                                                          Radius.circular(
+                                                                              10))),
+                                                                  child:
+                                                                      Padding(
+                                                                          padding: const EdgeInsets
+                                                                              .symmetric(
+                                                                              horizontal:
+                                                                                  10,
+                                                                              vertical:
+                                                                                  10),
+                                                                          child:
+                                                                              Center(
+                                                                            child:
+                                                                                Text(
+                                                                              'Recommended Price is ${Constant.amountShow(amount: amount)}. Approx distance ${double.parse(orderModel.distance.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)} ${Constant.distanceType}'.tr,
+                                                                              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                                                                            ),
+                                                                          )),
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        )
-                                                      ],
+                                                            ],
+                                                          )
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                            )
-                          ],
-                        ),
+                                              );
+                                            },
+                                          ),
+                              )
+                            ],
+                          );
+                        }),
                       ),
                     ),
                   ),
