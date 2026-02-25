@@ -114,8 +114,7 @@ class NotificationService {
     }
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert:
-          false, // Avoid double notifications on iOS while app is in foreground. Manual display() handles this.
+      alert: true, // Show alert banner when app is in foreground
       badge: true,
       sound: true,
     );

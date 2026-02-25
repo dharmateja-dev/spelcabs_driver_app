@@ -212,7 +212,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     // Use the new LocationPermissionHelper
     final hasPermission =
         await LocationPermissionHelper.checkAndRequestLocationPermission(
-      showEducationalDialog: true,
+      showEducationalDialog:
+          false, // Disclosure already shown by DriverLocationPermissionScreen
     );
 
     if (!hasPermission) {

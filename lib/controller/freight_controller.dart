@@ -243,7 +243,8 @@ class FreightController extends GetxController {
     // Use the new LocationPermissionHelper
     final hasPermission =
         await LocationPermissionHelper.checkAndRequestLocationPermission(
-      showEducationalDialog: true,
+      showEducationalDialog:
+          false, // Disclosure already shown by DriverLocationPermissionScreen
     );
 
     if (!hasPermission) {
