@@ -27,6 +27,53 @@ class HomeIntercityScreen extends StatelessWidget {
                 body: Center(child: Constant.loader(context)));
           }
 
+          // Block freight vehicle drivers from outstation rides
+          if (controller.driverModel.value.vehicleInformation != null &&
+              controller
+                      .driverModel.value.vehicleInformation!.freightVehicleId !=
+                  null &&
+              controller.driverModel.value.vehicleInformation!.freightVehicleId!
+                  .isNotEmpty) {
+            return Scaffold(
+              backgroundColor: AppColors.primary,
+              body: Column(
+                children: [
+                  SizedBox(
+                    height: Responsive.width(8, context),
+                    width: Responsive.width(100, context),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: Responsive.height(100, context),
+                      width: Responsive.width(100, context),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Freight drivers are allowed only for freight service"
+                                  .tr,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
           if (controller.selectedService.value.intercityType != true) {
             return Scaffold(
               backgroundColor: AppColors.primary,

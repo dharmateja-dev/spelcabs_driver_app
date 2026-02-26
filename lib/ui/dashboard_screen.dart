@@ -41,6 +41,12 @@ class DashBoardScreen extends StatelessWidget {
                           return Constant.loader(context);
                         }
 
+                        if (!snapshot.hasData ||
+                            snapshot.data == null ||
+                            snapshot.data!.data() == null) {
+                          return Constant.loader(context);
+                        }
+
                         DriverUserModel driverModel =
                             DriverUserModel.fromJson(snapshot.data!.data()!);
                         return Container(

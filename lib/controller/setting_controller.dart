@@ -37,6 +37,8 @@ class SettingController extends GetxController {
     if (Preferences.getString(Preferences.themeKey).toString().isNotEmpty) {
       selectedMode.value =
           Preferences.getString(Preferences.themeKey).toString();
+    } else {
+      selectedMode.value = "System";
     }
     isLoading.value = false;
     update();

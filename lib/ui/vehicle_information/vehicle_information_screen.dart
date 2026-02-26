@@ -3,8 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver/constant/constant.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/controller/vehicle_information_controller.dart';
-import 'package:driver/ui/dashboard_screen.dart';
-import 'package:driver/controller/home_controller.dart';
+import 'package:driver/controller/dash_board_controller.dart';
 import 'package:driver/model/driver_user_model.dart';
 import 'package:driver/model/driver_rules_model.dart';
 import 'package:driver/model/vehicle_type_model.dart';
@@ -15,7 +14,6 @@ import 'package:driver/themes/button_them.dart';
 import 'package:driver/themes/responsive.dart';
 import 'package:driver/themes/text_field_them.dart';
 import 'package:driver/utils/DarkThemeProvider.dart';
-import 'package:driver/utils/app_logger.dart';
 import 'package:driver/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -975,33 +973,6 @@ class VehicleInformationScreen extends StatelessWidget {
                                                 "Information update successfully"
                                                     .tr);
 
-                                            // Refresh HomeController data to ensure orders and location get refreshed
-                                            try {
-                                              if (Get.isRegistered<
-                                                  HomeController>()) {
-                                                final homeController =
-                                                    Get.find<HomeController>();
-                                                homeController.isLoading.value =
-                                                    true;
-                                                // Re-fetch driver document and active rides; also restart location updates
-                                                homeController.getDriver();
-                                                await Future.delayed(
-                                                    const Duration(
-                                                        milliseconds: 500));
-                                                homeController.getActiveRide();
-                                                homeController
-                                                    .updateCurrentLocation();
-                                                homeController.isLoading.value =
-                                                    false;
-                                              }
-                                            } catch (e) {
-                                              // Non-fatal: just log
-                                              AppLogger.error(
-                                                  "Error refreshing HomeController after saving vehicle info: $e",
-                                                  tag:
-                                                      "VehicleInformationScreen");
-                                            }
-
                                             // Determine correct tab based on vehicle type:
                                             // If freight vehicle selected -> Freight tab (index 2)
                                             // If service/passenger vehicle selected -> City tab (index 0)
@@ -1012,12 +983,16 @@ class VehicleInformationScreen extends StatelessWidget {
                                               initialIndex = 2; // Freight
                                             }
 
-                                            // Redirect to correct screen
-                                            Get.offAll(
-                                                () => const DashBoardScreen(),
-                                                arguments: {
-                                                  'initialIndex': initialIndex
-                                                });
+                                            // VehicleInformationScreen is a drawer item inside DashBoardScreen,
+                                            // so just switch the drawer index to City or Freight
+                                            final dashController =
+                                                Get.find<DashBoardController>();
+                                            dashController.selectedDrawerIndex
+                                                .value = initialIndex;
+                                          } else {
+                                            ShowToastDialog.showToast(
+                                                "Failed to save vehicle information, please try again"
+                                                    .tr);
                                           }
                                         });
                                       },

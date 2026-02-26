@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:driver/constant/collection_name.dart';
 import 'package:driver/constant/show_toast_dialog.dart';
 import 'package:driver/ui/account_deletion_policy_scree.dart';
 import 'package:driver/ui/auth_screen/login_screen.dart';
@@ -24,6 +28,11 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class DashBoardController extends GetxController {
+  /// Static variable to pass initial drawer index before navigation.
+  /// Set this before calling Get.offAll to DashBoardScreen.
+  /// It will be consumed (reset to null) in onInit.
+  static int? pendingInitialIndex;
+
   final drawerItems = [
     DrawerItem('City'.tr, "assets/icons/ic_city.svg"),
     DrawerItem('Outstation'.tr, "assets/icons/ic_intercity.svg"),
@@ -94,15 +103,52 @@ class DashBoardController extends GetxController {
     Get.back();
   }
 
+  /// Subscription to monitor driver document deletion from admin panel
+  StreamSubscription? _driverDocSubscription;
+  bool _isRedirecting = false;
+
   @override
   void onInit() {
-    if (Get.arguments != null &&
+    // Check for pending initial index (set before navigation)
+    if (pendingInitialIndex != null) {
+      selectedDrawerIndex.value = pendingInitialIndex!;
+      pendingInitialIndex = null; // Consume it
+    }
+    // Also check Get.arguments as fallback
+    else if (Get.arguments != null &&
         Get.arguments is Map &&
         Get.arguments['initialIndex'] != null) {
       selectedDrawerIndex.value = Get.arguments['initialIndex'];
     }
     getLocation();
+    _listenForAccountDeletion();
     super.onInit();
+  }
+
+  /// Listens to the driver's Firestore document.
+  /// If the document is deleted (e.g., from admin panel), the driver is
+  /// signed out and redirected to the login screen.
+  void _listenForAccountDeletion() {
+    final uid = FireStoreUtils.getCurrentUid();
+    _driverDocSubscription = FirebaseFirestore.instance
+        .collection(CollectionName.driverUsers)
+        .doc(uid)
+        .snapshots()
+        .listen((snapshot) {
+      if (!snapshot.exists && !_isRedirecting) {
+        _isRedirecting = true;
+        _handleAccountDeleted();
+      }
+    });
+  }
+
+  /// Signs out the user and redirects to login when account is deleted from admin
+  Future<void> _handleAccountDeleted() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (_) {}
+    ShowToastDialog.showToast("Your account has been deleted by the admin".tr);
+    Get.offAll(const LoginScreen());
   }
 
   Future<void> getLocation() async {
@@ -121,6 +167,12 @@ class DashBoardController extends GetxController {
       return Future.value(false);
     }
     return Future.value(true);
+  }
+
+  @override
+  void onClose() {
+    _driverDocSubscription?.cancel();
+    super.onClose();
   }
 }
 

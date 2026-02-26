@@ -308,8 +308,11 @@ class SettingScreen extends StatelessWidget {
           ShowToastDialog.closeLoader();
           if (value == true) {
             ShowToastDialog.showToast("Account deleted".tr);
-            Get.offAll(const LoginScreen());
+          } else {
+            ShowToastDialog.showToast(
+                "Account deletion failed, please try again".tr);
           }
+          Get.offAll(const LoginScreen());
         });
       },
     );
