@@ -93,7 +93,20 @@ class DashBoardController extends GetxController {
 
   Future<void> onSelectItem(int index) async {
     if (index == 15) {
-      // Logout index
+      // Logout index - check for active rides first
+      ShowToastDialog.showLoader("Please wait".tr);
+      bool hasActive = await FireStoreUtils.hasActiveRide();
+      ShowToastDialog.closeLoader();
+
+      if (hasActive) {
+        ShowToastDialog.showToast(
+            "You cannot logout while you have an active ride. Please complete or cancel your ride first."
+                .tr);
+        Get.back(); // Close drawer
+        return;
+      }
+
+      // Proceed with logout
       FireStoreUtils.logout();
       await FirebaseAuth.instance.signOut();
       Get.offAll(const LoginScreen());
