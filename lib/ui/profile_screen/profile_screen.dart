@@ -275,40 +275,49 @@ class ProfileScreen extends StatelessWidget {
                                           onPress: () async {
                                             ShowToastDialog.showLoader(
                                                 "Please wait".tr);
-                                            if (controller.profileImage.value
-                                                .isNotEmpty) {
-                                              controller.profileImage.value =
-                                                  await Constant
-                                                      .uploadUserImageToFireStorage(
-                                                          File(
-                                                              controller
-                                                                  .profileImage
-                                                                  .value),
-                                                          "profileImage/${FireStoreUtils.getCurrentUid()}",
-                                                          File(controller
-                                                                  .profileImage
-                                                                  .value)
-                                                              .path
-                                                              .split('/')
-                                                              .last);
-                                            }
+                                            try {
+                                              // Only upload if it's a local file path, not a URL
+                                              if (controller.profileImage.value
+                                                      .isNotEmpty &&
+                                                  !Constant().hasValidUrl(
+                                                      controller.profileImage
+                                                          .value)) {
+                                                controller.profileImage.value =
+                                                    await Constant
+                                                        .uploadUserImageToFireStorage(
+                                                            File(controller
+                                                                .profileImage
+                                                                .value),
+                                                            "profileImage/${FireStoreUtils.getCurrentUid()}",
+                                                            File(controller
+                                                                    .profileImage
+                                                                    .value)
+                                                                .path
+                                                                .split('/')
+                                                                .last);
+                                              }
 
-                                            DriverUserModel driverUserModel =
-                                                controller.driverModel.value;
-                                            driverUserModel.fullName =
-                                                controller.fullNameController
-                                                    .value.text;
-                                            driverUserModel.profilePic =
-                                                controller.profileImage.value;
+                                              DriverUserModel driverUserModel =
+                                                  controller.driverModel.value;
+                                              driverUserModel.fullName =
+                                                  controller.fullNameController
+                                                      .value.text;
+                                              driverUserModel.profilePic =
+                                                  controller.profileImage.value;
 
-                                            FireStoreUtils.updateDriverUser(
-                                                    driverUserModel)
-                                                .then((value) {
+                                              await FireStoreUtils
+                                                  .updateDriverUser(
+                                                      driverUserModel);
                                               ShowToastDialog.closeLoader();
                                               ShowToastDialog.showToast(
                                                   "Profile update successfully"
                                                       .tr);
-                                            });
+                                            } catch (e) {
+                                              ShowToastDialog.closeLoader();
+                                              ShowToastDialog.showToast(
+                                                  "Failed to update profile"
+                                                      .tr);
+                                            }
                                           },
                                         ),
                                       ],
@@ -324,7 +333,8 @@ class ProfileScreen extends StatelessWidget {
         });
   }
 
-  Future<dynamic> buildBottomSheet(BuildContext context, ProfileController controller) {
+  Future<dynamic> buildBottomSheet(
+      BuildContext context, ProfileController controller) {
     return showModalBottomSheet(
         context: context,
         builder: (context) {

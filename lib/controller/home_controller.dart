@@ -70,7 +70,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     _startLocationServiceMonitoring();
     getDriver();
     getActiveRide();
-    updateCurrentLocation(); // Ensure this is called to start location updates
+    updateCurrentLocation(
+        isInitialSetup:
+            true); // Ensure this is called to start location updates
     super.onInit();
   }
 
@@ -85,7 +87,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           AppLogger.info(
               "Location service enabled, re-initializing location...",
               tag: "HomeController");
-          updateCurrentLocation();
+          updateCurrentLocation(isInitialSetup: true);
         }
       },
       onError: (error) {
@@ -206,33 +208,49 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Location location = Location();
 
-  Future<void> updateCurrentLocation() async {
+  Future<void> updateCurrentLocation({bool isInitialSetup = false}) async {
     AppLogger.debug("updateCurrentLocation called.", tag: "HomeController");
 
-    // Use the new LocationPermissionHelper
-    final hasPermission =
-        await LocationPermissionHelper.checkAndRequestLocationPermission(
-      showEducationalDialog:
-          false, // Disclosure already shown by DriverLocationPermissionScreen
-    );
+    // Check permission status without showing the OS prompt
+    final permission = await geo.Geolocator.checkPermission();
 
-    if (!hasPermission) {
-      AppLogger.warning("Location permission not granted.",
+    if (permission == geo.LocationPermission.always ||
+        permission == geo.LocationPermission.whileInUse) {
+      // Permission already granted - no need to request again
+      AppLogger.info("Location permission already granted: $permission",
+          tag: "HomeController");
+    } else if (isInitialSetup) {
+      // Only request permission on initial setup (from onInit), not on every resume
+      final hasPermission =
+          await LocationPermissionHelper.checkAndRequestLocationPermission(
+        showEducationalDialog: false,
+      );
+      if (!hasPermission) {
+        AppLogger.warning("Location permission not granted.",
+            tag: "HomeController");
+        _waitingForLocationService = true;
+        isLoading.value = false;
+        update();
+        return;
+      }
+
+      // Request background location permission only on initial setup
+      final hasBackgroundPermission =
+          await LocationPermissionHelper.requestBackgroundLocationPermission();
+      if (!hasBackgroundPermission) {
+        AppLogger.warning(
+            "Background location permission not granted. App will work with limited functionality.",
+            tag: "HomeController");
+      }
+    } else {
+      // Not initial setup and permission not granted - don't prompt again
+      AppLogger.warning(
+          "Location permission not granted, skipping location setup.",
           tag: "HomeController");
       _waitingForLocationService = true;
       isLoading.value = false;
       update();
       return;
-    }
-
-    // Request background location permission for drivers
-    final hasBackgroundPermission =
-        await LocationPermissionHelper.requestBackgroundLocationPermission();
-    if (!hasBackgroundPermission) {
-      AppLogger.warning(
-          "Background location permission not granted. App will work with limited functionality.",
-          tag: "HomeController");
-      // Continue anyway - app can work with "While Using" permission
     }
 
     // Permission granted, set up location tracking

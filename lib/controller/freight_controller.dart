@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:intl/intl.dart';
-import 'package:driver/utils/location_permission_helper.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 
 class FreightController extends GetxController {
   RxInt selectedIndex = 0.obs;
@@ -252,24 +252,15 @@ class FreightController extends GetxController {
   Location location = Location();
 
   Future<void> updateCurrentLocation() async {
-    // Use the new LocationPermissionHelper
-    final hasPermission =
-        await LocationPermissionHelper.checkAndRequestLocationPermission(
-      showEducationalDialog:
-          false, // Disclosure already shown by DriverLocationPermissionScreen
-    );
+    // Silently check permission status - don't re-request
+    // Permission should already be handled by HomeController or DriverLocationPermissionScreen
+    final permission = await geo.Geolocator.checkPermission();
 
-    if (!hasPermission) {
+    if (permission != geo.LocationPermission.always &&
+        permission != geo.LocationPermission.whileInUse) {
       isLoading.value = false;
       update();
       return;
-    }
-
-    // Request background location permission for drivers
-    final hasBackgroundPermission =
-        await LocationPermissionHelper.requestBackgroundLocationPermission();
-    if (!hasBackgroundPermission) {
-      // Continue anyway - app can work with "While Using" permission
     }
 
     // Permission granted, set up location tracking
