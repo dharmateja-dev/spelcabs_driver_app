@@ -58,6 +58,7 @@ class ButtonThem {
     bool isVisible = true,
     bool iconVisibility = false,
     String iconAssetImage = '',
+    double iconWidth = 32.0,
   }) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
@@ -94,8 +95,8 @@ class ButtonThem {
                 visible: iconVisibility,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child:
-                      Image.asset(iconAssetImage, fit: BoxFit.cover, width: 32),
+                  child: Image.asset(iconAssetImage,
+                      fit: BoxFit.cover, width: iconWidth),
                 ),
               ),
               Text(

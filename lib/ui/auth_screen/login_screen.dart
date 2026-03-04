@@ -207,7 +207,10 @@ class LoginScreen extends StatelessWidget {
                                 context,
                                 title: "Login with apple".tr,
                                 iconVisibility: true,
-                                iconAssetImage: 'assets/icons/ic_apple.png',
+                                iconAssetImage: themeChange.getThem()
+                                    ? 'assets/icons/ic_apple_white.png'
+                                    : 'assets/icons/ic_apple_black.png',
+                                iconWidth: 25,
                                 onPress: () async {
                                   ShowToastDialog.showLoader("Please wait".tr);
                                   await controller.signInWithApple();
