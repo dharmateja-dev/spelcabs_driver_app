@@ -41,6 +41,7 @@ class OrderFreightScreen extends StatelessWidget {
                           isEqualTo: FireStoreUtils.getCurrentUid())
                       .where('intercityServiceId',
                           isEqualTo: Constant.freightServiceId)
+                      .where('status', isEqualTo: Constant.rideComplete)
                       .orderBy("createdDate", descending: true)
                       .snapshots(),
                   builder: (BuildContext context,
@@ -92,7 +93,7 @@ class OrderFreightScreen extends StatelessWidget {
                                           : [
                                               BoxShadow(
                                                 color: Colors.grey
-                                                    .withValues(alpha :0.5),
+                                                    .withValues(alpha: 0.5),
                                                 blurRadius: 8,
                                                 offset: const Offset(0,
                                                     2), // changes position of shadow

@@ -40,6 +40,7 @@ class OrderScreen extends StatelessWidget {
                         .collection(CollectionName.orders)
                         .where('driverId',
                             isEqualTo: FireStoreUtils.getCurrentUid())
+                        .where('status', isEqualTo: Constant.rideComplete)
                         .orderBy("createdDate", descending: true)
                         .snapshots(),
                     builder: (BuildContext context,
@@ -90,7 +91,7 @@ class OrderScreen extends StatelessWidget {
                                             : [
                                                 BoxShadow(
                                                   color: Colors.grey
-                                                      .withValues(alpha :0.5),
+                                                      .withValues(alpha: 0.5),
                                                   blurRadius: 8,
                                                   offset: const Offset(0,
                                                       2), // changes position of shadow
